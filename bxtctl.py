@@ -288,6 +288,10 @@ class BxtCtl:
                             type=str,
                             help="Command to execute",
                             choices=bxt_commands)
+        parser.add_argument("-b", "--branch", type=str, choices=acl.get_branches(), help="Target Branch")
+        parser.add_argument("-r", "--repo", type=str, choices=acl.get_repositories(), help="Target Repository")
+        parser.add_argument("-a", "--archictecre", type=str, choices=acl.get_architectures(), help="Target Architecture")
+        parser.add_argument("-p", "--package", type=str, nargs="+", help="Target Package")
         args = parser.parse_args()
 
         if args.command == "reconfigure":
