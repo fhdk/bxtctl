@@ -34,7 +34,7 @@ version = "0.1.0"
 user_agent = F"{app_name}/{version}"
 config_dir = f"{Path.home()}/.config/{app_name}"
 config_file = f"config.json"
-bxt_commands = ["init", "login", "ls", "compare", "commit", "shell"]
+bxt_commands = ["commit", "compare", "configure", "login", "ls", "shell"]
 endpoint = {
     "auth": "api/auth",
     "sections": "api/sections/get",
@@ -120,12 +120,12 @@ class BxtSettings:
         except (Exception,):
             pass
 
-    def init_config(self) -> bool:
+    def configure(self) -> bool:
         options = _get_config_options()
         passwd = pwinput(prompt="password: ", mask="")
         self._name = options["name"]
         self._url = options["url"]
-        self._token = post_auth(url=f"{self._url}/{endpoint['auth']}", name=self._name, passwd=passwd)
+        self._token = _http_get_token(url=f"{self._url}/{endpoint['auth']}", name=self._name, passwd=passwd)
         self._save_config()
         if self._token == "":
             return False
@@ -136,7 +136,7 @@ class BxtSettings:
         if username == "":
             username = self._name
         password = pwinput(prompt="password: ", mask="")
-        self._token = post_auth(url=f"{self._url}/{endpoint['auth']}", name=username, passwd=password)
+        self._token = _http_get_token(url=f"{self._url}/{endpoint['auth']}", name=username, passwd=password)
         self._save_config()
         if self._token == "":
             return False
@@ -196,7 +196,7 @@ class BxtAcl:
 
 def _http_get_acl(url: str, token: str) -> list:
     try:
-        session = build_session(token)
+        session = _build_session(token)
         session = session.get(url)
         return json.loads(session.text)
 
@@ -215,9 +215,9 @@ def _get_config_options() -> dict:
             return options
 
 
-def verify(url: str, token: str) -> bool:
+def _http_verify_token(url: str, token: str) -> bool:
     try:
-        session = build_session(token)
+        session = _build_session(token)
         session = session.get(url)
         if session.status_code == 200:
             return True
@@ -228,10 +228,10 @@ def verify(url: str, token: str) -> bool:
     return False
 
 
-def post_auth(url: str, name: str, passwd: str) -> str:
+def _http_get_token(url: str, name: str, passwd: str) -> str:
     credentials = {"name": name, "password": passwd}
     try:
-        session = build_session()
+        session = _build_session()
         session = session.post(url, json=credentials)
         print(session)
         if session.status_code == 200:
@@ -247,7 +247,7 @@ def post_auth(url: str, name: str, passwd: str) -> str:
     return ""
 
 
-def build_session(token: str = None) -> requests.session():
+def _build_session(token: str = None) -> requests.session():
     session = requests.session()
     session.headers.update({"User-Agent": user_agent})
     if token is not None:
@@ -261,19 +261,10 @@ class BxtCtl:
 
     @staticmethod
     def run():
-        parser = argparse.ArgumentParser(
-            prog=f"{app_name}",
-            description="Command line tool for bxt package management.",
-            epilog=f"{app_name} v.{version} - AGPL v3 or later <{license_url}>")
-        parser.add_argument("command",
-                            type=str,
-                            help="Command to execute",
-                            choices=bxt_commands)
-
-        args = parser.parse_args()
         config = BxtSettings(config_dir, config_file)
-        if config.get_url() == "" or config.get_name() == "" or args.command == "init":
-            if not config.init_config():
+        # if config is uninitialized force setup config
+        if config.get_url() == "" or config.get_name() == "":
+            if not config.configure():
                 print("Initialization failed")
                 exit(1)
 
@@ -289,14 +280,41 @@ class BxtCtl:
         print(f"Architectures : {acl.get_architectures()}")
         print(f"Repositories  : {acl.get_repositories()}")
 
+        parser = argparse.ArgumentParser(
+            prog=f"{app_name}",
+            description="Command line tool for bxt package management.",
+            epilog=f"{app_name} v.{version} - AGPL v3 or later <{license_url}>")
+        parser.add_argument("command",
+                            type=str,
+                            help="Command to execute",
+                            choices=bxt_commands)
+        args = parser.parse_args()
+
+        if args.command == "reconfigure":
+            if not config.configure():
+                print("Reconfiguration failed.")
+                exit(1)
+
+        if args.command == "commit":
+
+            print("TODO - commit package to branch/repo/arch")
+            exit(0)
+
+        if args.commmand == "compare":
+            print("TODO - compare two packges in /repo/arch")
+            exit(0)
+
         if args.command == "ls":
-            pass
+            print("TODO - list packages from branch/repo/arch")
+            exit(0)
 
         if args.command == "login":
             config.login()
+            exit(0)
 
         if args.command == "shell":
             Shell().cmdloop()
+            exit(0)
 
 
 def start():
