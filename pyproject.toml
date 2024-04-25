@@ -1,0 +1,47 @@
+[tool.poetry]
+name = "bxtctl"
+version = "0.1.0"
+description = "bxt repo management tool"
+authors = ["Frede Hundewadt"]
+readme = "README.md"
+license = "LICENCE"
+
+classifiers = [
+    'Private :: Do Not Upload',
+    'Development Status :: 4 - Development/Alpha',
+    'Intended Audience :: End User/Desktop',
+    'License :: OSI Approved :: AGPL3 License',
+    'Natural Language :: English',
+    'Programming Language :: Python :: 3.11',
+    'Environment :: Console'
+]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+requests = "^2.31.0"
+
+[tool.poetry.scripts]
+bxtctl = "bxtctl:start"
+format = "black:main ."
+
+[tool.poetry.group.lint.dependencies]
+coverage = "^7.3.1"
+black = "^24.2.0"
+pymarkdownlnt = "^0.9.17"
+
+[tool.poetry.group.docs.dependencies]
+mkdocs = "^1.5.3"
+
+[tool.poetry.group.test.dependencies]
+pytest = "^7.4.2"
+pytest-cov = "^4.1.0"
+
+[tool.black]
+line-length = 88
+
+[tool.pymarkdown]
+plugins.MD013.enabled = false
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
