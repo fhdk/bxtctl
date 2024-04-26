@@ -272,14 +272,15 @@ class BxtCtl:
             if not config.login():
                 print("Login failed")
                 exit(1)
-
         sections = _http_get_acl(f"{config.get_url()}/{endpoint['sections']}", config.get_token())
         acl = BxtAcl(sections)
+        print(f"TODO - remove this block")
+        print(f"---------- PERMISSIONS ---------- ")
         print(f"bxt user: '{config.get_name()}' has access to:")
         print(f"Branches      : {acl.get_branches()}")
         print(f"Architectures : {acl.get_architectures()}")
         print(f"Repositories  : {acl.get_repositories()}")
-
+        print(f"----------    HELP     ---------- ")
         parser = argparse.ArgumentParser(
             prog=f"{app_name}",
             description="Command line tool for bxt package management.",
