@@ -19,6 +19,7 @@ classifiers = [
 [tool.poetry.dependencies]
 python = "^3.11"
 requests = "^2.31.0"
+pwinput = "^1.0.3"
 
 [tool.poetry.scripts]
 bxtctl = "bxtctl:start"
