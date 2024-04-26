@@ -238,7 +238,6 @@ def _http_get_token(url: str, name: str, passwd: str) -> str:
             cookie_jar = requests.utils.dict_from_cookiejar(session.cookies)
             try:
                 token = cookie_jar["token"]
-                print(token)
                 return token
             except (KeyError,):
                 print("CookieJar is empty :(")
