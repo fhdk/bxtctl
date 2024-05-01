@@ -62,10 +62,11 @@ class BxtCtl(cmd2.Cmd):
 
         # if config is uninitialized force setup config
         if self.config.get_url() == "" or self.config.get_name() == "":
-            print("Enter configuration details")
+            print("Enter initial configuration")
             if not self.config.configure():
                 print("Initialization failed")
                 exit(1)
+            self.prompt = f"({self.config.get_name()}@bxt) $ "
 
         # if token is empty - login
         if self.config.get_token() == "":
