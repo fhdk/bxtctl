@@ -181,7 +181,7 @@ class Http:
     def _http_prepare_session(self) -> requests.session():
         """
         prepare the http session
-        :return: session
+        :return: new http session
         """
         session = requests.session()
         session.headers.update({"User-Agent": self._user_agent})
