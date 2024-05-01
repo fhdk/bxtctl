@@ -51,7 +51,7 @@ class BxtCtl(cmd2.Cmd):
     comp_args.add_argument("-p", "--package", type=str, nargs="*", help="Packages to compare")
 
     commit_args = Cmd2ArgumentParser(description="Commit package to repository")
-    commit_args.add_argument("package", type=str, help="Path to package file")
+    commit_args.add_argument("package", type=str, help="Package Name")
     commit_args.add_argument("pkgfile", type=str, help="Path to package file")
     commit_args.add_argument("sigfile", type=str, help="Path to signature file")
     commit_args.add_argument("repo", type=str, help="Target Repository", choices=acl.get_repositories())
