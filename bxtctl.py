@@ -39,12 +39,12 @@ class BxtCtl(cmd2.Cmd):
     sections = http.get_sections(f"{config.get_url()}/{Config.endpoint['sections']}")
     acl = Acl(sections)
 
-    list_args = Cmd2ArgumentParser(description="List content branch/repo/arch")
+    list_args = Cmd2ArgumentParser(description="List content of repo branch architecture")
     list_args.add_argument("repo", type=str, help="Repository", choices=acl.get_repositories())
     list_args.add_argument("branch", type=str, help="Branch", choices=acl.get_branches())
     list_args.add_argument("arch", type=str, help="Artitecture", choices=acl.get_architectures())
 
-    comp_args = Cmd2ArgumentParser(description="Compare repo package across branches")
+    comp_args = Cmd2ArgumentParser(description="Compare repo package across branches and architecures")
     comp_args.add_argument("repo", type=str, help="Repository", choices=acl.get_repositories())
     comp_args.add_argument("-b", "--branch", type=str, nargs="*", help="Branches", choices=acl.get_branches())
     comp_args.add_argument("-a", "--arch", type=str, nargs="*", help="Architecure", choices=acl.get_architectures())
