@@ -138,7 +138,7 @@ class BxtCtl(cmd2.Cmd):
         if not self.config.configure():
             print("Configuration failed!")
 
-    def do_startsync(self, args):
+    def do_sync(self, args):
         """
         Start sync
         :return:
