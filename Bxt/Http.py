@@ -24,6 +24,7 @@ import json
 from .User import User
 from .LogEntry import LogEntry
 from .Package import Package
+from .Section import Section
 
 
 class Http:
@@ -37,7 +38,7 @@ class Http:
     def set_token(self, token: str):
         self._token = token
 
-    def get_logs(self, url) -> list:
+    def get_logs(self, url) -> [LogEntry]:
         """
         Get package logs
         :param url:
@@ -65,7 +66,7 @@ class Http:
         session = session.get(url)
         return json.loads(session.text)
 
-    def get_packages(self, url: str, branch: str, repositoriy: str, architectue: str) -> list:
+    def get_packages(self, url: str, branch: str, repositoriy: str, architectue: str) -> [Package]:
         """
         get a list of packages
         :param url:
@@ -78,7 +79,7 @@ class Http:
         session = session.get(url, params={"branch": branch, "repository": repositoriy, "architecture": architectue})
         return json.loads(session.text)
 
-    def get_sections(self, url: str) -> list:
+    def get_sections(self, url: str) -> [Section]:
         """
         Get ACL
         :param url:
@@ -94,7 +95,7 @@ class Http:
 
         return []
 
-    def get_users(self, url: str) -> dict:
+    def get_users(self, url: str) -> User:
         """
         Get users
         :param url:
