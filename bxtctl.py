@@ -45,9 +45,9 @@ class BxtCtl(cmd2.Cmd):
     list_args.add_argument("arch", type=str, help="Artitecture", choices=acl.get_architectures())
 
     comp_args = Cmd2ArgumentParser(description="Compare repo package across branches")
-    comp_args.add_argument("branch", type=str, help="Repository", choices=acl.get_repositories())
-    comp_args.add_argument("branch", type=str, nargs="+", help="Branches", choices=acl.get_branches())
-    comp_args.add_argument("branch", type=str, nargs="+", help="Architecure", choices=acl.get_architectures())
+    comp_args.add_argument("repo", type=str, help="Repository", choices=acl.get_repositories())
+    comp_args.add_argument("-b", "--branch", type=str, nargs="*", help="Branches", choices=acl.get_branches())
+    comp_args.add_argument("-a", "--arch", type=str, nargs="*", help="Architecure", choices=acl.get_architectures())
 
     def __init__(self):
         super().__init__()
@@ -83,16 +83,22 @@ class BxtCtl(cmd2.Cmd):
         for pkg in pkgs:
             print(f"{pkg['name']:<30}: {pkg['preferredCandidate']['version']}")
 
-    # @with_argparser(comp_args)
-    # def do_compare(self, args):
-    #     """
-    #     Compare branches
-    #     :param args:
-    #     :return:
-    #     """
-    #     packages = self.http.get_packages(f"{self.config.get_url()}/{self.config.endpoint['packages']}", args.branch, args.repo, args.arch)
-    #     print(packages)
-    #
+    @with_argparser(comp_args)
+    def do_compare(self, args):
+        """
+        Compare branches
+        :param args:
+        :return:
+        """
+        branches = args.branch
+        architectures = args.arch
+        print(branches)
+        print(architectures)
+
+        for branch in branches:
+            for arch in architectures:
+                archpkgs = self.http.get_packages(f"{self.config.get_url()}/{self.config.endpoint['packages']}", branch, args.repo, arch)
+                print(archpkgs)
 
 
 def start():
