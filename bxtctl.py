@@ -34,7 +34,7 @@ class BxtCtl(cmd2.Cmd):
     Main application object
     """
     config = Config()
-    prompt = f"(bctctl) {config.get_name()} $ "
+    prompt = f"({config.get_name()}@bxt) $ "
     http = Http(Config.user_agent, config.get_token())
     sections = http.get_sections(f"{config.get_url()}/{Config.endpoint['sections']}")
     acl = Acl(sections)
