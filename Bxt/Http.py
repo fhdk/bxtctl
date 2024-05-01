@@ -38,6 +38,19 @@ class Http:
     def set_token(self, token: str):
         self._token = token
 
+    def start_sync(self, url: str) -> bool:
+        """
+        Start sync
+        :return: True/False
+        """
+        session = self._http_prepare_session()
+        try:
+            session = session.post(url)
+            return True
+        except (Exception,) as err:
+            print(f"err")
+            return False
+
     def get_logs(self, url) -> [LogEntry]:
         """
         Get package logs

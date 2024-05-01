@@ -144,7 +144,7 @@ class BxtCtl(cmd2.Cmd):
         :return:
         """
         if self.config.get_token():
-            print("TODO - call http sync")
+            self.http.start_sync(f"{self.config.get_url()}/{self.config.endpoint['sync']}")
         else:
             print("Please login")
 
