@@ -36,7 +36,6 @@ class Config:
     user_agent = F"{app_name}/{app_version}"
     config_dir = f"{Path.home()}/.config/{app_name}"
     config_file = f"config.json"
-    commands = ["list", "commit", "compare", "login", "configure"]
     endpoint = {
         "auth": "api/auth",
         "sections": "api/sections/get",
