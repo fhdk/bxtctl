@@ -122,7 +122,7 @@ class BxtCtl(cmd2.Cmd):
         print("TODO - commit package to repo")
         pass
 
-    def do_login(self):
+    def do_login(self, args):
         """
         Login
         :return: True/False
@@ -130,7 +130,7 @@ class BxtCtl(cmd2.Cmd):
         if not self.config.login():
             print("Login failed!")
 
-    def do_configure(self):
+    def do_configure(self, args):
         """
         Reconfigure
         :return: True/False
@@ -138,7 +138,7 @@ class BxtCtl(cmd2.Cmd):
         if not self.config.configure():
             print("Configuration failed!")
 
-    def do_sync(self):
+    def do_startsync(self, args):
         """
         Start sync
         :return:
