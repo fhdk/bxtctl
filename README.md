@@ -57,16 +57,16 @@ optional arguments:
 ```
 ```
 (default@bxt) $ help commit
-Usage: commit [-h] package pkgfile sigfile {core} {testing, unstable, stable} {aarch64, x86_64}
+Usage: commit [-h] package pkgfile sigfile {core} {unstable, testing, stable} {aarch64, x86_64}
 
 Commit package to repository
 
 positional arguments:
-  package               Path to package file
+  package               Package Name
   pkgfile               Path to package file
   sigfile               Path to signature file
   {core}                Target Repository
-  {testing, unstable, stable}
+  {unstable, testing, stable}
                         Target Branch
   {aarch64, x86_64}     Target Architecture
 
