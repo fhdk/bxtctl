@@ -40,14 +40,22 @@ class BxtCtl(cmd2.Cmd):
     acl = Acl(sections)
 
     list_args = Cmd2ArgumentParser(description="List content of repo branch architecture")
-    list_args.add_argument("repo", type=str, help="Repository", choices=acl.get_repositories())
-    list_args.add_argument("branch", type=str, help="Branch", choices=acl.get_branches())
-    list_args.add_argument("arch", type=str, help="Artitecture", choices=acl.get_architectures())
+    list_args.add_argument("repo", type=str, help="Target Repository", choices=acl.get_repositories())
+    list_args.add_argument("branch", type=str, help="Target Branch", choices=acl.get_branches())
+    list_args.add_argument("arch", type=str, help="Target Artitecture", choices=acl.get_architectures())
 
     comp_args = Cmd2ArgumentParser(description="Compare repo package across branches and architecures")
-    comp_args.add_argument("repo", type=str, help="Repository", choices=acl.get_repositories())
+    comp_args.add_argument("repo", type=str, help="Target Repository", choices=acl.get_repositories())
     comp_args.add_argument("-b", "--branch", type=str, nargs="*", help="Branches", choices=acl.get_branches())
     comp_args.add_argument("-a", "--arch", type=str, nargs="*", help="Architecure", choices=acl.get_architectures())
+
+    commit_args = Cmd2ArgumentParser(description="Commit package to repository")
+    commit_args.add_argument("-n", "--pkgname", type=str, help="Path to package file")
+    commit_args.add_argument("-f", "--pkgfile", type=str, help="Path to package file")
+    commit_args.add_argument("-s", "--sigfile", type=str, help="Path to signature file")
+    commit_args.add_argument("repo", type=str, help="Target Repository", choices=acl.get_repositories())
+    commit_args.add_argument("branch", type=str, help="Target Branch", choices=acl.get_branches())
+    commit_args.add_argument("arch", type=str, help="Target Architecture", choices=acl.get_architectures())
 
     def __init__(self):
         super().__init__()
@@ -99,6 +107,15 @@ class BxtCtl(cmd2.Cmd):
             for arch in architectures:
                 archpkgs = self.http.get_packages(f"{self.config.get_url()}/{self.config.endpoint['packages']}", branch, args.repo, arch)
                 print(archpkgs)
+
+    @with_argparser(commit_args)
+    def do_commit(self, args):
+        """
+        Commpit package to repo
+        :param args:
+        :return:
+        """
+        pass
 
 
 def start():
