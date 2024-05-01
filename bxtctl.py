@@ -33,8 +33,8 @@ class BxtCtl(cmd2.Cmd):
     """
     Main application object
     """
-    prompt = "(bctctl) "
     config = Config()
+    prompt = f"(bctctl) {config.get_name()} $ "
     http = Http(Config.user_agent, config.get_token())
     sections = http.get_sections(f"{config.get_url()}/{Config.endpoint['sections']}")
     acl = Acl(sections)
@@ -44,7 +44,7 @@ class BxtCtl(cmd2.Cmd):
     list_args.add_argument("branch", type=str, help="Branch", choices=acl.get_branches())
     list_args.add_argument("arch", type=str, help="Artitecture", choices=acl.get_architectures())
 
-    comp_args = Cmd2ArgumentParser(description="Compare branches")
+    comp_args = Cmd2ArgumentParser(description="Compare repo package across branches")
     comp_args.add_argument("branch", type=str, help="Repository", choices=acl.get_repositories())
     comp_args.add_argument("branch", type=str, nargs="+", help="Branches", choices=acl.get_branches())
     comp_args.add_argument("branch", type=str, nargs="+", help="Architecure", choices=acl.get_architectures())
@@ -70,7 +70,7 @@ class BxtCtl(cmd2.Cmd):
         print(f"Branches      : {self.acl.get_branches()}")
         print(f"Architectures : {self.acl.get_architectures()}")
         print(f"Repositories  : {self.acl.get_repositories()}")
-        print(f"----------             ---------- ")
+        print(f"--------------------------------- ")
 
     @with_argparser(list_args)
     def do_list(self, args):
@@ -79,21 +79,26 @@ class BxtCtl(cmd2.Cmd):
         :param args:
         :return:
         """
-        packages = self.http.get_packages(f"{self.config.get_url()}/{self.config.endpoint['packages']}", args.branch, args.repo, args.arch)
-        print(packages)
+        pkgs = self.http.get_packages(f"{self.config.get_url()}/{self.config.endpoint['packages']}", args.branch, args.repo, args.arch)
+        for pkg in pkgs:
+            print(f"{pkg["name"]:>15}")
 
-    @with_argparser(comp_args)
-    def do_compare(self, args):
-        """
-        Compare branches
-        :param args:
-        :return:
-        """
-        packages = self.http.get_packages(f"{self.config.get_url()}/{self.config.endpoint['packages']}", args.branch, args.repo, args.arch)
-        print(packages)
-
+    # @with_argparser(comp_args)
+    # def do_compare(self, args):
+    #     """
+    #     Compare branches
+    #     :param args:
+    #     :return:
+    #     """
+    #     packages = self.http.get_packages(f"{self.config.get_url()}/{self.config.endpoint['packages']}", args.branch, args.repo, args.arch)
+    #     print(packages)
+    #
 
 def start():
+    """
+    Poetry entry point
+    :return:
+    """
     app = BxtCtl()
     sys.exit(app.cmdloop())
 

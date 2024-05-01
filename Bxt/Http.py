@@ -37,7 +37,7 @@ class Http:
     def set_token(self, token: str):
         self._token = token
 
-    def get_logs(self, url) -> [LogEntry]:
+    def get_logs(self, url) -> list:
         """
         Get package logs
         :param url:
@@ -65,15 +65,14 @@ class Http:
         session = session.get(url)
         return json.loads(session.text)
 
-    def get_packages(self, url: str, branch: str, repositoriy: str, architectue: str) -> [Package]:
+    def get_packages(self, url: str, branch: str, repositoriy: str, architectue: str) -> list:
         """
         get a list of packages
         :param url:
         :param branch:
         :param repositoriy:
         :param architectue:
-        :return: 200 [{"name":"string","section","string","repository":"string","branch":"string","architecture":"string"},"pool_entries"[{"version":"string","hasSignature":true}]]]
-        :return: 401
+        :return: [{"name":"string","section","string","repository":"string","branch":"string","architecture":"string"},"pool_entries"[{"version":"string","hasSignature":true}]]]
         """
         session = self._http_prepare_session()
         session = session.get(url, params={"branch": branch, "repository": repositoriy, "architecture": architectue})
@@ -83,8 +82,7 @@ class Http:
         """
         Get ACL
         :param url:
-        :return: 200 [{"branch": "string","repository": "string","architecture": "string"}]
-        :return: 401
+        :return: [{"branch": "string","repository": "string","architecture": "string"}]
         """
         try:
             session = self._http_prepare_session()
@@ -96,12 +94,11 @@ class Http:
 
         return []
 
-    def get_users(self, url: str) -> [User]:
+    def get_users(self, url: str) -> dict:
         """
         Get users
         :param url:
-        :return: 200 [{"name":"string","permissions":["string"]}]
-        :return: 401
+        :return: [{"name":"string","permissions":["string"]}]
         """
         try:
             session = self._http_prepare_session()
@@ -163,8 +160,7 @@ class Http:
         :param url:
         :param name:
         :param passwd:
-        :return: 200 { "token":"<string>" }
-        :return: 401
+        :return: { "token":"<string>" }
         """
         credentials = {"name": name, "password": passwd}
         try:
@@ -185,7 +181,7 @@ class Http:
     def _http_prepare_session(self) -> requests.session():
         """
         prepare the http session
-        :return:
+        :return: session
         """
         session = requests.session()
         session.headers.update({"User-Agent": self._user_agent})
