@@ -138,6 +138,16 @@ class BxtCtl(cmd2.Cmd):
         if not self.config.configure():
             print("Configuration failed!")
 
+    def do_sync(self):
+        """
+        Start sync
+        :return:
+        """
+        if self.config.get_token():
+            print("TODO - call http sync")
+        else:
+            print("Please login")
+
 
 def start():
     """
