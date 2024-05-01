@@ -46,8 +46,8 @@ class BxtCtl(cmd2.Cmd):
 
     comp_args = Cmd2ArgumentParser(description="Compare repo package across branches and architecures")
     comp_args.add_argument("repo", type=str, help="Target Repository", choices=acl.get_repositories())
-    comp_args.add_argument("-b", "--branch", type=str, nargs="*", help="Branches", choices=acl.get_branches())
-    comp_args.add_argument("-a", "--arch", type=str, nargs="*", help="Architecure", choices=acl.get_architectures())
+    comp_args.add_argument("-b", "--branch", type=str, nargs="*", help="Branches to compare", choices=acl.get_branches())
+    comp_args.add_argument("-a", "--arch", type=str, nargs="*", help="Architecures to compare", choices=acl.get_architectures())
     comp_args.add_argument("-p", "--package", type=str, nargs="*", help="Packages to compare")
 
     commit_args = Cmd2ArgumentParser(description="Commit package to repository")
