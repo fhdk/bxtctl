@@ -62,12 +62,14 @@ class BxtCtl(cmd2.Cmd):
 
         # if config is uninitialized force setup config
         if self.config.get_url() == "" or self.config.get_name() == "":
+            print("Enter configuration details")
             if not self.config.configure():
                 print("Initialization failed")
                 exit(1)
 
         # if token is empty - login
         if self.config.get_token() == "":
+            print("First time login")
             if not self.config.login():
                 print("Login failed")
                 exit(1)
@@ -111,9 +113,25 @@ class BxtCtl(cmd2.Cmd):
         """
         Commpit package to repo
         :param args:
-        :return:
+        :return: True/False
         """
         pass
+
+    def do_login(self):
+        """
+        Login
+        :return: True/False
+        """
+        if not self.config.login():
+            print("Login failed!")
+
+    def do_configure(self):
+        """
+        Reconfigure
+        :return: True/False
+        """
+        if not self.config.configure():
+            print("Configuration failed!")
 
 
 def start():
