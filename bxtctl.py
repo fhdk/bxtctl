@@ -104,13 +104,13 @@ class BxtCtl(cmd2.Cmd):
         """
         branches = args.branch
         architectures = args.arch
-
+        from pprint import pprint
         for branch in branches:
             for arch in architectures:
                 archpkgs = self.http.get_packages(f"{self.config.get_url()}/{self.config.endpoint['packages']}", branch, args.repo, arch)
                 pkgs = [x for x in archpkgs if x["name"] in args.package]
                 for pkg in pkgs:
-                    print(pkg)
+                    pprint(pkg)
 
     @with_argparser(commit_args)
     def do_commit(self, args):
