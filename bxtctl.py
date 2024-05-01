@@ -100,8 +100,6 @@ class BxtCtl(cmd2.Cmd):
         """
         branches = args.branch
         architectures = args.arch
-        print(branches)
-        print(architectures)
 
         for branch in branches:
             for arch in architectures:
