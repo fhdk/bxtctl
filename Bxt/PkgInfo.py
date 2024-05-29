@@ -35,3 +35,25 @@ class PkgInfo:
             'repository': self._repository,
             'architecture': self._architecture
         }
+
+# [
+#     {
+#         "name": "string",
+#         "section": "string",
+#         "poolEntries": {
+#             "additionalProp1": {
+#                 "version": "string",
+#                 "signaturePath": true
+#             },
+#             "additionalProp2": {
+#                 "version": "string",
+#                 "signaturePath": true
+#             },
+#             "additionalProp3": {
+#                 "version": "string",
+#                 "signaturePath": true
+#             }
+#         },
+#         "preferredLocation": "string"
+#     }
+# ]

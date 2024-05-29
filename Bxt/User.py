@@ -35,6 +35,14 @@ class User:
     def get(self):
         return {
             "name": self._name,
-            "permissions": self._permissions,
-            "password": self._password
+            "password": self._password,
+            "permissions": self._permissions
         }
+
+# {
+#   "name": "string",
+#   "password": "string",
+#   "permissions": [
+#     "string"
+#   ]
+# }

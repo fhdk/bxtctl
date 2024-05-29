@@ -29,5 +29,5 @@ class PkgFiles:
     def get(self):
         return {
             "file": self._file,
-            "signagure": self._signature
+            "signature": self._signature
         }

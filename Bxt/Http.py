@@ -21,6 +21,7 @@
 import requests
 from requests import utils
 import json
+from json import JSONDecodeError
 from .User import User
 from .LogEntry import LogEntry
 from .Package import Package
@@ -48,36 +49,26 @@ class Http:
             session = session.post(url)
             return True
         except (Exception,) as err:
-            print(f"err")
+            print(f"{err}")
             return False
 
     def get_logs(self, url) -> [LogEntry]:
         """
         Get package logs
         :param url:
-        :return:[{
-                    "id": "string",
-                    "time": "string",
-                    "package": {
-                        "name": "string",
-                        "section": {
-                            "branch": "string",
-                            "repository": "string",
-                            "architecture": "string"
-                        }, "pool_entries":
-                        [
-                            {
-                                "version": "string",
-                                "hasSignature": true
-                            }
-                        ]
-                    },
-                    "action": "string"
-                }]
+        :return: list of log entries
         """
-        session = self._http_prepare_session()
-        session = session.get(url)
-        return json.loads(session.text)
+        try:
+            session = self._http_prepare_session()
+            session = session.get(url)
+            return json.loads(session.text)
+        except (JSONDecodeError,) as err:
+            print(f"{err}")
+        except (requests.exceptions.ConnectionError,) as err:
+            print(f"{err}")
+        except (requests.exceptions.Timeout,) as err:
+            print(f"{err}")
+        return []
 
     def get_packages(self, url: str, branch: str, repositoriy: str, architectue: str) -> [Package]:
         """
@@ -88,9 +79,17 @@ class Http:
         :param architectue:
         :return: [{"name":"string","section","string","repository":"string","branch":"string","architecture":"string"},"pool_entries"[{"version":"string","hasSignature":true}]]]
         """
-        session = self._http_prepare_session()
-        session = session.get(url, params={"branch": branch, "repository": repositoriy, "architecture": architectue})
-        return json.loads(session.text)
+        try:
+            session = self._http_prepare_session()
+            session = session.get(url, params={"branch": branch, "repository": repositoriy, "architecture": architectue})
+            return json.loads(session.text)
+        except (JSONDecodeError,) as err:
+            print(f"{err}")
+        except (requests.exceptions.ConnectionError,) as err:
+            print(f"{err}")
+        except (requests.exceptions.Timeout,) as err:
+            print(f"{err}")
+        return []
 
     def get_sections(self, url: str) -> [Section]:
         """
@@ -102,13 +101,13 @@ class Http:
             session = self._http_prepare_session()
             session = session.get(url)
             return json.loads(session.text)
-
+        except (JSONDecodeError,) as err:
+            print(f"There was an error decoding response from {url}. The message is contained in {err}.")
         except (requests.exceptions.ConnectionError,) as err:
             print(f"{err}")
-
         return []
 
-    def get_users(self, url: str) -> User:
+    def get_users(self, url: str) -> [User]:
         """
         Get users
         :param url:
@@ -118,8 +117,11 @@ class Http:
             session = self._http_prepare_session()
             session = session.get(url)
             return json.loads(session.txt)
+        except (JSONDecodeError,) as err:
+            print(f"{err}")
         except (requests.exceptions.ConnectionError,) as err:
             print(f"{err}")
+        return []
 
     def add_user(self, user: User):
         """
@@ -139,6 +141,7 @@ class Http:
         :return: 400
         :return: 401
         """
+        pass
 
     def remove_user(self, user_id: str):
         """
@@ -202,3 +205,6 @@ class Http:
         if self._token is not None:
             session.cookies.update({"token": self._token})
         return session
+
+    def _get_response(self, url: str) -> requests.Response:
+        pass

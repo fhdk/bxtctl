@@ -22,12 +22,42 @@ class PoolEntry:
     """
     Package Pool Entry info
     """
-    def __init__(self, version: str, has_signature: bool):
+    def __init__(self, prop_name: str, version: str, has_signature: bool):
+        self.prop_name = prop_name
         self._version = version
         self._has_signature = has_signature
 
     def get(self):
         return {
-            self._version,
-            self._has_signature
+            self.prop_name: {
+                self._version,
+                self._has_signature
+            }
         }
+
+# [
+#   {
+#     "id": "string",
+#     "time": 0,
+#     "type": "Add",
+#     "package": {
+#       "name": "string",
+#       "section": "string",
+#       "poolEntries": {
+#         "additionalProp1": {
+#           "version": "string",
+#           "signaturePath": true
+#         },
+#         "additionalProp2": {
+#           "version": "string",
+#           "signaturePath": true
+#         },
+#         "additionalProp3": {
+#           "version": "string",
+#           "signaturePath": true
+#         }
+#       },
+#       "preferredLocation": "string"
+#     }
+#   }
+# ]

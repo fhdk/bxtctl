@@ -39,3 +39,12 @@ class Users:
 
     def all(self):
         return self._users
+
+# [
+#   {
+#     "name": "string",
+#     "permissions": [
+#       "string"
+#     ]
+#   }
+# ]

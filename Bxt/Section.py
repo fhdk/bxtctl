@@ -33,3 +33,11 @@ class Section:
             "repository": self._repository,
             "architecture": self._architecture
         }
+
+# [
+#   {
+#     "branch": "string",
+#     "repository": "string",
+#     "architecture": "string"
+#   }
+# ]

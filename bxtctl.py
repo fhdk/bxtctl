@@ -34,9 +34,14 @@ class BxtCtl(cmd2.Cmd):
     Main application object
     """
     config = Config()
+    token = config.get_token()
+    if not token:
+        config.configure()
+
     prompt = f"({config.get_name()}@bxt) $ "
     http = Http(Config.user_agent, config.get_token())
     sections = http.get_sections(f"{config.get_url()}/{Config.endpoint['sections']}")
+
     acl = Acl(sections)
 
     list_args = Cmd2ArgumentParser(description="List content of repo branch architecture")
@@ -44,11 +49,11 @@ class BxtCtl(cmd2.Cmd):
     list_args.add_argument("branch", type=str, help="Target Branch", choices=acl.get_branches())
     list_args.add_argument("arch", type=str, help="Target Artitecture", choices=acl.get_architectures())
 
-    comp_args = Cmd2ArgumentParser(description="Compare repo package across branches and architecures")
+    comp_args = Cmd2ArgumentParser(description="Compare repo package across branches and architectures")
     comp_args.add_argument("repo", type=str, help="Target Repository", choices=acl.get_repositories())
     comp_args.add_argument("-b", "--branch", type=str, nargs="*", help="Branches to compare", choices=acl.get_branches())
     comp_args.add_argument("-a", "--arch", type=str, nargs="*", help="Architecures to compare", choices=acl.get_architectures())
-    comp_args.add_argument("-p", "--package", type=str, nargs="*", help="Packages to compare")
+    comp_args.add_argument("-p", "--package", type=str, nargs="?", help="Packages to compare")
 
     commit_args = Cmd2ArgumentParser(description="Commit package to repository")
     commit_args.add_argument("package", type=str, help="Package Name")
@@ -93,7 +98,7 @@ class BxtCtl(cmd2.Cmd):
         """
         pkgs = self.http.get_packages(f"{self.config.get_url()}/{self.config.endpoint['packages']}", args.branch, args.repo, args.arch)
         for pkg in pkgs:
-            print(f"{pkg['name']:<30}: {pkg['preferredCandidate']['version']}")
+            print(f"{pkg['name']:<30}: {pkg['poolEntries']['sync']['version']}")
 
     @with_argparser(comp_args)
     def do_compare(self, args):
@@ -108,9 +113,13 @@ class BxtCtl(cmd2.Cmd):
         for branch in branches:
             for arch in architectures:
                 archpkgs = self.http.get_packages(f"{self.config.get_url()}/{self.config.endpoint['packages']}", branch, args.repo, arch)
-                pkgs = [x for x in archpkgs if x["name"] in args.package]
-                for pkg in pkgs:
-                    pprint(pkg)
+                if args.package is not None:
+                    pkgs = [x for x in archpkgs if x["name"] in args.package]
+                    for pkg in pkgs:
+                        pprint(pkg)
+                else:
+                    for pkg in archpkgs:
+                        pprint(pkg)
 
     @with_argparser(commit_args)
     def do_commit(self, args):

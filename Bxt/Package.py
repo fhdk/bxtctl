@@ -26,14 +26,36 @@ class Package:
     """
     A package list entry
     """
-    def __init__(self, name: str, section: Section, pool_entries: [PoolEntry]):
+    def __init__(self, name: str, section: Section, poolentries: [PoolEntry], preferred_location: str):
         self._name = name
-        self._section = Section
-        self._pool_entires = pool_entries
+        self._section = section
+        self._pool_entries = poolentries
+        self._preferred_location = preferred_location
 
     def get(self):
         return {
             "name": self._name,
             "section": self._section,
-            "pool_entries": self._pool_entires
+            "poolEntries": self._pool_entries,
+            "preferredLocation": self._preferred_location
         }
+
+# {
+# "name": "string",
+# "section": "string",
+# "poolEntries": {
+#   "additionalProp1": {
+#     "version": "string",
+#     "signaturePath": true
+#   },
+#   "additionalProp2": {
+#     "version": "string",
+#     "signaturePath": true
+#   },
+#   "additionalProp3": {
+#     "version": "string",
+#     "signaturePath": true
+#   }
+# },
+# "preferredLocation": "string"
+# }

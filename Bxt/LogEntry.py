@@ -22,16 +22,44 @@ from .Package import Package
 
 
 class LogEntry:
-    def __init__(self, id: str, time: str, package: Package, action: str):
-        self._id = id
+    def __init__(self, logid: str, time: int, package: Package, entrytype: str):
+        self._id = logid
         self._time = time
         self._package = package
-        self._action = action
+        self._entrytype = entrytype
 
     def get(self):
         return {
             "id": self._id,
             "time": self._time,
             "package": self._package,
-            "action": self._action
+            "type": self._entrytype
         }
+
+    # [
+    #   {
+    #     "id": "string",
+    #     "time": 0,
+    #     "type": "Add",
+    #     "package": {
+    #       "name": "string",
+    #       "section": "string",
+    #       "poolEntries": {
+    #         "additionalProp1": {
+    #           "version": "string",
+    #           "signaturePath": true
+    #         },
+    #         "additionalProp2": {
+    #           "version": "string",
+    #           "signaturePath": true
+    #         },
+    #         "additionalProp3": {
+    #           "version": "string",
+    #           "signaturePath": true
+    #         }
+    #       },
+    #       "preferredLocation": "string"
+    #     }
+    #   }
+    # ]
+

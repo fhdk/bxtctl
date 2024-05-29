@@ -31,20 +31,7 @@ class Packages:
     def get(self) -> [Package]:
         """
         Get Packages
-        :return:[{
-                    "name": "string",
-                    "section": {
-                        "branch": "string",
-                        "repository": "string",
-                        "architecture": "string"
-                     },
-                     "pool_entries": [
-                     {
-                        "version": "string",
-                        "hasSignature": true
-                        }
-                    ]
-                }]
+        :return: list of Packages
         """
         return self._packages
 
@@ -57,3 +44,24 @@ class Packages:
         pkgs = [x for x in self._packages if x["name"] == name]
         for pkg in pkgs:
             return pkg
+
+# {
+# "name": "string",
+# "section": "string",
+# "poolEntries": {
+#   "additionalProp1": {
+#     "version": "string",
+#     "signaturePath": true
+#   },
+#   "additionalProp2": {
+#     "version": "string",
+#     "signaturePath": true
+#   },
+#   "additionalProp3": {
+#     "version": "string",
+#     "signaturePath": true
+#   }
+# },
+# "preferredLocation": "string"
+# }
+

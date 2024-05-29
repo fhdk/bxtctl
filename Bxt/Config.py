@@ -32,19 +32,20 @@ class Config:
     """
     license_url = "https://www.gnu.org/licenses/agpl.html"
     app_name = "bxtctl"
-    app_version = "0.1.0"
+    app_version = "0.2.0"
     user_agent = F"{app_name}/{app_version}"
     config_dir = f"{Path.home()}/.config/{app_name}"
     config_file = f"config.json"
     endpoint = {
         "auth": "api/auth",
-        "sections": "api/sections/get",
-        "packages": "api/packages/get",
-        "commit": "api/packages/commit",
         "logs": "api/logs/packages",
-        "sync": "api/sync",
+        "packages": "api/packages",
+        "pkgCommit": "api/packages/commit",
+        "pkgSnap": "api/packages/snap",
+        "pkgSync": "api/packages/sync",
+        "sections": "api/sections",
         "verify": "api/verify",
-        "users": "api/users",
+        "user": "api/users",
         "userAdd": "api/users/add",
         "userUpdate": "api/users/update",
         "userRemove": "api/users/remove",
