@@ -98,7 +98,8 @@ class BxtCtl(cmd2.Cmd):
         """
         pkgs = self.http.get_packages(f"{self.config.get_url()}/{self.config.endpoint['packages']}", args.branch, args.repo, args.arch)
         for pkg in pkgs:
-            print(f"{pkg['name']:<30}: {pkg['poolEntries']['sync']['version']}")
+            # print(f"{pkg['name']:<30}: {pkg['poolEntries']['sync']['version']} ({pkg['preferredLocation']})")
+            print(pkg)
 
     @with_argparser(comp_args)
     def do_compare(self, args):
