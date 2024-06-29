@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
 # bxtctl is command line client designed to interact with bxt api
@@ -20,22 +19,11 @@
 # Authors: Frede Hundewadt https://github.com/fhdk/bxtctl
 #
 
-import argparse
-import cmd2
-from cmd2 import Cmd2ArgumentParser, with_argparser
-import sys
-from Bxt.Acl import Acl
-from Bxt.BxtConfig import BxtConfig
-from Bxt.Http import Http
-import jwt
+class Token:
+    def __init__(self, token_data: dict):
+        self._token = token_data["access_token"]
+        self._refresh_token = token_data["refresh_token"]
+        self.token_type = token_data["token_type"]
 
-
-config = BxtConfig()
-
-x = config.configure()
-
-# prompt = f"({config.get_name()}@bxt) $ "
-http = Http(BxtConfig.user_agent, config.get_access_token())
-
-sections = http.get_sections(f"{config.get_url()}/{BxtConfig.endpoint['sections']}")
-print(f"sections: {sections}\n")
+    def __str__(self):
+        return f"BxtToken (Access Token: {self._token}, Refresh Token: {self._refresh_token}, Token Type: {self.token_type})"

@@ -20,19 +20,18 @@
 #
 import json
 import os
-
 from pwinput import pwinput
 from pathlib import Path
 from .Http import Http
 
 
-class Config:
+class BxtConfig:
     """
     Main Settings Class
     """
     license_url = "https://www.gnu.org/licenses/agpl.html"
     app_name = "bxtctl"
-    app_version = "0.2.0"
+    app_version = "0.3.0"
     user_agent = F"{app_name}/{app_version}"
     config_dir = f"{Path.home()}/.config/{app_name}"
     config_file = f"config.json"
@@ -44,11 +43,7 @@ class Config:
         "pkgSnap": "api/packages/snap",
         "pkgSync": "api/packages/sync",
         "sections": "api/sections",
-        "verify": "api/verify",
         "user": "api/users",
-        "userAdd": "api/users/add",
-        "userUpdate": "api/users/update",
-        "userRemove": "api/users/remove",
     }
 
     def __init__(self):
@@ -56,32 +51,53 @@ class Config:
         Intialize configuration
         Creates the configuration folder and initialize or load configuraiton
         """
+        self._file_name = f"{self.config_dir}/{self.config_file}"
         self.http = Http(user_agent=self.user_agent)
         self._url: str = ""
-        self._token: str = ""
+        self._access_token: str = ""
         self._name: str = ""
-        self._file_name = f"{self.config_dir}/{self.config_file}"
+        self._refresh_token: str = ""
+
+        # create config dir if not existing
         if not os.path.isdir(self.config_dir):
             os.mkdir(self.config_dir)
+
         if not os.path.isfile(f"{self.config_dir}/{self.config_file}"):
+            # generrate empty default
             self.__save_config__()
         else:
+            # load config
             self.__load_config__()
 
-    def get_token(self) -> str:
+    def get_refresh_token(self) -> str:
+        """
+        Get Refresh Token
+        :return:
+        """
+        return self._refresh_token
+
+    def set_refresh_token(self, token) -> None:
+        """
+        Set Refresh Token
+        :param token:
+        :return:
+        """
+        self._refresh_token = token
+
+    def get_access_token(self) -> str:
         """
         Return Bxt token
         :return:
         """
-        return self._token
+        return self._access_token
 
-    def set_token(self, value: str):
+    def set_access_token(self, value: str):
         """
         Set Bxt token
         :param value:
         :return:
         """
-        self._token = value
+        self._access_token = value
         self.__save_config__()
 
     def get_name(self) -> str:
@@ -116,12 +132,18 @@ class Config:
         self._url = value
         self.__save_config__()
 
+    def is_valid(self):
+        return (self._url is not None and
+                self._access_token is not None and
+                self._refresh_token is not None and
+                self._name is not None)
+
     def __str__(self):
         """
         Return textual representation of the configuration  class
         :return:
         """
-        return f"BxtConfig(Url: '{self._url}', Name: '{self._name}', Token: '{self._token}')"
+        return f"BxtConfig(Url: '{self._url}', Name: '{self._name}'"
 
     def __save_config__(self):
         """
@@ -129,7 +151,9 @@ class Config:
         :return:
         """
         config = {
-            "token": self._token,
+            "access_token": self._access_token,
+            "refresh_token": self._refresh_token,
+            "token_type": self._token_type,
             "name": self._name,
             "url": self._url
         }
@@ -147,9 +171,19 @@ class Config:
                 data = json.load(infile)
 
             try:
-                self._token = data["token"]
+                self._access_token = data["access_token"]
             except (KeyError,) as e:
-                self._token = ""
+                self._access_token = ""
+
+            try:
+                self._refresh_token = data["refresh_token"]
+            except (KeyError,) as e:
+                self._refresh_token = ""
+
+            try:
+                self._token_type = data["token_type"]
+            except (KeyError,) as e:
+                self._token_type = ""
 
             try:
                 self._name = data["name"]
@@ -160,8 +194,11 @@ class Config:
                 self._url = f"{data['url']}"
             except (KeyError,) as e:
                 self._url = ""
+
         except (FileNotFoundError,):
-            self._token = ""
+            self._token_type = ""
+            self._access_token = ""
+            self._refresh_token = ""
             self._name = ""
             self._url = ""
         except (Exception,):
@@ -172,13 +209,26 @@ class Config:
         Create BctCtl configuration
         :return:
         """
+        # get options - username and service url
         options = _get_user_input_for_config()
+        # get password from user
         passwd = pwinput(prompt="password: ", mask="")
+        # assign options to variables
         self._name = options["name"]
         self._url = options["url"]
-        self._token = self.http.get_token(url=f"{self._url}/{self.endpoint['auth']}", name=self._name, passwd=passwd)
+        # get response from service
+        result = self.http.try_password_token(url=f"{self._url}/{self.endpoint['auth']}",
+                                              name=self._name, passwd=passwd)
+        if result.status == 200:
+            print(result)
+            data = result.get_json()
+            self._access_token = data["access_token"]
+            self._refresh_token = data["refresh_token"]
+            self._token_type = data["token_type"]
+            exit()
+
         self.__save_config__()
-        if self._token == "":
+        if self._access_token == "":
             return False
         return True
 
@@ -191,15 +241,20 @@ class Config:
         if username == "":
             username = self._name
         password = pwinput(prompt="password: ", mask="")
-        self._token = self.http.get_token(url=f"{self._url}/{self.endpoint['auth']}", name=username, passwd=password)
-        self._name = username
-        self.__save_config__()
-        if self._token == "":
-            return False
-        return True
+        result = self.http.try_password_token(url=f"{self._url}/{self.endpoint['auth']}",
+                                              name=username, passwd=password)
+        if result.status == 200:
+            self._name = username
+            self.__save_config__()
+            if self._access_token == "":
+                return False
+            return True
 
-    def verify(self) -> bool:
-        return self.http.verify_token(url=f"{self._url}/{self.endpoint['verify']}")
+    def revoke_access(self) -> bool:
+        result = self.http.revoke_refresh_token(f"{self._url}/{self.endpoint['verify']}")
+        if result.status == 200:
+            return True
+        return False
 
 
 def _get_user_input_for_config() -> dict:

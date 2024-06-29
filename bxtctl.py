@@ -25,7 +25,7 @@ import cmd2
 from cmd2 import Cmd2ArgumentParser, with_argparser
 import sys
 from Bxt.Acl import Acl
-from Bxt.Config import Config
+from Bxt.BxtConfig import BxtConfig
 from Bxt.Http import Http
 
 
@@ -33,14 +33,14 @@ class BxtCtl(cmd2.Cmd):
     """
     Main application object
     """
-    config = Config()
-    token = config.get_token()
+    config = BxtConfig()
+    token = config.get_access_token()
     if not token:
         config.configure()
 
     prompt = f"({config.get_name()}@bxt) $ "
-    http = Http(Config.user_agent, config.get_token())
-    sections = http.get_sections(f"{config.get_url()}/{Config.endpoint['sections']}")
+    http = Http(BxtConfig.user_agent, config.get_access_token())
+    sections = http.get_sections(f"{config.get_url()}/{BxtConfig.endpoint['sections']}")
 
     acl = Acl(sections)
 
@@ -75,7 +75,7 @@ class BxtCtl(cmd2.Cmd):
             self.prompt = f"({self.config.get_name()}@bxt) $ "
 
         # if token is empty - login
-        if self.config.get_token() == "":
+        if self.config.get_access_token() == "":
             print("First time login")
             if not self.config.login():
                 print("Login failed")
@@ -153,7 +153,7 @@ class BxtCtl(cmd2.Cmd):
         Start sync
         :return:
         """
-        if self.config.get_token():
+        if self.config.get_access_token():
             self.http.start_sync(f"{self.config.get_url()}/{self.config.endpoint['sync']}")
         else:
             print("Please login")
