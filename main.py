@@ -24,7 +24,7 @@ import argparse
 import cmd2
 from cmd2 import Cmd2ArgumentParser, with_argparser
 import sys
-from Bxt.Acl import Acl
+from Bxt.BxtAcl import BxtAcl
 from Bxt.BxtConfig import BxtConfig
 from Bxt.Http import Http
 import jwt

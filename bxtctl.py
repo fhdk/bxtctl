@@ -24,7 +24,7 @@ import argparse
 import cmd2
 from cmd2 import Cmd2ArgumentParser, with_argparser
 import sys
-from Bxt.Acl import Acl
+from Bxt.BxtAcl import BxtAcl
 from Bxt.BxtConfig import BxtConfig
 from Bxt.Http import Http
 
@@ -42,7 +42,7 @@ class BxtCtl(cmd2.Cmd):
     http = Http(BxtConfig.user_agent, config.get_access_token())
     sections = http.get_sections(f"{config.get_url()}/{BxtConfig.endpoint['sections']}")
 
-    acl = Acl(sections)
+    acl = BxtAcl(sections)
 
     list_args = Cmd2ArgumentParser(description="List content of repo branch architecture")
     list_args.add_argument("repo", type=str, help="Target Repository", choices=acl.get_repositories())

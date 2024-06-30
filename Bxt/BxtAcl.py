@@ -21,7 +21,7 @@
 from .Section import Section
 
 
-class Acl:
+class BxtAcl:
     """
     Bxt Access Control List
     """
