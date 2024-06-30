@@ -38,7 +38,7 @@ class BxtCtl(cmd2.Cmd):
     if not token:
         config.configure()
 
-    prompt = f"({config.get_name()}@bxt) $ "
+    prompt = f"({config.get_name()}@{config.get_hostname()}) $ "
     http = Http(BxtConfig.user_agent, config.get_access_token())
     sections = http.get_sections(f"{config.get_url()}/{BxtConfig.endpoint['sections']}")
 
@@ -96,7 +96,8 @@ class BxtCtl(cmd2.Cmd):
         :param args:
         :return:
         """
-        pkgs = self.http.get_packages(f"{self.config.get_url()}/{self.config.endpoint['packages']}", args.branch, args.repo, args.arch)
+        pkgs = self.http.get_packages(f"{self.config.get_url()}/{self.config.endpoint['packages']}", args.branch,
+                                      args.repo, args.arch)
         for pkg in pkgs:
             print(f"{pkg['name']:<30}: {pkg['poolEntries'][pkg['preferredLocation']]['version']}")
             print(pkg)
@@ -113,7 +114,8 @@ class BxtCtl(cmd2.Cmd):
         from pprint import pprint
         for branch in branches:
             for arch in architectures:
-                archpkgs = self.http.get_packages(f"{self.config.get_url()}/{self.config.endpoint['packages']}", branch, args.repo, arch)
+                archpkgs = self.http.get_packages(f"{self.config.get_url()}/{self.config.endpoint['packages']}", branch,
+                                                  args.repo, arch)
                 if args.package is not None:
                     pkgs = [x for x in archpkgs if x["name"] in args.package]
                     for pkg in pkgs:
@@ -148,19 +150,10 @@ class BxtCtl(cmd2.Cmd):
         if not self.config.configure():
             print("Configuration failed!")
 
-    def do_sync(self, args):
-        """
-        Start sync
-        :return:
-        """
-        if self.config.get_access_token():
-            self.http.start_sync(f"{self.config.get_url()}/{self.config.endpoint['sync']}")
-        else:
-            print("Please login")
-
 
 def start():
     """
+
     Poetry entry point
     :return:
     """

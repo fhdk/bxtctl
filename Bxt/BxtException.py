@@ -19,7 +19,7 @@
 # Authors: Frede Hundewadt https://github.com/fhdk/bxtctl
 #
 
-class BxtErrorHandler(Exception):
+class BxtException(Exception):
     def __init__(self, msg, errors):
         super().__init__(msg)
         self.errors = errors

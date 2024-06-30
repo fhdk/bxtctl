@@ -18,11 +18,14 @@
 #
 # Authors: Frede Hundewadt https://github.com/fhdk/bxtctl
 #
+import base64
 import json
 import os
 from pwinput import pwinput
 from pathlib import Path
 from .Http import Http
+from .BxtToken import BxtToken
+from .MyEncoder import MyEncoder
 
 
 class BxtConfig:
@@ -37,13 +40,12 @@ class BxtConfig:
     config_file = f"config.json"
     endpoint = {
         "auth": "api/auth",
+        "revoke": "api/auth/revoke",
         "logs": "api/logs/packages",
         "packages": "api/packages",
         "pkgCommit": "api/packages/commit",
-        "pkgSnap": "api/packages/snap",
         "pkgSync": "api/packages/sync",
         "sections": "api/sections",
-        "user": "api/users",
     }
 
     def __init__(self):
@@ -51,12 +53,11 @@ class BxtConfig:
         Intialize configuration
         Creates the configuration folder and initialize or load configuraiton
         """
-        self._file_name = f"{self.config_dir}/{self.config_file}"
-        self.http = Http(user_agent=self.user_agent)
+        self._configstore = f"{self.config_dir}/{self.config_file}"
+        self._http = Http(user_agent=self.user_agent)
         self._url: str = ""
-        self._access_token: str = ""
-        self._name: str = ""
-        self._refresh_token: str = ""
+        self._username: str = ""
+        self._token: BxtToken = BxtToken()
 
         # create config dir if not existing
         if not os.path.isdir(self.config_dir):
@@ -69,52 +70,33 @@ class BxtConfig:
             # load config
             self.__load_config__()
 
+    def get_hostname(self) -> str:
+        """
+        get hostname without protocol
+        :return:
+        """
+        return self._url.split("//")[-1]
+
     def get_refresh_token(self) -> str:
         """
         Get Refresh Token
         :return:
         """
-        return self._refresh_token
-
-    def set_refresh_token(self, token) -> None:
-        """
-        Set Refresh Token
-        :param token:
-        :return:
-        """
-        self._refresh_token = token
+        return self._token.get_refresh_token()
 
     def get_access_token(self) -> str:
         """
         Return Bxt token
         :return:
         """
-        return self._access_token
-
-    def set_access_token(self, value: str):
-        """
-        Set Bxt token
-        :param value:
-        :return:
-        """
-        self._access_token = value
-        self.__save_config__()
+        return self._token.get_access_token()
 
     def get_name(self) -> str:
         """
         Return Bxt username
         :return:
         """
-        return self._name
-
-    def set_name(self, value: str):
-        """
-        Set Bxt username
-        :param value:
-        :return:
-        """
-        self._name = value
-        self.__save_config__()
+        return self._username
 
     def get_url(self) -> str:
         """
@@ -123,86 +105,8 @@ class BxtConfig:
         """
         return self._url
 
-    def set_url(self, value: str):
-        """
-        Set the Bxt endpoint url
-        :param value:
-        :return:
-        """
-        self._url = value
-        self.__save_config__()
-
     def is_valid(self):
-        return (self._url is not None and
-                self._access_token is not None and
-                self._refresh_token is not None and
-                self._name is not None)
-
-    def __str__(self):
-        """
-        Return textual representation of the configuration  class
-        :return:
-        """
-        return f"BxtConfig(Url: '{self._url}', Name: '{self._name}'"
-
-    def __save_config__(self):
-        """
-        Initialize configuration and write empty config
-        :return:
-        """
-        config = {
-            "access_token": self._access_token,
-            "refresh_token": self._refresh_token,
-            "token_type": self._token_type,
-            "name": self._name,
-            "url": self._url
-        }
-        with open(self._file_name, "w") as outfile:
-            json.dump(config, outfile)
-
-    def __load_config__(self):
-        """
-        Load BxtCtl configuration
-        The function assumes the file exist
-        :return:
-        """
-        try:
-            with open(self._file_name, "r") as infile:
-                data = json.load(infile)
-
-            try:
-                self._access_token = data["access_token"]
-            except (KeyError,) as e:
-                self._access_token = ""
-
-            try:
-                self._refresh_token = data["refresh_token"]
-            except (KeyError,) as e:
-                self._refresh_token = ""
-
-            try:
-                self._token_type = data["token_type"]
-            except (KeyError,) as e:
-                self._token_type = ""
-
-            try:
-                self._name = data["name"]
-            except (KeyError,) as e:
-                self._name = ""
-
-            try:
-                self._url = f"{data['url']}"
-            except (KeyError,) as e:
-                self._url = ""
-
-        except (FileNotFoundError,):
-            self._token_type = ""
-            self._access_token = ""
-            self._refresh_token = ""
-            self._name = ""
-            self._url = ""
-        except (Exception,):
-            pass
+        return self._url != "" and self._username != ""
 
     def configure(self) -> bool:
         """
@@ -212,49 +116,112 @@ class BxtConfig:
         # get options - username and service url
         options = _get_user_input_for_config()
         # get password from user
-        passwd = pwinput(prompt="password: ", mask="")
+        password = pwinput(prompt="password: ", mask="")
         # assign options to variables
-        self._name = options["name"]
+        self._username = options["name"]
         self._url = options["url"]
         # get response from service
-        result = self.http.try_password_token(url=f"{self._url}/{self.endpoint['auth']}",
-                                              name=self._name, passwd=passwd)
-        if result.status == 200:
-            print(result)
-            data = result.get_json()
-            self._access_token = data["access_token"]
-            self._refresh_token = data["refresh_token"]
-            self._token_type = data["token_type"]
-            exit()
-
-        self.__save_config__()
-        if self._access_token == "":
-            return False
-        return True
+        result = self._http.authenticate(url=f"{self._url}/{self.endpoint['auth']}",
+                                         username=self._username,
+                                         password=password)
+        # status code 200 set token and save config
+        if result.status() == 200:
+            self._token = BxtToken(result.content())
+            self.__save_config__()
+            return True
+        return False
 
     def login(self) -> bool:
         """
         request login credentials to get a token
         :return:
         """
-        username = input(f"bxt user ({self._name}): ").strip()
+        print(f"login bxt service : {self._url}")
+        username = input(f"bxt ({self._username}) : ").strip()
         if username == "":
-            username = self._name
+            username = self._username
         password = pwinput(prompt="password: ", mask="")
-        result = self.http.try_password_token(url=f"{self._url}/{self.endpoint['auth']}",
-                                              name=username, passwd=password)
-        if result.status == 200:
-            self._name = username
+        result = self._http.authenticate(url=f"{self._url}/{self.endpoint['auth']}", username=username,
+                                         password=password)
+        if result.status() == 200:
+            self._username = username
+            self._token = BxtToken(result.content())
             self.__save_config__()
-            if self._access_token == "":
-                return False
             return True
+        self._token = BxtToken()
+        self.__save_config__()
+        return False
 
     def revoke_access(self) -> bool:
-        result = self.http.revoke_refresh_token(f"{self._url}/{self.endpoint['verify']}")
-        if result.status == 200:
+        result = self._http.revoke_refresh_token(f"{self._url}/{self.endpoint['revoke_access']}")
+        if result.status() == 200:
+            self._token = {}
+            self.__save_config__()
             return True
         return False
+
+    def __str__(self):
+        """
+        Return textual representation of the configuration  class
+        :return:
+        """
+        return f"BxtConfig(Url: '{self._url}', Name: '{self._username}', Token: '{self._token}')"
+
+    def __load_config__(self):
+        """
+        Load BxtCtl configuration
+        The function assumes the file exist
+        :return:
+        """
+        try:
+            with open(self._configstore, "r") as infile:
+                config = json.load(infile)
+            # read name
+            try:
+                self._username = config['username']
+            except KeyError:
+                self._username = ""
+            # read url
+            try:
+                self._url = f"{config['url']}"
+            except KeyError:
+                self._url = ""
+            # read token
+            try:
+                self._token = BxtToken(config['token'])
+            except KeyError:
+                self._token = BxtToken()
+
+        except json.JSONDecodeError:
+            self._username = ""
+            self._url = ""
+            self._token = BxtToken()
+        except FileNotFoundError:
+            self._token = BxtToken()
+            self._username = ""
+            self._url = ""
+        except (Exception,):
+            pass
+
+    def __save_config__(self):
+        """
+        Initialize configuration and write config
+        :return:
+        """
+        temp = {
+            "url": self._url,
+            "username": self._username,
+            "token": self._token,
+        }
+        with open(self._configstore, "w") as outfile:
+            json.dump(temp, outfile, cls=MyEncoder)
+
+    def __validate_owner__(self) -> bool:
+        """
+        validate if token belongs to name in config
+        :return:
+        """
+        return self._token.validate_owner(self._username)
 
 
 def _get_user_input_for_config() -> dict:
@@ -264,7 +231,7 @@ def _get_user_input_for_config() -> dict:
     """
     options = {"name": "", "url": ""}
     while True:
-        options["url"] = input(f"bxt http: ").strip()
-        options["name"] = input(f"bxt user: ").strip()
-        if options["url"] != "" and options["name"] != "":
+        options["url"] = input(f"bxt service : ").strip()
+        options["name"] = input(f"bxt username : ").strip()
+        if options["url"] != "" and options["name"] != "" and options["url"].startswith("http"):
             return options

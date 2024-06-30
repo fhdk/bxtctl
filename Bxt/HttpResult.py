@@ -19,11 +19,26 @@
 # Authors: Frede Hundewadt https://github.com/fhdk/bxtctl
 #
 
-class Token:
-    def __init__(self, token_data: dict):
-        self._token = token_data["access_token"]
-        self._refresh_token = token_data["refresh_token"]
-        self.token_type = token_data["token_type"]
+from typing import Dict, Any, List
 
-    def __str__(self):
-        return f"BxtToken (Access Token: {self._token}, Refresh Token: {self._refresh_token}, Token Type: {self.token_type})"
+
+class HttpResult:
+    def __init__(self, content: Dict[str, Any], status: int):
+        self._content = content
+        self._status = status
+
+    def content(self) -> Dict[str, Any]:
+        return self._content
+
+    def status(self) -> int:
+        return self._status
+
+    def get(self):
+        return {
+            "json": self._content,
+            "status": self._status
+        }
+
+    def __str__(self) -> str:
+        return f"Status: {self._status}, Content: '{self._content}'"
+

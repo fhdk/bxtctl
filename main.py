@@ -32,10 +32,14 @@ import jwt
 
 config = BxtConfig()
 
-x = config.configure()
+if not config.is_valid():
+    y = config.configure()
+
+if not config.get_access_token():
+    z = config.login()
 
 # prompt = f"({config.get_name()}@bxt) $ "
-http = Http(BxtConfig.user_agent, config.get_access_token())
-
+http = Http(BxtConfig.user_agent)
+http.set_access_token(config.get_access_token())
 sections = http.get_sections(f"{config.get_url()}/{BxtConfig.endpoint['sections']}")
 print(f"sections: {sections}\n")

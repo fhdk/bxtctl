@@ -21,45 +21,85 @@
 
 import requests
 from json import JSONDecodeError
-from .User import User
+from .HttpResult import HttpResult
 from .LogEntry import LogEntry
 from .Package import Package
 from .Section import Section
-from .BxtErrorHandler import BxtErrorHandler
-from typing import Dict, Any, List
-
-
-class HttpResult:
-    def __init__(self, json_data: Dict[str, Any], status: int):
-        self.json = json_data
-        self.status = status
-
-    def get_json(self) -> Dict[str, Any]:
-        return self.json
-
-    def get_status(self) -> int:
-        return self.status
-
-    def get(self):
-        return {
-            "json": self.json,
-            "status": self.status
-        }
-
-    def __str__(self) -> str:
-        return f"{self.json}"
+from .BxtException import BxtException
 
 
 class Http:
     """
     Http helper class
     """
-    def __init__(self, user_agent: str, access_token: str = None, refresh_token: str = None):
+    def __init__(self, user_agent: str, access_token: str = None):
         self._user_agent = user_agent
-        self._access_token = access_token
-        self._refresh_token = refresh_token
+        self._access_token: str = access_token
 
-    def make_request(self, url: str, method: str, params=None, data=None) -> HttpResult:
+    def authenticate(self, url: str, username: str, password: str) -> HttpResult:
+        """
+        Authenticate from username and password
+        :param url:
+        :param username:
+        :param password:
+        :return:
+        """
+        data = {
+            "name": username,
+            "password": password,
+            "response_type": "bearer"
+        }
+        return self.make_http_request(method="post", url=url, data=data)
+
+    def commit(self, url: str, data: list) -> HttpResult:
+        """
+        post a commit request
+        :return:
+        """
+        pass
+
+    def compare(self, url: str, data: list) -> HttpResult:
+        """
+        post compare request
+        :param url:
+        :param data:
+        :return:
+        """
+        return self.make_http_request(method="post", url=url, data=data)
+        # {
+        #     "sections": [
+        #         {
+        #             "branch": "unstable",
+        #             "repository": "core",
+        #             "architecture": "x86_64"
+        #         },
+        #         {
+        #             "branch": "testing",
+        #             "repository": "core",
+        #             "architecture": "x86_64"
+        #         },
+        #         {
+        #             "branch": "stable",
+        #             "repository": "core",
+        #             "architecture": "x86_64"
+        #         }
+        #     ],
+        #     "compareTable": {
+        #         "qwt": {
+        #             "unstable/core/x86_64": {
+        #                 "overlay": "6.2.0-1"
+        #             },
+        #             "testing/core/x86_64": {
+        #                 "overlay": "6.2.0-1"
+        #             },
+        #             "stable/core/x86_64": {
+        #                 "overlay": "6.2.0-1"
+        #             }
+        #         }
+        #     }
+        # }
+
+    def make_http_request(self, method: str, url: str, params=None, data=None) -> HttpResult:
         """
         make http request
         :param url:
@@ -72,11 +112,12 @@ class Http:
         session.headers.update({"User-Agent": self._user_agent})
 
         if self._access_token is not None:
+            # todo - check for expiration and refresh if required
             session.headers.update({"Authorization": "Bearer " + self._access_token})
 
         try:
             # execute request
-            session = session.request(url, method, params=params, json=data)
+            session = session.request(method=method, url=url, params=params, json=data)
             # return response data and status
             return HttpResult(session.json(), session.status_code)
 
@@ -89,39 +130,19 @@ class Http:
         except requests.exceptions.Timeout:
             return HttpResult({'error': 'Timeout error'}, 408)
 
-    def set_token(self, access_token: str):
-        self._access_token = access_token
-
-    def start_sync(self, url: str) -> bool:
-        """
-        Start sync
-        :return: True/False
-        """
-        try:
-            result = self.make_request(url, "POST")
-            if result.status == 200:
-                return True
-        except (Exception,) as err:
-            print(f"{err}")
-            return False
-
-    def get_logs(self, url) -> [LogEntry]:
+    def get_logs(self, url: str) -> [LogEntry]:
         """
         Get package logs
         :param url:
         :return: list of log entries
         """
+        result = self.make_http_request(method="get", url=url)
         try:
-            result = self.make_request(url, "GET")
-            if result.status == 200:
-                return result.json
-
-        except (JSONDecodeError,) as err:
-            print(f"{err}")
-        except (requests.exceptions.ConnectionError,) as err:
-            print(f"{err}")
-        except (requests.exceptions.Timeout,) as err:
-            print(f"{err}")
+            if result.status() == 200:
+                return result.content()
+            raise BxtException('Failed to get logs', {"status": result.status(), "message": result.content()})
+        except BxtException as e:
+            print(f"{e}\n{e.errors}")
         return []
 
     def get_packages(self, url: str, branch: str, repositoriy: str, architectue: str) -> [Package]:
@@ -133,17 +154,18 @@ class Http:
         :param architectue:
         :return: [{"name":"string","section","string","repository":"string","branch":"string","architecture":"string"},"pool_entries":[{"version":"string","hasSignature":true}]]]
         """
+        params = {
+            "branch": branch,
+            "repository": repositoriy,
+            "architecture": architectue
+        }
         try:
-            result = self.make_request(url, "GET", params={"branch": branch, "repository": repositoriy,
-                                                           "architecture": architectue})
-            if result.status == 200:
-                return result.json
-        except (JSONDecodeError,) as err:
-            print(f"{err}")
-        except (requests.exceptions.ConnectionError,) as err:
-            print(f"{err}")
-        except (requests.exceptions.Timeout,) as err:
-            print(f"{err}")
+            result = self.make_http_request(method="get", url=url, params=params)
+            if result.status() == 200:
+                return result.content()
+            raise BxtException("Failed to get packages", {"status": result.status(), "message": result.content()})
+        except BxtException as e:
+            print(f"{e}\n{e.errors}")
         return []
 
     def get_sections(self, url: str) -> [Section]:
@@ -153,34 +175,25 @@ class Http:
         :return: [{"branch": "string","repository": "string","architecture": "string"}]
         """
         try:
-            result = self.make_request(url, "GET")
-            if result.status == 200:
-                return result.json
-            raise BxtErrorHandler("Section Error", result.json)
-        except BxtErrorHandler as e:
+            result = self.make_http_request(method="get", url=url)
+            if result.status() == 200:
+                return result.content()
+            raise BxtException("Failed to get sections", {"status": result.status(), "message": result.content()})
+        except BxtException as e:
             print(f"{e}\n{e.errors}")
-        except (JSONDecodeError,) as err:
-            print(f"There was an error decoding response from {url}. The message is contained in {err}.")
-        except (requests.exceptions.ConnectionError,) as err:
-            print(f"{err}")
         return []
 
-    def get_users(self, url: str) -> [User]:
+    def renew_access_token(self, url: str, refresh_token: str) -> HttpResult:
         """
-        Get users
+        Authenticate from refresh token
+        :param refresh_token:
         :param url:
-        :return: [{"name":"string","permissions":["string"]}]
+        :return:
         """
-        try:
-            req_result = self.make_request(url, "GET")
-            if req_result.status == 200:
-                return req_result.json
-
-        except (JSONDecodeError,) as err:
-            print(f"{err}")
-        except (requests.exceptions.ConnectionError,) as err:
-            print(f"{err}")
-        return []
+        data = {
+            "token": refresh_token
+        }
+        return self.make_http_request(method="get", url=url, data=data)
 
     def revoke_refresh_token(self, url: str) -> HttpResult:
         """
@@ -188,53 +201,12 @@ class Http:
         :param url:
         :return:
         """
-        return self.make_request(url, "POST")
+        return self.make_http_request(method="post", url=url)
 
-    def try_password_token(self, url: str, name: str, passwd: str) -> HttpResult:
+    def set_access_token(self, access_token: str):
         """
-        Authenticate from username and password
-        :param url:
-        :param name:
-        :param passwd:
+        set access token
+        :param access_token:
         :return:
         """
-        credentials = {"name": name, "password": passwd}
-        return self.make_request(url, "POST", data=credentials)
-
-    def try_refresh_token(self, url: str) -> HttpResult:
-        """
-        Authenticate from refresh token
-        :param url:
-        :return:
-        """
-        return self.make_request(url, "POST", data={"token": self._refresh_token})
-
-    def user_add(self, user: User):
-        """
-        Add user
-        :param user:
-        :return: 200
-        :return: 400
-        :return: 401
-        """
-        pass
-
-    def user_mod(self, user: User):
-        """
-        Update user
-        :param user:
-        :return: 200
-        :return: 400
-        :return: 401
-        """
-        pass
-
-    def user_del(self, user_id: str):
-        """
-        Remove user
-        :param user_id:
-        :return: 200
-        :return: 400
-        :return: 401
-        """
-        pass
+        self._access_token = access_token
