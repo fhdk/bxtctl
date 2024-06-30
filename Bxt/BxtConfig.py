@@ -25,7 +25,7 @@ from pwinput import pwinput
 from pathlib import Path
 from .Http import Http
 from .BxtToken import BxtToken
-from .MyEncoder import MyEncoder
+from .BxtEncoder import BxtEncoder
 
 
 class BxtConfig:
@@ -214,7 +214,7 @@ class BxtConfig:
             "token": self._token,
         }
         with open(self._configstore, "w") as outfile:
-            json.dump(temp, outfile, cls=MyEncoder)
+            json.dump(temp, outfile, cls=BxtEncoder)
 
     def __validate_owner__(self) -> bool:
         """
