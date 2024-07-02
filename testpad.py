@@ -52,14 +52,15 @@ token = config.get_access_token()
 endpoint = f"{config.get_url()}/{config.endpoint["pkgCommit"]}"
 
 test_repo = os.path.join(os.path.dirname(__file__), "repo")
+test_pkg = "arch-install-scripts-28-1-any.pkg.tar.zst"
 upload_target = {
-    "branch": "unstable",
-    "repository": "extra",
+    "branch": "stable",
+    "repository": "multilib",
     "architecture": "x86_64"
 }
 upload_form = {
-    ("package1.file", ("arch-install-scripts-28-1-any.pkg.tar.zst", open(f"{test_repo}/arch-install-scripts-28-1-any.pkg.tar.zst", "rb"))),
-    ("package1.signatureFile", ("arch-install-scripts-28-1-any.pkg.tar.zst", open(f"{test_repo}/arch-install-scripts-28-1-any.pkg.tar.zst.sig", "rb"))),
+    ("package1.file", (test_pkg, open(f"{test_repo}/{test_pkg}", "rb"))),
+    ("package1.signatureFile", (f"{test_pkg}.sig", open(f"{test_repo}/{test_pkg}.sig", "rb"))),
     ("package1.section", (None, json.dumps(upload_target))),
 }
 
