@@ -46,9 +46,9 @@ class Http:
         :return:
         """
         data = {"name": username, "password": password, "response_type": "bearer"}
-        return self.make_http_request(method="post", url=url, data=data)
+        return self.make_http_request(method="post", url=url, json=data)
 
-    def commit(self, url: str, data: list) -> HttpResult:
+    def commit(self, url: str, data: list, files: list) -> HttpResult:
         """
         post a commit request
         :return:
@@ -62,7 +62,7 @@ class Http:
         :param data:
         :return:
         """
-        return self.make_http_request(method="post", url=url, data=data)
+        return self.make_http_request(method="post", url=url, json=data)
         # {
         #     "pkgSection": [
         #         {
@@ -97,17 +97,29 @@ class Http:
         # }
 
     def make_http_request(
-        self, method: str, url: str, params=None, data=None
+        self,
+        method: str,
+        url: str,
+        params=None,
+        json=None,
+        data=None,
+        headers=None,
+        files=None,
     ) -> HttpResult:
         """
         make http request
+        :param files:
+        :param headers:
+        :param data:
         :param url:
         :param method:
         :param params:
-        :param data:
+        :param json:
         :return:
         """
         session = requests.session()
+        if headers is not None:
+            session.headers.update(headers)
         session.headers.update({"User-Agent": self._user_agent})
 
         if self._access_token is not None:
@@ -116,7 +128,15 @@ class Http:
 
         try:
             # execute request
-            session = session.request(method=method, url=url, params=params, json=data)
+            session = session.request(
+                method=method,
+                url=url,
+                params=params,
+                json=json,
+                data=data,
+                files=files,
+                headers=headers,
+            )
             # return response data and status
             return HttpResult(session.json(), session.status_code)
 
@@ -156,7 +176,7 @@ class Http:
         :param branch:
         :param repositoriy:
         :param architectue:
-        :return: [{"name":"string","section","string","repository":"string","branch":"string","architecture":"string"},"pool_entries":[{"version":"string","hasSignature":true}]]]
+        :return:
         """
         params = {
             "branch": branch,
@@ -201,7 +221,7 @@ class Http:
         :return:
         """
         data = {"token": refresh_token}
-        return self.make_http_request(method="get", url=url, data=data)
+        return self.make_http_request(method="get", url=url, json=data)
 
     def revoke_refresh_token(self, url: str) -> HttpResult:
         """

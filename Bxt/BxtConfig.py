@@ -78,13 +78,6 @@ class BxtConfig:
         """
         return self._url.split("//")[-1]
 
-    def get_refresh_token(self) -> str:
-        """
-        Get Refresh Token
-        :return:
-        """
-        return self._token.get_refresh_token()
-
     def get_access_token(self) -> str:
         """
         Return Bxt token
@@ -106,8 +99,21 @@ class BxtConfig:
         """
         return self._url
 
-    def is_valid(self):
+    def is_valid(self) -> bool:
         return self._url != "" and self._username != ""
+
+    def is_token_expired(self) -> bool:
+        return self._token.is_access_token_expired()
+
+    def renew_access_token(self) -> bool:
+        refresh_token = self._token.get_refresh_token()
+        result = self._http.renew_access_token(url=f"{self._url}/{self.endpoint["refresh"]}",
+                                               refresh_token=refresh_token)
+        if result.status == 200:
+            self._token = BxtToken(result.content())
+            self.__save_config__()
+            return True
+        return False
 
     def configure(self) -> bool:
         """

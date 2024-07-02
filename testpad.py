@@ -21,6 +21,9 @@
 #
 
 import argparse
+import json
+import time
+
 import cmd2
 import requests
 from cmd2 import Cmd2ArgumentParser, with_argparser
@@ -32,42 +35,54 @@ import jwt
 from pprint import pprint
 import os
 
-# config = BxtConfig()
-#
-# if not config.is_valid():
-#     y = config.configure()
-#
-# if not config.get_access_token():
-#     z = config.login()
+config = BxtConfig()
+
+if not config.is_valid():
+    y = config.configure()
+
+if not config.get_access_token():
+    z = config.login()
+
+
+if config.is_token_expired():
+    if not config.renew_access_token():
+        z = config.login()
+
 #
 # # prompt = f"({config.get_name()}@bxt) $ "
 # http = Http(BxtConfig.user_agent)
 # http.set_access_token(config.get_access_token())
 # sections = http.get_sections(f"{config.get_url()}/{BxtConfig.endpoint['sections']}")
 # print(f"sections: {sections}\n")
+token = config.get_access_token()
+endpoint = f"{config.get_url()}/{config.endpoint["pkgCommit"]}"
 
 test_repo = os.path.join(os.path.dirname(__file__), "repo")
-files = {
-    ("packageFile", (None, f"{test_repo}/abseil-cpp-20240116.2-2-x86_64.pkg.tar.zst")),
-    (
-        "packageSignature",
-        (None, f"{test_repo}/abseil-cpp-20240116.2-2-x86_64.pkg.tar.zst.sig"),
-    ),
-    ("packageFile", (None, f"{test_repo}/arch-install-scripts-28-1-any.pkg.tar.zst")),
-    (
-        "packageSignature",
-        (None, f"{test_repo}/arch-install-scripts-28-1-any.pkg.tar.zstsig"),
-    ),
+upload_target = {
+    "branch": "unstable",
+    "repository": "extra",
+    "architecture": "x86_64"
 }
-body = {
-    "packageSection": {
-        "branch": "unstable",
-        "repository": "extra",
-        "architecture": "x86_64",
-    }
+upload_form = {
+    ("package1.file", open(f"{test_repo}/arch-install-scripts-28-1-any.pkg.tar.zst", "rb")),
+    ("package1.signatureFile", open(f"{test_repo}/arch-install-scripts-28-1-any.pkg.tar.zst.sig", "rb")),
+    ("package1.section", json.dumps(upload_target)),
 }
-response = requests.request("post", "https://httpbin.org/post", files=files, json=body)
-print("  --> response headers")
-pprint(response.json()["headers"])
-print("  --> response json")
-pprint(response.json())
+
+params = {"package1.section": upload_target}
+headers = {"Authorization": f"Bearer {token}"}
+
+print("upload_form : ")
+print(upload_form)
+print("params : ")
+print(params)
+print(json.dumps(params))
+req = requests.session()
+req.headers.update(headers)
+
+print("request begin --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
+response = req.post(endpoint, files=upload_form, params=params)
+print("response recv --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
+print("          headers ", response.headers)
+print("          status  ", response.status_code)
+

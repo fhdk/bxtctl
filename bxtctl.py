@@ -24,6 +24,7 @@ import argparse
 import cmd2
 from cmd2 import Cmd2ArgumentParser, with_argparser
 import sys
+import os
 from Bxt.BxtAcl import BxtAcl
 from Bxt.BxtConfig import BxtConfig
 from Bxt.Http import Http
@@ -41,7 +42,7 @@ class BxtCtl(cmd2.Cmd):
 
     prompt = f"({config.get_name()}@{config.get_hostname()}) $ "
     http = Http(BxtConfig.user_agent, config.get_access_token())
-    sections = http.get_sections(f"{config.get_url()}/{BxtConfig.endpoint['sections']}")
+    sections = http.get_sections(f"{config.get_url()}/{BxtConfig.endpoint['pkgSection']}")
 
     acl = BxtAcl(sections)
 
@@ -178,7 +179,35 @@ class BxtCtl(cmd2.Cmd):
         :return: True/False
         """
         print(f"TODO - commit package to repo - using {args}")
-        pass
+
+        test_repo = os.path.join(os.path.dirname(__file__), "repo")
+        files = {
+            (
+                "packageFile",
+                (None, f"{test_repo}/abseil-cpp-20240116.2-2-x86_64.pkg.tar.zst"),
+            ),
+            (
+                "packageSignature",
+                (None, f"{test_repo}/abseil-cpp-20240116.2-2-x86_64.pkg.tar.zst.sig"),
+            ),
+            (
+                "packageFile",
+                (None, f"{test_repo}/arch-install-scripts-28-1-any.pkg.tar.zst"),
+            ),
+            (
+                "packageSignature",
+                (None, f"{test_repo}/arch-install-scripts-28-1-any.pkg.tar.zstsig"),
+            ),
+        }
+        body = {
+            "packageSection": {
+                "branch": "unstable",
+                "repository": "extra",
+                "architecture": "x86_64",
+            }
+        }
+
+        result = self.http.commit(url=f"{self.config.get_url()}/{self.config.endpoint['packages']}", )
 
     def do_login(self, args):
         """
@@ -187,6 +216,8 @@ class BxtCtl(cmd2.Cmd):
         """
         if not self.config.login():
             print("Login failed!")
+
+        self.prompt = f"({self.config.get_name()}@{self.config.get_hostname()}) $ "
 
     def do_configure(self, args):
         """

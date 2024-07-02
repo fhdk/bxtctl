@@ -73,22 +73,22 @@ class BxtToken:
         decoded = jwt.decode(self.refresh_token, verify=False)
         return decoded["username"] == bxt_owner
 
-    def access_expired(self) -> bool:
+    def is_access_token_expired(self) -> bool:
         """
         check if access token has expired
         :return:
         """
-        decoded = jwt.decode(self.access_token, verify=False)
+        decoded = jwt.decode(self.access_token, options={"verify_signature": False}, algorithms=["HS256"], typ="JWT")
         expiration_time = decoded.get("exp")
         current_time = int(time.time())
         return expiration_time < current_time
 
-    def refresh_expired(self) -> bool:
+    def is_refresh_token_expired(self) -> bool:
         """
         check if refresh token has expired
         :return:
         """
-        decoded = jwt.decode(self.refresh_token, verify=False)
+        decoded = jwt.decode(self.refresh_token, options={"verify_signature": False}, algorithms=["HS256"], typ="JWT")
         expiration_time = decoded.get("exp")
         current_time = int(time.time())
         return expiration_time < current_time
