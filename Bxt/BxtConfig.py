@@ -40,12 +40,12 @@ class BxtConfig:
     config_file = f"config.json"
     endpoint = {
         "auth": "api/auth",
+        "refresh": "api/auth/refresh",
         "revoke": "api/auth/revoke",
         "logs": "api/logs/packages",
-        "packages": "api/packages",
+        "pkgList": "api/packages",
         "pkgCommit": "api/packages/commit",
-        "pkgSync": "api/packages/sync",
-        "sections": "api/sections",
+        "pkgSection": "api/sections",
     }
 
     def __init__(self):
@@ -62,7 +62,7 @@ class BxtConfig:
         # create config dir if not existing
         if not os.path.isdir(self.config_dir):
             os.mkdir(self.config_dir)
-
+        # check configstore on disk
         if not os.path.isfile(f"{self.config_dir}/{self.config_file}"):
             # generrate empty default
             self.__save_config__()
@@ -117,16 +117,18 @@ class BxtConfig:
         options = _get_user_input_for_config()
         # get password from user
         password = pwinput(prompt="password: ", mask="")
-        # assign options to variables
+        # assign returned option to the configuration
         self._username = options["name"]
         self._url = options["url"]
         # get response from service
         result = self._http.authenticate(url=f"{self._url}/{self.endpoint['auth']}",
                                          username=self._username,
                                          password=password)
-        # status code 200 set token and save config
+        # handle result
         if result.status() == 200:
+            # assign content from result to token
             self._token = BxtToken(result.content())
+            # save configuration
             self.__save_config__()
             return True
         return False
@@ -136,18 +138,27 @@ class BxtConfig:
         request login credentials to get a token
         :return:
         """
-        print(f"login bxt service : {self._url}")
+        # display current service
+        print(f"login bxt service : {self.get_hostname()}")
+        # username prompt
         username = input(f"bxt ({self._username}) : ").strip()
         if username == "":
             username = self._username
+        # password prompt
         password = pwinput(prompt="password: ", mask="")
+        # get reponse from service
         result = self._http.authenticate(url=f"{self._url}/{self.endpoint['auth']}", username=username,
                                          password=password)
+        # handle result
         if result.status() == 200:
+            # assign username - could have been changed
             self._username = username
+            # assign the result to the token
             self._token = BxtToken(result.content())
+            # save configuration
             self.__save_config__()
             return True
+        # replace current token
         self._token = BxtToken()
         self.__save_config__()
         return False

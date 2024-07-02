@@ -131,7 +131,7 @@ class BxtCtl(cmd2.Cmd):
         :param args:
         :return: True/False
         """
-        print("TODO - commit package to repo")
+        print(f"TODO - commit package to repo - using {args}")
         pass
 
     def do_login(self, args):

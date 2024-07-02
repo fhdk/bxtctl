@@ -67,7 +67,7 @@ class Http:
         """
         return self.make_http_request(method="post", url=url, data=data)
         # {
-        #     "sections": [
+        #     "pkgSection": [
         #         {
         #             "branch": "unstable",
         #             "repository": "core",
