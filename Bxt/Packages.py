@@ -25,6 +25,7 @@ class Packages:
     """
     A set of packages from a given branch, repo and architecture
     """
+
     def __init__(self, packages: [Package]):
         self._packages = packages
 
@@ -45,6 +46,7 @@ class Packages:
         for pkg in pkgs:
             return pkg
 
+
 # {
 # "name": "string",
 # "section": "string",
@@ -64,4 +66,3 @@ class Packages:
 # },
 # "preferredLocation": "string"
 # }
-

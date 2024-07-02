@@ -32,6 +32,7 @@ class Http:
     """
     Http helper class
     """
+
     def __init__(self, user_agent: str, access_token: str = None):
         self._user_agent = user_agent
         self._access_token: str = access_token
@@ -44,11 +45,7 @@ class Http:
         :param password:
         :return:
         """
-        data = {
-            "name": username,
-            "password": password,
-            "response_type": "bearer"
-        }
+        data = {"name": username, "password": password, "response_type": "bearer"}
         return self.make_http_request(method="post", url=url, data=data)
 
     def commit(self, url: str, data: list) -> HttpResult:
@@ -99,7 +96,9 @@ class Http:
         #     }
         # }
 
-    def make_http_request(self, method: str, url: str, params=None, data=None) -> HttpResult:
+    def make_http_request(
+        self, method: str, url: str, params=None, data=None
+    ) -> HttpResult:
         """
         make http request
         :param url:
@@ -122,13 +121,13 @@ class Http:
             return HttpResult(session.json(), session.status_code)
 
         except JSONDecodeError:
-            return HttpResult({'error': 'Invalid JSON format'}, 400)
+            return HttpResult({"error": "Invalid JSON format"}, 400)
 
         except requests.exceptions.ConnectionError:
-            return HttpResult({'error': 'Connection error'}, 503)
+            return HttpResult({"error": "Connection error"}, 503)
 
         except requests.exceptions.Timeout:
-            return HttpResult({'error': 'Timeout error'}, 408)
+            return HttpResult({"error": "Timeout error"}, 408)
 
     def get_logs(self, url: str) -> [LogEntry]:
         """
@@ -140,12 +139,17 @@ class Http:
         try:
             if result.status() == 200:
                 return result.content()
-            raise BxtException('Failed to get logs', {"status": result.status(), "message": result.content()})
+            raise BxtException(
+                "Failed to get logs",
+                {"status": result.status(), "message": result.content()},
+            )
         except BxtException as e:
             print(f"{e}\n{e.errors}")
         return []
 
-    def get_packages(self, url: str, branch: str, repositoriy: str, architectue: str) -> [Package]:
+    def get_packages(
+        self, url: str, branch: str, repositoriy: str, architectue: str
+    ) -> [Package]:
         """
         get a list of packages
         :param url:
@@ -157,13 +161,16 @@ class Http:
         params = {
             "branch": branch,
             "repository": repositoriy,
-            "architecture": architectue
+            "architecture": architectue,
         }
         try:
             result = self.make_http_request(method="get", url=url, params=params)
             if result.status() == 200:
                 return result.content()
-            raise BxtException("Failed to get packages", {"status": result.status(), "message": result.content()})
+            raise BxtException(
+                "Failed to get packages",
+                {"status": result.status(), "message": result.content()},
+            )
         except BxtException as e:
             print(f"{e}\n{e.errors}")
         return []
@@ -178,7 +185,10 @@ class Http:
             result = self.make_http_request(method="get", url=url)
             if result.status() == 200:
                 return result.content()
-            raise BxtException("Failed to get sections", {"status": result.status(), "message": result.content()})
+            raise BxtException(
+                "Failed to get sections",
+                {"status": result.status(), "message": result.content()},
+            )
         except BxtException as e:
             print(f"{e}\n{e.errors}")
         return []
@@ -190,9 +200,7 @@ class Http:
         :param url:
         :return:
         """
-        data = {
-            "token": refresh_token
-        }
+        data = {"token": refresh_token}
         return self.make_http_request(method="get", url=url, data=data)
 
     def revoke_refresh_token(self, url: str) -> HttpResult:

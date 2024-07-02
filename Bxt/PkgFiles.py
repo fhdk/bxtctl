@@ -22,12 +22,10 @@ class PkgFiles:
     """
     The binary part of a package commit
     """
+
     def __init__(self, file: object, signature: object):
         self._file = file
         self._signature = signature
 
     def get(self):
-        return {
-            "file": self._file,
-            "signature": self._signature
-        }
+        return {"file": self._file, "signature": self._signature}

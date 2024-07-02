@@ -2,6 +2,18 @@
 
 Commandline tool for bxt package management
 
+## repo packages
+
+- python-cmd2
+- python-prettytable
+- python-pyjwt
+- python-requests
+- python-requests-toolbelt
+
+### custom package
+
+- python-pwinput
+
 ## Development
 
 ```bash

@@ -22,6 +22,7 @@ class Section:
     """
     Package Section info
     """
+
     def __init__(self, branch: str, repository: str, architecture: str):
         self._branch = branch
         self._repository = repository
@@ -31,8 +32,9 @@ class Section:
         return {
             "branch": self._branch,
             "repository": self._repository,
-            "architecture": self._architecture
+            "architecture": self._architecture,
         }
+
 
 # [
 #   {

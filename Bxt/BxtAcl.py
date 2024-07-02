@@ -25,6 +25,7 @@ class BxtAcl:
     """
     Bxt Access Control List
     """
+
     def __init__(self, sections: [Section]):
         """
         Initialize ACL using a sections object

@@ -33,6 +33,7 @@ class BxtCtl(cmd2.Cmd):
     """
     Main application object
     """
+
     config = BxtConfig()
     token = config.get_access_token()
     if not token:
@@ -44,24 +45,58 @@ class BxtCtl(cmd2.Cmd):
 
     acl = BxtAcl(sections)
 
-    list_args = Cmd2ArgumentParser(description="List content of repo branch architecture")
-    list_args.add_argument("repo", type=str, help="Target Repository", choices=acl.get_repositories())
-    list_args.add_argument("branch", type=str, help="Target Branch", choices=acl.get_branches())
-    list_args.add_argument("arch", type=str, help="Target Artitecture", choices=acl.get_architectures())
+    list_args = Cmd2ArgumentParser(
+        description="List content of repo branch architecture"
+    )
+    list_args.add_argument(
+        "repo", type=str, help="Target Repository", choices=acl.get_repositories()
+    )
+    list_args.add_argument(
+        "branch", type=str, help="Target Branch", choices=acl.get_branches()
+    )
+    list_args.add_argument(
+        "arch", type=str, help="Target Artitecture", choices=acl.get_architectures()
+    )
 
-    comp_args = Cmd2ArgumentParser(description="Compare repo package across branches and architectures")
-    comp_args.add_argument("repo", type=str, help="Target Repository", choices=acl.get_repositories())
-    comp_args.add_argument("-b", "--branch", type=str, nargs="*", help="Branches to compare", choices=acl.get_branches())
-    comp_args.add_argument("-a", "--arch", type=str, nargs="*", help="Architecures to compare", choices=acl.get_architectures())
-    comp_args.add_argument("-p", "--package", type=str, nargs="?", help="Packages to compare")
+    comp_args = Cmd2ArgumentParser(
+        description="Compare repo package across branches and architectures"
+    )
+    comp_args.add_argument(
+        "repo", type=str, help="Target Repository", choices=acl.get_repositories()
+    )
+    comp_args.add_argument(
+        "-b",
+        "--branch",
+        type=str,
+        nargs="*",
+        help="Branches to compare",
+        choices=acl.get_branches(),
+    )
+    comp_args.add_argument(
+        "-a",
+        "--arch",
+        type=str,
+        nargs="*",
+        help="Architecures to compare",
+        choices=acl.get_architectures(),
+    )
+    comp_args.add_argument(
+        "-p", "--package", type=str, nargs="?", help="Packages to compare"
+    )
 
     commit_args = Cmd2ArgumentParser(description="Commit package to repository")
     commit_args.add_argument("package", type=str, help="Package Name")
     commit_args.add_argument("pkgfile", type=str, help="Path to package file")
     commit_args.add_argument("sigfile", type=str, help="Path to signature file")
-    commit_args.add_argument("repo", type=str, help="Target Repository", choices=acl.get_repositories())
-    commit_args.add_argument("branch", type=str, help="Target Branch", choices=acl.get_branches())
-    commit_args.add_argument("arch", type=str, help="Target Architecture", choices=acl.get_architectures())
+    commit_args.add_argument(
+        "repo", type=str, help="Target Repository", choices=acl.get_repositories()
+    )
+    commit_args.add_argument(
+        "branch", type=str, help="Target Branch", choices=acl.get_branches()
+    )
+    commit_args.add_argument(
+        "arch", type=str, help="Target Architecture", choices=acl.get_architectures()
+    )
 
     def __init__(self):
         super().__init__()
@@ -96,10 +131,16 @@ class BxtCtl(cmd2.Cmd):
         :param args:
         :return:
         """
-        pkgs = self.http.get_packages(f"{self.config.get_url()}/{self.config.endpoint['packages']}", args.branch,
-                                      args.repo, args.arch)
+        pkgs = self.http.get_packages(
+            f"{self.config.get_url()}/{self.config.endpoint['packages']}",
+            args.branch,
+            args.repo,
+            args.arch,
+        )
         for pkg in pkgs:
-            print(f"{pkg['name']:<30}: {pkg['poolEntries'][pkg['preferredLocation']]['version']}")
+            print(
+                f"{pkg['name']:<30}: {pkg['poolEntries'][pkg['preferredLocation']]['version']}"
+            )
             print(pkg)
 
     @with_argparser(comp_args)
@@ -112,10 +153,15 @@ class BxtCtl(cmd2.Cmd):
         branches = args.branch
         architectures = args.arch
         from pprint import pprint
+
         for branch in branches:
             for arch in architectures:
-                archpkgs = self.http.get_packages(f"{self.config.get_url()}/{self.config.endpoint['packages']}", branch,
-                                                  args.repo, arch)
+                archpkgs = self.http.get_packages(
+                    f"{self.config.get_url()}/{self.config.endpoint['packages']}",
+                    branch,
+                    args.repo,
+                    arch,
+                )
                 if args.package is not None:
                     pkgs = [x for x in archpkgs if x["name"] in args.package]
                     for pkg in pkgs:
@@ -161,7 +207,7 @@ def start():
     sys.exit(app.cmdloop())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     """
     Main entry point
     """

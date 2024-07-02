@@ -33,7 +33,7 @@ class LogEntry:
             "id": self._id,
             "time": self._time,
             "package": self._package,
-            "type": self._entrytype
+            "type": self._entrytype,
         }
 
     # [
@@ -62,4 +62,3 @@ class LogEntry:
     #     }
     #   }
     # ]
-

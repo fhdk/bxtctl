@@ -19,10 +19,12 @@
 # Authors: Frede Hundewadt https://github.com/fhdk/bxtctl
 #
 
+
 class User:
     """
     User ACL object
     """
+
     def __init__(self, name: str, permissions: [str]):
         self._name = name
         self._permissions = permissions
@@ -36,8 +38,9 @@ class User:
         return {
             "name": self._name,
             "password": self._password,
-            "permissions": self._permissions
+            "permissions": self._permissions,
         }
+
 
 # {
 #   "name": "string",

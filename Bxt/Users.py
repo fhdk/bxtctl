@@ -25,6 +25,7 @@ class Users:
     """
     List of Users ACL objects
     """
+
     def __init__(self, users: [User]):
         self._users = users
 
@@ -39,6 +40,7 @@ class Users:
 
     def all(self):
         return self._users
+
 
 # [
 #   {

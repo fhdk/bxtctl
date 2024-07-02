@@ -22,18 +22,15 @@ class PoolEntry:
     """
     Package Pool Entry info
     """
+
     def __init__(self, prop_name: str, version: str, has_signature: bool):
         self.prop_name = prop_name
         self._version = version
         self._has_signature = has_signature
 
     def get(self):
-        return {
-            self.prop_name: {
-                self._version,
-                self._has_signature
-            }
-        }
+        return {self.prop_name: {self._version, self._has_signature}}
+
 
 # [
 #   {

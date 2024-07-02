@@ -34,11 +34,7 @@ class HttpResult:
         return self._status
 
     def get(self):
-        return {
-            "json": self._content,
-            "status": self._status
-        }
+        return {"json": self._content, "status": self._status}
 
     def __str__(self) -> str:
         return f"Status: {self._status}, Content: '{self._content}'"
-

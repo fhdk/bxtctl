@@ -32,10 +32,11 @@ class BxtConfig:
     """
     Main Settings Class
     """
+
     license_url = "https://www.gnu.org/licenses/agpl.html"
     app_name = "bxtctl"
     app_version = "0.3.0"
-    user_agent = F"{app_name}/{app_version}"
+    user_agent = f"{app_name}/{app_version}"
     config_dir = f"{Path.home()}/.config/{app_name}"
     config_file = f"config.json"
     endpoint = {
@@ -121,9 +122,11 @@ class BxtConfig:
         self._username = options["name"]
         self._url = options["url"]
         # get response from service
-        result = self._http.authenticate(url=f"{self._url}/{self.endpoint['auth']}",
-                                         username=self._username,
-                                         password=password)
+        result = self._http.authenticate(
+            url=f"{self._url}/{self.endpoint['auth']}",
+            username=self._username,
+            password=password,
+        )
         # handle result
         if result.status() == 200:
             # assign content from result to token
@@ -147,8 +150,11 @@ class BxtConfig:
         # password prompt
         password = pwinput(prompt="password: ", mask="")
         # get reponse from service
-        result = self._http.authenticate(url=f"{self._url}/{self.endpoint['auth']}", username=username,
-                                         password=password)
+        result = self._http.authenticate(
+            url=f"{self._url}/{self.endpoint['auth']}",
+            username=username,
+            password=password,
+        )
         # handle result
         if result.status() == 200:
             # assign username - could have been changed
@@ -164,7 +170,9 @@ class BxtConfig:
         return False
 
     def revoke_access(self) -> bool:
-        result = self._http.revoke_refresh_token(f"{self._url}/{self.endpoint['revoke_access']}")
+        result = self._http.revoke_refresh_token(
+            f"{self._url}/{self.endpoint['revoke_access']}"
+        )
         if result.status() == 200:
             self._token = {}
             self.__save_config__()
@@ -189,7 +197,7 @@ class BxtConfig:
                 config = json.load(infile)
             # read name
             try:
-                self._username = config['username']
+                self._username = config["username"]
             except KeyError:
                 self._username = ""
             # read url
@@ -199,7 +207,7 @@ class BxtConfig:
                 self._url = ""
             # read token
             try:
-                self._token = BxtToken(config['token'])
+                self._token = BxtToken(config["token"])
             except KeyError:
                 self._token = BxtToken()
 
@@ -244,5 +252,9 @@ def _get_user_input_for_config() -> dict:
     while True:
         options["url"] = input(f"bxt service : ").strip()
         options["name"] = input(f"bxt username : ").strip()
-        if options["url"] != "" and options["name"] != "" and options["url"].startswith("http"):
+        if (
+            options["url"] != ""
+            and options["name"] != ""
+            and options["url"].startswith("http")
+        ):
             return options

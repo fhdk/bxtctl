@@ -26,6 +26,7 @@ class Package:
     """
     Package commit object
     """
+
     def __init__(self, files: PkgFiles, info: PkgInfo):
         self._files = PkgFiles
         self._info = PkgInfo
@@ -37,7 +38,4 @@ class Package:
         self._info = info
 
     def get(self):
-        return {
-            "files": self._files,
-            "info": self._info
-        }
+        return {"repo": self._files, "info": self._info}

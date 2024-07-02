@@ -26,7 +26,14 @@ class Package:
     """
     A package list entry
     """
-    def __init__(self, name: str, section: Section, poolentries: [PoolEntry], preferred_location: str):
+
+    def __init__(
+        self,
+        name: str,
+        section: Section,
+        poolentries: [PoolEntry],
+        preferred_location: str,
+    ):
         self._name = name
         self._section = section
         self._pool_entries = poolentries
@@ -37,8 +44,9 @@ class Package:
             "name": self._name,
             "section": self._section,
             "poolEntries": self._pool_entries,
-            "preferredLocation": self._preferred_location
+            "preferredLocation": self._preferred_location,
         }
+
 
 # {
 # "name": "string",

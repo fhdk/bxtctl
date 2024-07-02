@@ -28,5 +28,3 @@ class Logs:
 
     def get(self, package: str) -> [LogEntry]:
         pass
-
-

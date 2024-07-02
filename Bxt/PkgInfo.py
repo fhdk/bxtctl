@@ -22,6 +22,7 @@ class PkgInfo:
     """
     The info part of a package commit
     """
+
     def __init__(self, name: str, branch: str, repository: str, architecture: str):
         self._name = name
         self._branch = branch
@@ -30,11 +31,12 @@ class PkgInfo:
 
     def get(self):
         return {
-            'name': self._name,
-            'branch': self._branch,
-            'repository': self._repository,
-            'architecture': self._architecture
+            "name": self._name,
+            "branch": self._branch,
+            "repository": self._repository,
+            "architecture": self._architecture,
         }
+
 
 # [
 #     {
