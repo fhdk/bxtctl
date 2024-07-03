@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "bxtctl"
-version = "0.1.0"
+version = "0.3.0"
 description = "bxt repo management tool"
 authors = ["Frede Hundewadt"]
 readme = "README.md"
