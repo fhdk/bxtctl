@@ -36,7 +36,7 @@ from pprint import pprint
 import os
 
 """
-part three of four in a series of tests
+part four of four in a series of tests
 deletes the test package
 from: stable -> extra -> x86_64 repo
 from: stable -> multilib -> x86_64 repo
