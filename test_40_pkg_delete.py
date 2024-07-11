@@ -35,6 +35,17 @@ import jwt
 from pprint import pprint
 import os
 
+"""
+part three of four in a series of tests
+deletes the test package
+from: stable -> extra -> x86_64 repo
+from: stable -> multilib -> x86_64 repo
+
+For now the result is verified by using the WebUI
+A later update will use the packages list endpoint 
+to verify the package is removed form both targets
+"""
+
 config = BxtConfig()
 
 if not config.is_valid():

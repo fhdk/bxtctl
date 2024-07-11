@@ -35,6 +35,16 @@ import jwt
 from pprint import pprint
 import os
 
+
+"""
+Part one of four in a series of tests
+Commits a test package to stable -> multilib -> x86_64 repo
+
+For now the result is verified by using the WebUI
+A later update will use the packages list endpoint 
+to verify the package exist at the target repo 
+"""
+
 config = BxtConfig()
 
 if not config.is_valid():
