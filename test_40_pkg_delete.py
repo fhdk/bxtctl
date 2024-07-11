@@ -60,8 +60,15 @@ section_a = {
     "architecture": "x86_64"
 }
 
+section_b = {
+    "branch": "stable",
+    "repository": "extra",
+    "architecture": "x86_64"
+}
+
 bxt_delete_pkg = {
     ("to_delete", json.dumps([{"name": test_pkg, "section": section_a}])),
+    ("to_delete", json.dumps([{"name": test_pkg, "section": section_b}])),
 }
 
 headers = {"Authorization": f"Bearer {token}"}
