@@ -60,30 +60,6 @@ upload_section = {
     "architecture": "x86_64"
 }
 
-section_a = {
-    "branch": "stable",
-    "repository": "multilib",
-    "architecture": "x86_64"
-}
-
-section_b = {
-    "branch": "stable",
-    "repository": "extra",
-    "architecture": "x86_64"
-}
-
-bxt_move_pkg = {
-    ("to_move", json.dumps([{"name": test_pkg, "from_section": section_a, "to_section": section_b}])),
-}
-
-bxt_copy_pkg = {
-    ("to_copy", json.dumps([{"name": test_pkg, "from_section": section_b, "to_section": section_a}])),
-}
-
-bxt_delete_pkg = {
-    ("to_delete", json.dumps([{"name": test_pkg, "section": section_a}])),
-}
-
 bxt_upload_form = {
     ("package1.file", (test_pkg, open(f"{test_repo}/{test_pkg}", "rb"))),
     ("package1.signatureFile", (f"{test_pkg}.sig", open(f"{test_repo}/{test_pkg}.sig", "rb"))),
@@ -100,5 +76,5 @@ pprint(bxt_upload_form)
 print("upload request begin --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
 response = req.post(endpoint, files=bxt_upload_form)
 print("upload response recv --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
-print("          headers ", response.headers)
-print("          status  ", response.status_code)
+print("                 headers ", response.headers)
+print("                 status  ", response.status_code)
