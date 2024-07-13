@@ -120,13 +120,6 @@ class BxtCtl(cmd2.Cmd):
     # commit command
     commit_args = Cmd2ArgumentParser(description="Commit package(s) to repository")
     commit_args.add_argument(
-        "-p",
-        "--package",
-        type=str,
-        required=True,
-        nargs="?",
-        help="package filename (multiple -p can be passed)")
-    commit_args.add_argument(
         "branch",
         type=str,
         nargs=1,
@@ -147,6 +140,11 @@ class BxtCtl(cmd2.Cmd):
         help="Target Architecture",
         choices=acl.get_architectures()
     )
+    commit_args.add_argument(
+        "package",
+        type=str,
+        nargs="?",
+        help="package filename(s) (multiple files can be passed)")
 
     def __init__(self):
         super().__init__()
