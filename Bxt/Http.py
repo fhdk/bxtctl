@@ -48,7 +48,7 @@ class Http:
         data = {"name": username, "password": password, "response_type": "bearer"}
         return self.make_http_request(method="post", url=url, json=data)
 
-    def commit(self, url: str, data: list, files: list) -> HttpResult:
+    def commit(self, url: str, data: dict, files: dict) -> HttpResult:
         """
         post a commit request
         :return:
