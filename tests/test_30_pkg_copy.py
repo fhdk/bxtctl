@@ -35,14 +35,15 @@ import jwt
 from pprint import pprint
 import os
 
-
 """
-Part one of four in a series of tests
-Commits a test package to stable -> multilib -> x86_64 repo
+part three of four in a series of tests
+copies the test package
+from: stable -> extra -> x86_64 repo
+to: stable -> multilib -> x86_64 repo
 
 For now the result is verified by using the WebUI
 A later update will use the packages list endpoint 
-to verify the package exist at the target repo 
+to verify the package now exist at both targets
 """
 
 config = BxtConfig()
@@ -62,18 +63,22 @@ token = config.get_access_token()
 endpoint = f"{config.get_url()}/{config.endpoint["pkgCommit"]}"
 
 test_repo = os.path.join(os.path.dirname(__file__), "repo")
-test_pkg = "arch-install-scripts-28-1-any.pkg.tar.zst"
+test_pkg = "arch-install-scripts"
 
-upload_section = {
-    "branch": "stable",
+section_a = {
+    "branch": "unstable",
     "repository": "multilib",
     "architecture": "x86_64"
 }
 
-bxt_upload_form = {
-    ("package1.file", (test_pkg, open(f"{test_repo}/{test_pkg}", "rb"))),
-    ("package1.signatureFile", (f"{test_pkg}.sig", open(f"{test_repo}/{test_pkg}.sig", "rb"))),
-    ("package1.section", (None, json.dumps(upload_section))),
+section_b = {
+    "branch": "unstable",
+    "repository": "extra",
+    "architecture": "x86_64"
+}
+
+bxt_copy_pkg = {
+    ("to_copy", json.dumps([{"name": test_pkg, "from_section": section_b, "to_section": section_a}])),
 }
 
 headers = {"Authorization": f"Bearer {token}"}
@@ -81,10 +86,10 @@ headers = {"Authorization": f"Bearer {token}"}
 req = requests.session()
 req.headers.update(headers)
 
-print("bxt_upload_form : ")
-pprint(bxt_upload_form)
-print("upload request begin --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
-response = req.post(endpoint, files=bxt_upload_form)
-print("upload response recv --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
-print("                 headers ", response.headers)
-print("                 status  ", response.status_code)
+print("bxt_copy_pkg : ")
+pprint(bxt_copy_pkg)
+print("copy request begin --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
+response = req.post(endpoint, files=bxt_copy_pkg)
+print("copy response recv --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
+print("               headers ", response.headers)
+print("               status  ", response.status_code)

@@ -36,14 +36,14 @@ from pprint import pprint
 import os
 
 """
-part three of four in a series of tests
-copies the test package
+part four of four in a series of tests
+deletes the test package
 from: stable -> extra -> x86_64 repo
-to: stable -> multilib -> x86_64 repo
+from: stable -> multilib -> x86_64 repo
 
 For now the result is verified by using the WebUI
 A later update will use the packages list endpoint 
-to verify the package now exist at both targets
+to verify the package is removed form both targets
 """
 
 config = BxtConfig()
@@ -54,7 +54,6 @@ if not config.is_valid():
 if not config.get_access_token():
     z = config.login()
 
-
 if config.is_token_expired():
     if not config.renew_access_token():
         z = config.login()
@@ -63,22 +62,22 @@ token = config.get_access_token()
 endpoint = f"{config.get_url()}/{config.endpoint["pkgCommit"]}"
 
 test_repo = os.path.join(os.path.dirname(__file__), "repo")
-test_pkg = "arch-install-scripts-28-1-any.pkg.tar.zst"
+test_pkg = "arch-install-scripts"
 
 section_a = {
-    "branch": "stable",
+    "branch": "unstable",
     "repository": "multilib",
     "architecture": "x86_64"
 }
 
 section_b = {
-    "branch": "stable",
+    "branch": "unstable",
     "repository": "extra",
     "architecture": "x86_64"
 }
 
-bxt_copy_pkg = {
-    ("to_copy", json.dumps([{"name": test_pkg, "from_section": section_b, "to_section": section_a}])),
+bxt_delete_pkg = {
+    ("to_delete", json.dumps([{"name": test_pkg, "section": section_a}, {"name": test_pkg, "section": section_b}])),
 }
 
 headers = {"Authorization": f"Bearer {token}"}
@@ -86,10 +85,10 @@ headers = {"Authorization": f"Bearer {token}"}
 req = requests.session()
 req.headers.update(headers)
 
-print("bxt_copy_pkg : ")
-pprint(bxt_copy_pkg)
-print("copy request begin --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
-response = req.post(endpoint, files=bxt_copy_pkg)
-print("copy response recv --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
-print("               headers ", response.headers)
-print("               status  ", response.status_code)
+print("bxt_delete_pkg : ")
+pprint(bxt_delete_pkg)
+print("delete request begin --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
+response = req.post(endpoint, files=bxt_delete_pkg)
+print("delete response recv --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
+print("                 headers ", response.headers)
+print("                 status  ", response.status_code)

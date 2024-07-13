@@ -61,8 +61,6 @@ class Http:
         :param url:
         :param data:
         :return:
-        """
-        return self.make_http_request(method="post", url=url, json=data)
         # {
         #     "pkgSection": [
         #         {
@@ -95,6 +93,8 @@ class Http:
         #         }
         #     }
         # }
+        """
+        return self.make_http_request(method="post", url=url, data=data)
 
     def make_http_request(
         self,

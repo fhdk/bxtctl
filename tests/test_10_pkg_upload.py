@@ -35,15 +35,14 @@ import jwt
 from pprint import pprint
 import os
 
+
 """
-part two of four in a series of tests
-moves the test package
-from: stable -> multilib -> x86_64 repo
-to: stable -> extra -> x86_64 repo
+Part one of four in a series of tests
+Commits a test package to stable -> multilib -> x86_64 repo
 
 For now the result is verified by using the WebUI
 A later update will use the packages list endpoint 
-to verify the package moved to the target repo 
+to verify the package exist at the target repo 
 """
 
 config = BxtConfig()
@@ -63,22 +62,21 @@ token = config.get_access_token()
 endpoint = f"{config.get_url()}/{config.endpoint["pkgCommit"]}"
 
 test_repo = os.path.join(os.path.dirname(__file__), "repo")
-test_pkg = "arch-install-scripts-28-1-any.pkg.tar.zst"
-
-section_a = {
-    "branch": "stable",
+test_pkg_1 = "arch-install-scripts-28-1-any.pkg.tar.zst"
+test_pkg_2 = "abseil-cpp-20240116.2-2-x86_64.pkg.tar.zst"
+upload_section = {
+    "branch": "unstable",
     "repository": "multilib",
     "architecture": "x86_64"
 }
 
-section_b = {
-    "branch": "stable",
-    "repository": "extra",
-    "architecture": "x86_64"
-}
-
-bxt_move_pkg = {
-    ("to_move", json.dumps([{"name": test_pkg, "from_section": section_a, "to_section": section_b}])),
+bxt_upload_form = {
+    ("package1.file", (test_pkg_1, open(f"{test_repo}/{test_pkg_1}", "rb"))),
+    ("package1.signature", (f"{test_pkg_1}.sig", open(f"{test_repo}/{test_pkg_1}.sig", "rb"))),
+    ("package1.section", (None, json.dumps(upload_section))),
+    ("package2.file", (test_pkg_2, open(f"{test_repo}/{test_pkg_2}", "rb"))),
+    ("package2.signature", (f"{test_pkg_2}.sig", open(f"{test_repo}/{test_pkg_2}.sig", "rb"))),
+    ("package2.section", (None, json.dumps(upload_section))),
 }
 
 headers = {"Authorization": f"Bearer {token}"}
@@ -86,10 +84,10 @@ headers = {"Authorization": f"Bearer {token}"}
 req = requests.session()
 req.headers.update(headers)
 
-print("bxt_move_pkg : ")
-pprint(bxt_move_pkg)
-print("move request begin --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
-response = req.post(endpoint, files=bxt_move_pkg)
-print("move response recv --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
-print("               headers ", response.headers)
-print("               status  ", response.status_code)
+print("bxt_upload_form : ")
+pprint(bxt_upload_form)
+print("upload request begin --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
+response = req.post(endpoint, files=bxt_upload_form)
+print("upload response recv --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
+print("                 headers ", response.headers)
+print("                 status  ", response.status_code)

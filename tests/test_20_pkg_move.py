@@ -36,14 +36,14 @@ from pprint import pprint
 import os
 
 """
-part four of four in a series of tests
-deletes the test package
-from: stable -> extra -> x86_64 repo
+part two of four in a series of tests
+moves the test package
 from: stable -> multilib -> x86_64 repo
+to: stable -> extra -> x86_64 repo
 
 For now the result is verified by using the WebUI
 A later update will use the packages list endpoint 
-to verify the package is removed form both targets
+to verify the package moved to the target repo 
 """
 
 config = BxtConfig()
@@ -63,23 +63,22 @@ token = config.get_access_token()
 endpoint = f"{config.get_url()}/{config.endpoint["pkgCommit"]}"
 
 test_repo = os.path.join(os.path.dirname(__file__), "repo")
-test_pkg = "arch-install-scripts-28-1-any.pkg.tar.zst"
+test_pkg = "arch-install-scripts"
 
 section_a = {
-    "branch": "stable",
+    "branch": "unstable",
     "repository": "multilib",
     "architecture": "x86_64"
 }
 
 section_b = {
-    "branch": "stable",
+    "branch": "unstable",
     "repository": "extra",
     "architecture": "x86_64"
 }
 
-bxt_delete_pkg = {
-    ("to_delete", json.dumps([{"name": test_pkg, "section": section_a}])),
-    ("to_delete", json.dumps([{"name": test_pkg, "section": section_b}])),
+bxt_move_pkg = {
+    ("to_move", json.dumps([{"name": test_pkg, "from_section": section_a, "to_section": section_b}])),
 }
 
 headers = {"Authorization": f"Bearer {token}"}
@@ -87,10 +86,10 @@ headers = {"Authorization": f"Bearer {token}"}
 req = requests.session()
 req.headers.update(headers)
 
-print("bxt_delete_pkg : ")
-pprint(bxt_delete_pkg)
-print("delete request begin --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
-response = req.post(endpoint, files=bxt_delete_pkg)
-print("delete response recv --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
-print("                 headers ", response.headers)
-print("                 status  ", response.status_code)
+print("bxt_move_pkg : ")
+pprint(bxt_move_pkg)
+print("move request begin --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
+response = req.post(endpoint, files=bxt_move_pkg)
+print("move response recv --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
+print("               headers ", response.headers)
+print("               status  ", response.status_code)
