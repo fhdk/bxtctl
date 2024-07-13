@@ -46,22 +46,23 @@ if not config.is_valid():
     y = config.configure()
 
 if not config.get_access_token():
-    z = config.login()
+    config.login()
 
 if config.is_token_expired():
     if not config.renew_access_token():
         z = config.login()
 
 token = config.get_access_token()
-endpoint = f"{config.get_url()}/{config.endpoint["pkgList"]}"
+endpoint = f"{config.get_url()}/{config.endpoint["pkgCompare"]}"
 http = Http(config.user_agent, config.get_access_token())
 
 print("bxt_compare : ")
 print("compare request begin    --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
 compare_data = [{"branch": "unstable", "repository": "core", "architecture": "x86_64"},
-                {"branch": "testing", "repository": "core", "architecture": "x86_64"},
-                ]
+                {"branch": "testing", "repository": "core", "architecture": "x86_64"}]
+
 comparison = http.compare(endpoint, compare_data)
+
 print("compare request response --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
 
 pprint(f"{comparison}")

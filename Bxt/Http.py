@@ -94,7 +94,7 @@ class Http:
         #     }
         # }
         """
-        return self.make_http_request(method="post", url=url, data=data)
+        return self.make_http_request(method="post", url=url, json=data)
 
     def make_http_request(
         self,

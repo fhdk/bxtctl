@@ -47,6 +47,7 @@ class BxtConfig:
         "pkgList": "api/packages",
         "pkgCommit": "api/packages/commit",
         "pkgSection": "api/sections",
+        "pkgCompare": "api/compare",
     }
 
     def __init__(self):
@@ -106,13 +107,15 @@ class BxtConfig:
         return self._token.is_access_token_expired()
 
     def renew_access_token(self) -> bool:
-        refresh_token = self._token.get_refresh_token()
-        result = self._http.renew_access_token(url=f"{self._url}/{self.endpoint["refresh"]}",
-                                               refresh_token=refresh_token)
-        if result.status == 200:
-            self._token = BxtToken(result.content())
-            self.__save_config__()
-            return True
+        if not self._token.is_refresh_token_expired():
+            refresh_token = self._token.get_refresh_token()
+            result = self._http.renew_access_token(url=f"{self._url}/{self.endpoint["refresh"]}",
+                                                   refresh_token=refresh_token)
+            if result.status == 200:
+                self._token = BxtToken(result.content())
+                self.__save_config__()
+                return True
+
         return False
 
     def configure(self) -> bool:
