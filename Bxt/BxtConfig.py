@@ -38,7 +38,8 @@ class BxtConfig:
     app_version = "0.3.0"
     user_agent = f"{app_name}/{app_version}"
     config_dir = f"{Path.home()}/.config/{app_name}"
-    config_file = f"config.json"
+    config_file = "config.json"
+    work_dir = f"{Path.home()}/bxt-work"
     endpoint = {
         "auth": "api/auth",
         "refresh": "api/auth/refresh",
@@ -64,13 +65,22 @@ class BxtConfig:
         # create config dir if not existing
         if not os.path.isdir(self.config_dir):
             os.mkdir(self.config_dir)
+        if not os.path.isdir(self.work_dir):
+            os.mkdir(self.work_dir)
         # check configstore on disk
         if not os.path.isfile(f"{self.config_dir}/{self.config_file}"):
             # generrate empty default
-            self.__save_config__()
+            self.__save_config()
         else:
             # load config
-            self.__load_config__()
+            self.__load_config()
+
+    def save(self) -> None:
+        """
+        save config
+        :return:
+        """
+        self.__save_config()
 
     def get_hostname(self) -> str:
         """
@@ -113,7 +123,7 @@ class BxtConfig:
                                                    refresh_token=refresh_token)
             if result.status == 200:
                 self._token = BxtToken(result.content())
-                self.__save_config__()
+                self.__save_config()
                 return True
 
         return False
@@ -124,7 +134,7 @@ class BxtConfig:
         :return:
         """
         # get options - username and service url
-        options = _get_user_input_for_config()
+        options = self.__get_basic_config()
         # get password from user
         password = pwinput(prompt="password: ", mask="")
         # assign returned option to the configuration
@@ -141,7 +151,7 @@ class BxtConfig:
             # assign content from result to token
             self._token = BxtToken(result.content())
             # save configuration
-            self.__save_config__()
+            self.__save_config()
             return True
         return False
 
@@ -171,11 +181,11 @@ class BxtConfig:
             # assign the result to the token
             self._token = BxtToken(result.content())
             # save configuration
-            self.__save_config__()
+            self.__save_config()
             return True
         # replace current token
         self._token = BxtToken()
-        self.__save_config__()
+        self.__save_config()
         return False
 
     def revoke_access(self) -> bool:
@@ -184,7 +194,7 @@ class BxtConfig:
         )
         if result.status() == 200:
             self._token = {}
-            self.__save_config__()
+            self.__save_config()
             return True
         return False
 
@@ -195,7 +205,7 @@ class BxtConfig:
         """
         return f"BxtConfig(Url: '{self._url}', Name: '{self._username}', Token: '{self._token}')"
 
-    def __load_config__(self):
+    def __load_config(self):
         """
         Load BxtCtl configuration
         The function assumes the file exist
@@ -204,6 +214,11 @@ class BxtConfig:
         try:
             with open(self._configstore, "r") as infile:
                 config = json.load(infile)
+            # read workdir
+            try:
+                self.work_dir = config["work_dir"]
+            except KeyError:
+                pass
             # read name
             try:
                 self._username = config["username"]
@@ -231,7 +246,7 @@ class BxtConfig:
         except (Exception,):
             pass
 
-    def __save_config__(self):
+    def __save_config(self):
         """
         Initialize configuration and write config
         :return:
@@ -240,30 +255,31 @@ class BxtConfig:
             "url": self._url,
             "username": self._username,
             "token": self._token,
+            "work_dir": self.work_dir
         }
         with open(self._configstore, "w") as outfile:
             json.dump(temp, outfile, cls=BxtEncoder)
 
-    def __validate_owner__(self) -> bool:
+    def __validate_owner(self) -> bool:
         """
         validate if token belongs to name in config
         :return:
         """
         return self._token.validate_owner(self._username)
 
-
-def _get_user_input_for_config() -> dict:
-    """
-    get config options from user input
-    :return:
-    """
-    options = {"name": "", "url": ""}
-    while True:
-        options["url"] = input(f"bxt service : ").strip()
-        options["name"] = input(f"bxt username : ").strip()
-        if (
-            options["url"] != ""
-            and options["name"] != ""
-            and options["url"].startswith("http")
-        ):
-            return options
+    @staticmethod
+    def __get_basic_config() -> dict:
+        """
+        get config options from user input
+        :return:
+        """
+        options = {"name": "", "url": ""}
+        while True:
+            options["url"] = input(f"bxt service : ").strip()
+            options["name"] = input(f"bxt username : ").strip()
+            if (
+                options["url"] != ""
+                and options["name"] != ""
+                and options["url"].startswith("http")
+            ):
+                return options
