@@ -23,66 +23,96 @@ cd bxtctl
 poetry install
 poetry run bxtctl
 ```
-```bash
-(default@bxt) $ help
+## Command overview
 
+As the project is WIP the following is subject to change.
+
+This issue https://github.com/fhdk/bxtctl/issues/2 is intended to gather feedback on how the CLI commands.
+
+### Help command
+```
 Documented commands (use 'help -v' for verbose/'help <topic>' for details):
 ===========================================================================
 alias    configure  history  macro         run_script  shortcuts
 commit   edit       list     quit          set         sync     
 compare  help       login    run_pyscript  shell    
 ```
+
+### Configure command
+
+The `configure` command is run at first start to create a basic configuration file.
+
+It will query for the http endpoint of the bxt API and the username and the password needed to retrieve an access token.
+
+At any point the `configure` command can be used to change the service endpoint and the username.
+
+### Login command
+
+The `login` command can be used to change the username and retrieve a new access token based on the username and a provide password.
+
+The password is never stored on the system and there will be no characters echoed to screen.
+
+### Set workspace command
+
+The workspace is where you keep the packages you build. A default workspace `$HOME/bxt-workspace` is created at first run. 
+Use the `set_workspace` command to change the default.
+
 ```
-(default@bxt) $ help compare
-Usage: compare [-h] [-b [{testing, unstable, stable} [...]]] [-a [{aarch64, x86_64} [...]]] [-p [PACKAGE [...]]] {core}
+set_workspace /path/to/new/workspace
+```
 
-Compare repo package across branches and architecures
+### Compare command
 
-positional arguments:
-  {core}                Target Repository
+```
+Usage: compare [-h] [-b [{testing, unstable, stable} [...]]] [-r [{core, extra, multilib} [...]]] [-a [{aarch64, x86_64} [...]]] [-p [PACKAGE]]
+
+Compare repo package across branches and architectures
 
 optional arguments:
   -h, --help            show this help message and exit
   -b, --branch [{testing, unstable, stable} [...]]
                         Branches to compare
+  -r, --repo [{core, extra, multilib} [...]]
+                        Repositories to compare
   -a, --arch [{aarch64, x86_64} [...]]
                         Architecures to compare
-  -p, --package [PACKAGE [...]]
-                        Packages to compare
+  -p, --package [PACKAGE]
+                        Package(s) to compare (multiple -p can be passed)
+```
+
+### List command
 
 ```
-```
-(default@bxt) $ help list
-Usage: list [-h] {core} {testing, unstable, stable} {aarch64, x86_64}
+Usage: list [-h] {testing, unstable, stable} {core, extra, multilib} {aarch64, x86_64}
 
 List content of repo branch architecture
 
 positional arguments:
-  {core}                Target Repository
   {testing, unstable, stable}
                         Target Branch
+  {core, extra, multilib}
+                        Target Repository
   {aarch64, x86_64}     Target Artitecture
 
 optional arguments:
   -h, --help            show this help message and exit
+```
+
+### Commit command
 
 ```
-```
-(default@bxt) $ help commit
-Usage: commit [-h] package pkgfile sigfile {core} {unstable, testing, stable} {aarch64, x86_64}
+Usage: commit [-h] {testing, unstable, stable} {extra, multilib, core} {aarch64, x86_64} [package]
 
-Commit package to repository
+Commit package(s) to repository
 
 positional arguments:
-  package               Package Name
-  pkgfile               Path to package file
-  sigfile               Path to signature file
-  {core}                Target Repository
-  {unstable, testing, stable}
+  {testing, unstable, stable}
                         Target Branch
+  {extra, multilib, core}
+                        Target Repository
   {aarch64, x86_64}     Target Architecture
+  package               package filename (multiple packages can be passed)
 
 optional arguments:
   -h, --help            show this help message and exit
-
 ```
