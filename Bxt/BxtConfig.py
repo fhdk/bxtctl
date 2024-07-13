@@ -39,7 +39,7 @@ class BxtConfig:
     user_agent = f"{app_name}/{app_version}"
     config_dir = f"{Path.home()}/.config/{app_name}"
     config_file = "config.json"
-    work_dir = f"{Path.home()}/bxt-work"
+    work_dir = f"{Path.home()}/bxt-workspace"
     endpoint = {
         "auth": "api/auth",
         "refresh": "api/auth/refresh",
