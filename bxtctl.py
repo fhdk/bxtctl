@@ -36,34 +36,55 @@ class BxtCtl(cmd2.Cmd):
     """
 
     config = BxtConfig()
-    token = config.get_access_token()
-    if not token:
+    if not config.is_valid():
         config.configure()
 
+    if not config.get_access_token():
+        z = config.login()
+
+    if config.is_token_expired():
+        if not config.renew_access_token():
+            z = config.login()
+
     prompt = f"({config.get_name()}@{config.get_hostname()}) $ "
+    # cmd2.Cmd.prompt = f"({config.get_name()}@{config.get_hostname()}) $ "
     http = Http(BxtConfig.user_agent, config.get_access_token())
     sections = http.get_sections(f"{config.get_url()}/{BxtConfig.endpoint['pkgSection']}")
 
     acl = BxtAcl(sections)
+    # set workspace command
+    set_workspace = Cmd2ArgumentParser(description='Set workspace')
+    set_workspace.add_argument(
+        'workspace',
+        type=str,
+        help="Full path to workspace")
 
+    # list command
     list_args = Cmd2ArgumentParser(
         description="List content of repo branch architecture"
     )
     list_args.add_argument(
-        "repo", type=str, help="Target Repository", choices=acl.get_repositories()
+        "branch",
+        type=str,
+        help="Target Branch",
+        choices=acl.get_branches()
     )
     list_args.add_argument(
-        "branch", type=str, help="Target Branch", choices=acl.get_branches()
+        "repo",
+        type=str,
+        help="Target Repository",
+        choices=acl.get_repositories()
     )
     list_args.add_argument(
-        "arch", type=str, help="Target Artitecture", choices=acl.get_architectures()
+        "arch",
+        type=str,
+        help="Target Artitecture",
+        choices=acl.get_architectures()
     )
 
+    # compare command
     comp_args = Cmd2ArgumentParser(
         description="Compare repo package across branches and architectures"
-    )
-    comp_args.add_argument(
-        "repo", type=str, help="Target Repository", choices=acl.get_repositories()
     )
     comp_args.add_argument(
         "-b",
@@ -74,6 +95,14 @@ class BxtCtl(cmd2.Cmd):
         choices=acl.get_branches(),
     )
     comp_args.add_argument(
+        "-r",
+        "--repo",
+        type=str,
+        nargs="*",
+        help="Repositories to compare",
+        choices=acl.get_repositories()
+    )
+    comp_args.add_argument(
         "-a",
         "--arch",
         type=str,
@@ -82,33 +111,51 @@ class BxtCtl(cmd2.Cmd):
         choices=acl.get_architectures(),
     )
     comp_args.add_argument(
-        "-p", "--package", type=str, nargs="?", help="Packages to compare"
+        "-p",
+        "--package",
+        type=str,
+        nargs="?",
+        help="Package(s) to compare (multiple -p can be passed)",
     )
-
-    commit_args = Cmd2ArgumentParser(description="Commit package to repository")
-    commit_args.add_argument("package", type=str, help="Package Name")
-    commit_args.add_argument("pkgfile", type=str, help="Path to package file")
-    commit_args.add_argument("sigfile", type=str, help="Path to signature file")
+    # commit command
+    commit_args = Cmd2ArgumentParser(description="Commit package(s) to repository")
     commit_args.add_argument(
-        "repo", type=str, help="Target Repository", choices=acl.get_repositories()
+        "-p",
+        "--package",
+        type=str,
+        required=True,
+        nargs="?",
+        help="package filename (multiple -p can be passed)")
+    commit_args.add_argument(
+        "branch",
+        type=str,
+        nargs=1,
+        help="Target Branch",
+        choices=acl.get_branches()
     )
     commit_args.add_argument(
-        "branch", type=str, help="Target Branch", choices=acl.get_branches()
+        "repo",
+        type=str,
+        nargs=1,
+        help="Target Repository",
+        choices=acl.get_repositories()
     )
     commit_args.add_argument(
-        "arch", type=str, help="Target Architecture", choices=acl.get_architectures()
+        "arch",
+        type=str,
+        nargs=1,
+        help="Target Architecture",
+        choices=acl.get_architectures()
     )
 
     def __init__(self):
         super().__init__()
-
         # if config is uninitialized force setup config
         if self.config.get_url() == "" or self.config.get_name() == "":
             print("Enter initial configuration")
             if not self.config.configure():
                 print("Initialization failed")
                 exit(1)
-            self.prompt = f"({self.config.get_name()}@bxt) $ "
 
         # if token is empty - login
         if self.config.get_access_token() == "":
@@ -117,6 +164,8 @@ class BxtCtl(cmd2.Cmd):
                 print("Login failed")
                 exit(1)
 
+        self.prompt = f"({self.config.get_name()}@{self.config.get_hostname()}) $ "
+
         print(f"TODO - remove this block")
         print(f"---------- PERMISSIONS ---------- ")
         print(f"bxt user: '{self.config.get_name()}' has access to:")
@@ -124,6 +173,16 @@ class BxtCtl(cmd2.Cmd):
         print(f"Architectures : {self.acl.get_architectures()}")
         print(f"Repositories  : {self.acl.get_repositories()}")
         print(f"--------------------------------- ")
+
+    @with_argparser(set_workspace)
+    def do_set_workspace(self, args):
+        """
+        Set workspace
+        :param args:
+        :return:
+        """
+        self.config.work_dir = args.workspace
+        self.config.save()
 
     @with_argparser(list_args)
     def do_list(self, args):
@@ -179,35 +238,9 @@ class BxtCtl(cmd2.Cmd):
         :return: True/False
         """
         print(f"TODO - commit package to repo - using {args}")
-
-        test_repo = os.path.join(os.path.dirname(__file__), "repo")
-        files = {
-            (
-                "packageFile",
-                (None, f"{test_repo}/abseil-cpp-20240116.2-2-x86_64.pkg.tar.zst"),
-            ),
-            (
-                "packageSignature",
-                (None, f"{test_repo}/abseil-cpp-20240116.2-2-x86_64.pkg.tar.zst.sig"),
-            ),
-            (
-                "packageFile",
-                (None, f"{test_repo}/arch-install-scripts-28-1-any.pkg.tar.zst"),
-            ),
-            (
-                "packageSignature",
-                (None, f"{test_repo}/arch-install-scripts-28-1-any.pkg.tar.zstsig"),
-            ),
-        }
-        body = {
-            "packageSection": {
-                "branch": "unstable",
-                "repository": "extra",
-                "architecture": "x86_64",
-            }
-        }
-
-        result = self.http.commit(url=f"{self.config.get_url()}/{self.config.endpoint['packages']}", )
+        for pkg in args.package:
+            print(f"TODO - commit package to repo - using {pkg}")
+        print(f"commit to: {args.branch}/{args.repo}/{args.arch}")
 
     def do_login(self, args):
         """
