@@ -27,7 +27,7 @@ import sys
 import os
 from Bxt.BxtAcl import BxtAcl
 from Bxt.BxtConfig import BxtConfig
-from Bxt.Http import Http
+from Bxt.BxtSession import BxtSession
 
 
 class BxtCtl(cmd2.Cmd):
@@ -36,52 +36,42 @@ class BxtCtl(cmd2.Cmd):
     """
 
     config = BxtConfig()
-    if not config.is_valid():
+    if not config.valid_config():
         config.configure()
 
     if not config.get_access_token():
         z = config.login()
 
-    if config.is_token_expired():
+    if config.valid_token():
         if not config.renew_access_token():
             z = config.login()
 
     prompt = f"({config.get_name()}@{config.get_hostname()}) $ "
     # cmd2.Cmd.prompt = f"({config.get_name()}@{config.get_hostname()}) $ "
-    http = Http(BxtConfig.user_agent, config.get_access_token())
-    sections = http.get_sections(f"{config.get_url()}/{BxtConfig.endpoint['pkgSection']}")
+    http = BxtSession(BxtConfig.user_agent, config.get_access_token())
+    sections = http.get_sections(
+        f"{config.get_url()}/{BxtConfig.endpoint['pkgSection']}", None
+    )
 
     acl = BxtAcl(sections)
     # set workspace command
-    set_workspace = Cmd2ArgumentParser(description='Set workspace')
-    set_workspace.add_argument(
-        'workspace',
-        type=str,
-        help="Full path to workspace")
-
+    workspace = Cmd2ArgumentParser(description="Get or set workspace")
+    workspace.add_argument("-w", "--workspace", type=str, help="Full path to workspace")
+    # ###############################################################
     # list command
     list_args = Cmd2ArgumentParser(
         description="List content of repo branch architecture"
     )
     list_args.add_argument(
-        "branch",
-        type=str,
-        help="Target Branch",
-        choices=acl.get_branches()
+        "branch", type=str, help="Target Branch", choices=acl.get_branches()
     )
     list_args.add_argument(
-        "repo",
-        type=str,
-        help="Target Repository",
-        choices=acl.get_repositories()
+        "repo", type=str, help="Target Repository", choices=acl.get_repositories()
     )
     list_args.add_argument(
-        "arch",
-        type=str,
-        help="Target Artitecture",
-        choices=acl.get_architectures()
+        "arch", type=str, help="Target Artitecture", choices=acl.get_architectures()
     )
-
+    # ###############################################################
     # compare command
     comp_args = Cmd2ArgumentParser(
         description="Compare repo package across branches and architectures"
@@ -100,7 +90,7 @@ class BxtCtl(cmd2.Cmd):
         type=str,
         nargs="*",
         help="Repositories to compare",
-        choices=acl.get_repositories()
+        choices=acl.get_repositories(),
     )
     comp_args.add_argument(
         "-a",
@@ -117,34 +107,32 @@ class BxtCtl(cmd2.Cmd):
         nargs="?",
         help="Package(s) to compare (multiple -p can be passed)",
     )
+    # ###############################################################
     # commit command
     commit_args = Cmd2ArgumentParser(description="Commit package(s) to repository")
     commit_args.add_argument(
-        "branch",
-        type=str,
-        nargs=1,
-        help="Target Branch",
-        choices=acl.get_branches()
+        "branch", type=str, nargs=1, help="Target Branch", choices=acl.get_branches()
     )
     commit_args.add_argument(
         "repo",
         type=str,
         nargs=1,
         help="Target Repository",
-        choices=acl.get_repositories()
+        choices=acl.get_repositories(),
     )
     commit_args.add_argument(
         "arch",
         type=str,
         nargs=1,
         help="Target Architecture",
-        choices=acl.get_architectures()
+        choices=acl.get_architectures(),
     )
     commit_args.add_argument(
         "package",
         type=str,
         nargs="?",
-        help="package filename(s) (multiple files can be passed)")
+        help="package filename(s) (multiple files can be passed)",
+    )
 
     def __init__(self):
         super().__init__()
@@ -172,15 +160,18 @@ class BxtCtl(cmd2.Cmd):
         print(f"Repositories  : {self.acl.get_repositories()}")
         print(f"--------------------------------- ")
 
-    @with_argparser(set_workspace)
-    def do_set_workspace(self, args):
+    @with_argparser(workspace)
+    def do_workspace(self, args):
         """
-        Set workspace
+        Get or set workspace
         :param args:
         :return:
         """
-        self.config.work_dir = args.workspace
-        self.config.save()
+        if not args.workspace:
+            print(f"Current workspace is: {self.config.workspace}")
+        else:
+            self.config.workspace = args.workspace
+            self.config.save()
 
     @with_argparser(list_args)
     def do_list(self, args):
@@ -194,6 +185,7 @@ class BxtCtl(cmd2.Cmd):
             args.branch,
             args.repo,
             args.arch,
+            self.config.get_access_token(),
         )
         for pkg in pkgs:
             print(
@@ -219,6 +211,7 @@ class BxtCtl(cmd2.Cmd):
                     branch,
                     args.repo,
                     arch,
+                    self.config.get_access_token(),
                 )
                 if args.package is not None:
                     pkgs = [x for x in archpkgs if x["name"] in args.package]
@@ -236,9 +229,10 @@ class BxtCtl(cmd2.Cmd):
         :return: True/False
         """
         print(f"TODO - commit package to repo - using {args}")
+        print(f"Reading files from workspace: {self.config.workspace}")
+        print(f"Commit package(s) to: {args.branch}/{args.repo}/{args.arch}")
         for pkg in args.package:
-            print(f"TODO - commit package to repo - using {pkg}")
-        print(f"commit to: {args.branch}/{args.repo}/{args.arch}")
+            print(f"commit package: {pkg}")
 
     def do_login(self, args):
         """
@@ -261,7 +255,6 @@ class BxtCtl(cmd2.Cmd):
 
 def start():
     """
-
     Poetry entry point
     :return:
     """

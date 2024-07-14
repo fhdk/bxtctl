@@ -30,21 +30,20 @@ from cmd2 import Cmd2ArgumentParser, with_argparser
 import sys
 from Bxt.BxtAcl import BxtAcl
 from Bxt.BxtConfig import BxtConfig
-from Bxt.Http import Http
+from Bxt.BxtSession import BxtSession
 import jwt
 from pprint import pprint
 import os
 
 config = BxtConfig()
 
-if not config.is_valid():
+if not config.valid_config():
     y = config.configure()
 
 if not config.get_access_token():
     z = config.login()
 
-
-if config.is_token_expired():
+if config.valid_token():
     if not config.renew_access_token():
         z = config.login()
 
@@ -53,14 +52,13 @@ endpoint = f"{config.get_url()}/{config.endpoint["pkgCommit"]}"
 
 test_repo = os.path.join(os.path.dirname(__file__), "repo")
 test_pkg = "arch-install-scripts-28-1-any.pkg.tar.zst"
-upload_target = {
-    "branch": "stable",
-    "repository": "multilib",
-    "architecture": "x86_64"
-}
+upload_target = {"branch": "stable", "repository": "multilib", "architecture": "x86_64"}
 upload_form = {
     ("package1.file", (test_pkg, open(f"{test_repo}/{test_pkg}", "rb"))),
-    ("package1.signatureFile", (f"{test_pkg}.sig", open(f"{test_repo}/{test_pkg}.sig", "rb"))),
+    (
+        "package1.signatureFile",
+        (f"{test_pkg}.sig", open(f"{test_repo}/{test_pkg}.sig", "rb")),
+    ),
     ("package1.section", (None, json.dumps(upload_target))),
 }
 

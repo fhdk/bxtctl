@@ -28,14 +28,13 @@ from .Section import Section
 from .BxtException import BxtException
 
 
-class Http:
+class BxtSession:
     """
-    Http helper class
+    Bxt Http session helper class
     """
 
-    def __init__(self, user_agent: str, access_token: str = None):
+    def __init__(self, user_agent: str):
         self._user_agent = user_agent
-        self._access_token: str = access_token
 
     def authenticate(self, url: str, username: str, password: str) -> HttpResult:
         """
@@ -43,58 +42,32 @@ class Http:
         :param url:
         :param username:
         :param password:
-        :return:
+        :return: HttpResult
         """
         data = {"name": username, "password": password, "response_type": "bearer"}
         return self.make_http_request(method="post", url=url, json=data)
 
-    def commit(self, url: str, data: dict, files: dict) -> HttpResult:
+    def commit(self, url: str, data: dict, files: dict, token: str) -> HttpResult:
         """
         post a commit request
-        :return:
+        :param url:
+        :param data:
+        :param files:
+        :param token:
+        :return: HttpResult
         """
         pass
 
-    def compare(self, url: str, data: list) -> HttpResult:
+    def compare(self, url: str, data: list, token: str) -> HttpResult:
         """
         post compare request
+        :param token:
         :param url:
         :param data:
-        :return:
-        # {
-        #     "pkgSection": [
-        #         {
-        #             "branch": "unstable",
-        #             "repository": "core",
-        #             "architecture": "x86_64"
-        #         },
-        #         {
-        #             "branch": "testing",
-        #             "repository": "core",
-        #             "architecture": "x86_64"
-        #         },
-        #         {
-        #             "branch": "stable",
-        #             "repository": "core",
-        #             "architecture": "x86_64"
-        #         }
-        #     ],
-        #     "compareTable": {
-        #         "qwt": {
-        #             "unstable/core/x86_64": {
-        #                 "overlay": "6.2.0-1"
-        #             },
-        #             "testing/core/x86_64": {
-        #                 "overlay": "6.2.0-1"
-        #             },
-        #             "stable/core/x86_64": {
-        #                 "overlay": "6.2.0-1"
-        #             }
-        #         }
-        #     }
-        # }
+        :return: HttpResult
         """
-        return self.make_http_request(method="post", url=url, json=data)
+        headers = {"Authorization": f"Bearer {token}"}
+        return self.make_http_request(method="post", url=url, headers=headers, json=data)
 
     def make_http_request(
         self,
@@ -115,16 +88,12 @@ class Http:
         :param method:
         :param params:
         :param json:
-        :return:
+        :return: HttpResult
         """
         session = requests.session()
         if headers is not None:
             session.headers.update(headers)
         session.headers.update({"User-Agent": self._user_agent})
-
-        if self._access_token is not None:
-            # todo - check for expiration and refresh if required
-            session.headers.update({"Authorization": "Bearer " + self._access_token})
 
         try:
             # execute request
@@ -149,13 +118,15 @@ class Http:
         except requests.exceptions.Timeout:
             return HttpResult({"error": "Timeout error"}, 408)
 
-    def get_logs(self, url: str) -> [LogEntry]:
+    def get_logs(self, url: str, token: str) -> [LogEntry]:
         """
         Get package logs
+        :param token:
         :param url:
         :return: list of log entries
         """
-        result = self.make_http_request(method="get", url=url)
+        headers = {"Authorization": f"Bearer {token}"}
+        result = self.make_http_request(method="get", headers=headers, url=url)
         try:
             if result.status() == 200:
                 return result.content()
@@ -168,23 +139,30 @@ class Http:
         return []
 
     def get_packages(
-        self, url: str, branch: str, repositoriy: str, architectue: str
+        self,
+        url: str,
+        branch: str,
+        repositoriy: str,
+        architectue: str,
+        token: str,
     ) -> [Package]:
         """
         get a list of packages
+        :param token:
         :param url:
         :param branch:
         :param repositoriy:
         :param architectue:
-        :return:
+        :return: List of Package
         """
+        headers = {"Authorization": f"Bearer {token}"}
         params = {
             "branch": branch,
             "repository": repositoriy,
             "architecture": architectue,
         }
         try:
-            result = self.make_http_request(method="get", url=url, params=params)
+            result = self.make_http_request(method="get", url=url, headers=headers, params=params)
             if result.status() == 200:
                 return result.content()
             raise BxtException(
@@ -195,14 +173,16 @@ class Http:
             print(f"{e}\n{e.errors}")
         return []
 
-    def get_sections(self, url: str) -> [Section]:
+    def get_sections(self, url: str, token: str) -> [Section]:
         """
         Get ACL
+        :param token:
         :param url:
         :return: [{"branch": "string","repository": "string","architecture": "string"}]
         """
+        headers = {"Authorization": f"Bearer {token}"}
         try:
-            result = self.make_http_request(method="get", url=url)
+            result = self.make_http_request(method="get", url=url, headers=headers)
             if result.status() == 200:
                 return result.content()
             raise BxtException(
@@ -213,28 +193,24 @@ class Http:
             print(f"{e}\n{e.errors}")
         return []
 
-    def renew_access_token(self, url: str, refresh_token: str) -> HttpResult:
-        """
-        Authenticate from refresh token
-        :param refresh_token:
-        :param url:
-        :return:
-        """
-        data = {"token": refresh_token}
-        return self.make_http_request(method="get", url=url, json=data)
-
-    def revoke_refresh_token(self, url: str) -> HttpResult:
+    def revoke_refresh_token(self, url: str, token: str) -> HttpResult:
         """
         Revoke refresh token
+        :param token:
         :param url:
-        :return:
+        :return: HttpResult
         """
-        return self.make_http_request(method="post", url=url)
+        headers = {"Authorization": f"Bearer {token}"}
+        return self.make_http_request(method="post", url=url, headers=headers)
 
-    def set_access_token(self, access_token: str):
+    def use_refresh_token(self, url: str, token: str, refresh_token: str) -> HttpResult:
         """
-        set access token
-        :param access_token:
-        :return:
+        Authenticate from refresh token
+        :param token:
+        :param refresh_token:
+        :param url:
+        :return: HttpResult
         """
-        self._access_token = access_token
+        headers = {"Authorization": f"Bearer {token}"}
+        json_data = {"token": refresh_token}
+        return self.make_http_request(method="get", url=url, headers=headers, json=json_data)

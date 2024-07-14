@@ -23,6 +23,7 @@ cd bxtctl
 poetry install
 poetry run bxtctl
 ```
+
 ## Command overview
 
 As the project is WIP the following is subject to change.
@@ -30,6 +31,7 @@ As the project is WIP the following is subject to change.
 This issue https://github.com/fhdk/bxtctl/issues/2 is intended to gather feedback on how the CLI commands.
 
 ### Help command
+
 ```
 Documented commands (use 'help -v' for verbose/'help <topic>' for details):
 ===========================================================================
@@ -48,13 +50,15 @@ At any point the `configure` command can be used to change the service endpoint 
 
 ### Login command
 
-The `login` command can be used to change the username and retrieve a new access token based on the username and a provide password.
+The `login` command can be used to change the username and retrieve a new access token based on the username and a
+provide password.
 
 The password is never stored on the system and there will be no characters echoed to screen.
 
 ### Set workspace command
 
-The workspace is where you keep the packages you build. A default workspace `$HOME/bxt-workspace` is created at first run. 
+The workspace is where you keep the packages you build. A default workspace `$HOME/bxt-workspace` is created at first
+run.
 Use the `set_workspace` command to change the default.
 
 ```

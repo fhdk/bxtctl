@@ -23,7 +23,7 @@ import json
 import os
 from pwinput import pwinput
 from pathlib import Path
-from .Http import Http
+from .BxtSession import BxtSession
 from .BxtToken import BxtToken
 from .BxtEncoder import BxtEncoder
 
@@ -57,7 +57,7 @@ class BxtConfig:
         Creates the configuration folder and initialize or load configuraiton
         """
         self._configstore = f"{self.config_dir}/{self.config_file}"
-        self._http = Http(user_agent=self.user_agent)
+        self._http = BxtSession(user_agent=self.user_agent)
         self._url: str = ""
         self._username: str = ""
         self._token: BxtToken = BxtToken()
@@ -114,7 +114,8 @@ class BxtConfig:
         Return Bxt token
         :return:
         """
-        if self._token.get_access_expiration() <= 15:
+        expires_in = self._token.get_access_expiration()
+        if expires_in < 15:
             if not self.renew_access_token():
                 if not self.login():
                     return ""
@@ -136,6 +137,9 @@ class BxtConfig:
 
     def valid_config(self) -> bool:
         return self._url != "" and self._username != ""
+
+    def valid_refresh(self) -> bool:
+        return self._token.get_refresh_expired()
 
     def valid_token(self) -> bool:
         return self._token.get_access_expired()
@@ -176,9 +180,9 @@ class BxtConfig:
     def renew_access_token(self) -> bool:
         if not self._token.get_refresh_expired():
             refresh_token = self._token.get_refresh_token()
-            result = self._http.renew_access_token(url=f"{self._url}/{self.endpoint["refresh"]}",
-                                                   refresh_token=refresh_token)
-            if result.status == 200:
+            result = self._http.use_refresh_token(url=f"{self._url}/{self.endpoint["refresh"]}", token=self._token.get_access_token(),
+                                                  refresh_token=refresh_token)
+            if result.status() == 200:
                 self._token = BxtToken(result.content())
                 self.__save_config()
                 return True
@@ -186,9 +190,7 @@ class BxtConfig:
         return False
 
     def revoke_refresh_token(self) -> bool:
-        result = (self._http.revoke_refresh_token(
-            f"{self._url}/{self.endpoint["revoke"]}"
-        ))
+        result = self._http.revoke_refresh_token(f"{self._url}/{self.endpoint["revoke"]}", None)
         if result.status() == 200:
             self._token = {}
             self.__save_config()
@@ -259,7 +261,7 @@ class BxtConfig:
             "url": self._url,
             "username": self._username,
             "token": self._token,
-            "work_dir": self.workspace
+            "work_dir": self.workspace,
         }
         with open(self._configstore, "w") as outfile:
             json.dump(temp, outfile, cls=BxtEncoder)
@@ -282,8 +284,8 @@ class BxtConfig:
             options["url"] = input(f"bxt service  : ").strip()
             options["name"] = input(f"bxt username : ").strip()
             if (
-                    options["url"] != ""
-                    and options["name"] != ""
-                    and options["url"].startswith("http")
+                options["url"] != ""
+                and options["name"] != ""
+                and options["url"].startswith("http")
             ):
                 return options
