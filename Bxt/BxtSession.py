@@ -21,11 +21,12 @@
 
 import requests
 from json import JSONDecodeError
+from .BxtException import BxtException
 from .HttpResult import HttpResult
 from .LogEntry import LogEntry
 from .Package import Package
 from .Section import Section
-from .BxtException import BxtException
+from .User import User
 
 
 class BxtSession:
@@ -196,6 +197,15 @@ class BxtSession:
         except BxtException as e:
             print(f"{e}\n{e.errors}")
         return []
+
+    def get_user(self, url: str, token: str) -> User:
+        """
+        Get user information
+        :param url:
+        :param token:
+        :return:
+        """
+        pass
 
     def revoke_refresh_token(self, url: str, token: str) -> HttpResult:
         """

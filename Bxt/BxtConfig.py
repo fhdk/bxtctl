@@ -49,6 +49,7 @@ class BxtConfig:
         "pkgCommit": "api/packages/commit",
         "pkgSection": "api/sections",
         "pkgCompare": "api/compare",
+        "userInfo": "api/userinfo",
     }
 
     def __init__(self):
