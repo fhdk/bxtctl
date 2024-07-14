@@ -61,11 +61,9 @@ if config.valid_token():
 token = config.get_access_token()
 endpoint = f"{config.get_url()}/{config.endpoint["pkgCommit"]}"
 
-test_repo = os.path.join(os.path.dirname(__file__), "repo")
 test_pkg = "arch-install-scripts"
 
 section_a = {"branch": "unstable", "repository": "multilib", "architecture": "x86_64"}
-
 section_b = {"branch": "unstable", "repository": "extra", "architecture": "x86_64"}
 
 bxt_copy_pkg = {
