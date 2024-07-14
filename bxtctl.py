@@ -47,10 +47,11 @@ class BxtCtl(cmd2.Cmd):
             z = config.login()
 
     prompt = f"({config.get_name()}@{config.get_hostname()}) $ "
-    # cmd2.Cmd.prompt = f"({config.get_name()}@{config.get_hostname()}) $ "
-    http = BxtSession(BxtConfig.user_agent, config.get_access_token())
-    sections = http.get_sections(
-        f"{config.get_url()}/{BxtConfig.endpoint['pkgSection']}", None
+    # initialize a session object
+    bxt_session = BxtSession(BxtConfig.user_agent)
+    sections = bxt_session.get_sections(
+        f"{config.get_url()}/{BxtConfig.endpoint['pkgSection']}",
+        config.get_access_token(),
     )
 
     acl = BxtAcl(sections)
@@ -156,8 +157,8 @@ class BxtCtl(cmd2.Cmd):
         print(f"---------- PERMISSIONS ---------- ")
         print(f"bxt user: '{self.config.get_name()}' has access to:")
         print(f"Branches      : {self.acl.get_branches()}")
-        print(f"Architectures : {self.acl.get_architectures()}")
         print(f"Repositories  : {self.acl.get_repositories()}")
+        print(f"Architectures : {self.acl.get_architectures()}")
         print(f"--------------------------------- ")
 
     @with_argparser(workspace)
@@ -180,8 +181,8 @@ class BxtCtl(cmd2.Cmd):
         :param args:
         :return:
         """
-        pkgs = self.http.get_packages(
-            f"{self.config.get_url()}/{self.config.endpoint['packages']}",
+        pkgs = self.bxt_session.get_packages(
+            f"{self.config.get_url()}/{self.config.endpoint['pkgList']}",
             args.branch,
             args.repo,
             args.arch,
@@ -206,9 +207,9 @@ class BxtCtl(cmd2.Cmd):
 
         for branch in branches:
             for arch in architectures:
-                archpkgs = self.http.get_packages(
-                    f"{self.config.get_url()}/{self.config.endpoint['packages']}",
-                    branch,
+                archpkgs = self.bxt_session.get_packages(
+                    f"{self.config.get_url()}/{self.config.endpoint['pkgCompare']}",
+                    args.branch,
                     args.repo,
                     arch,
                     self.config.get_access_token(),
@@ -230,6 +231,7 @@ class BxtCtl(cmd2.Cmd):
         """
         print(f"TODO - commit package to repo - using {args}")
         print(f"Reading files from workspace: {self.config.workspace}")
+        print(f"Commit endpoint is: {self.config.endpoint['commitEndpoint']}")
         print(f"Commit package(s) to: {args.branch}/{args.repo}/{args.arch}")
         for pkg in args.package:
             print(f"commit package: {pkg}")

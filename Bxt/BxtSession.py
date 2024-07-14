@@ -67,7 +67,9 @@ class BxtSession:
         :return: HttpResult
         """
         headers = {"Authorization": f"Bearer {token}"}
-        return self.make_http_request(method="post", url=url, headers=headers, json=data)
+        return self.make_http_request(
+            method="post", url=url, headers=headers, json=data
+        )
 
     def make_http_request(
         self,
@@ -162,7 +164,9 @@ class BxtSession:
             "architecture": architectue,
         }
         try:
-            result = self.make_http_request(method="get", url=url, headers=headers, params=params)
+            result = self.make_http_request(
+                method="get", url=url, headers=headers, params=params
+            )
             if result.status() == 200:
                 return result.content()
             raise BxtException(
@@ -213,4 +217,6 @@ class BxtSession:
         """
         headers = {"Authorization": f"Bearer {token}"}
         json_data = {"token": refresh_token}
-        return self.make_http_request(method="get", url=url, headers=headers, json=json_data)
+        return self.make_http_request(
+            method="get", url=url, headers=headers, json=json_data
+        )

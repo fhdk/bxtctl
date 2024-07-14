@@ -180,8 +180,11 @@ class BxtConfig:
     def renew_access_token(self) -> bool:
         if not self._token.get_refresh_expired():
             refresh_token = self._token.get_refresh_token()
-            result = self._http.use_refresh_token(url=f"{self._url}/{self.endpoint["refresh"]}", token=self._token.get_access_token(),
-                                                  refresh_token=refresh_token)
+            result = self._http.use_refresh_token(
+                url=f"{self._url}/{self.endpoint["refresh"]}",
+                token=self._token.get_access_token(),
+                refresh_token=refresh_token,
+            )
             if result.status() == 200:
                 self._token = BxtToken(result.content())
                 self.__save_config()
@@ -190,7 +193,9 @@ class BxtConfig:
         return False
 
     def revoke_refresh_token(self) -> bool:
-        result = self._http.revoke_refresh_token(f"{self._url}/{self.endpoint["revoke"]}", None)
+        result = self._http.revoke_refresh_token(
+            f"{self._url}/{self.endpoint["revoke"]}", None
+        )
         if result.status() == 200:
             self._token = {}
             self.__save_config()
