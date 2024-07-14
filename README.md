@@ -55,14 +55,19 @@ provide password.
 
 The password is never stored on the system and there will be no characters echoed to screen.
 
-### Set workspace command
+### workspace command
 
 The workspace is where you keep the packages you build. A default workspace `$HOME/bxt-workspace` is created at first
 run.
-Use the `set_workspace` command to change the default.
+
+To show the current workspace
+```
+workspace
+```
+Use the `sworkspace` command to change the default.
 
 ```
-set_workspace /path/to/new/workspace
+workspace -w /path/to/new/workspace
 ```
 
 ### Compare command

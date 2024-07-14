@@ -69,11 +69,13 @@ section_b = {"branch": "unstable", "repository": "extra", "architecture": "x86_6
 bxt_delete_pkg = {
     (
         "to_delete",
-        json.dumps(
-            [
-                {"name": test_pkg, "section": section_a},
-                {"name": test_pkg, "section": section_b},
-            ]
+        (
+            json.dumps(
+                [
+                    {"name": test_pkg, "section": section_a},
+                    {"name": test_pkg, "section": section_b},
+                ]
+            )
         ),
     )
 }
