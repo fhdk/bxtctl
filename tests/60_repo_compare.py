@@ -30,7 +30,7 @@ from cmd2 import Cmd2ArgumentParser, with_argparser
 import sys
 from Bxt.BxtAcl import BxtAcl
 from Bxt.BxtConfig import BxtConfig
-from Bxt.Http import Http
+from Bxt.BxtSession import BxtSession
 import jwt
 from pprint import pprint
 import os
@@ -42,26 +42,28 @@ from: stable -> extra -> x86_64 repo
 
 config = BxtConfig()
 
-if not config.is_valid():
+if not config.valid_config():
     y = config.configure()
 
 if not config.get_access_token():
     config.login()
 
-if config.is_token_expired():
+if config.valid_token():
     if not config.renew_access_token():
         z = config.login()
 
 token = config.get_access_token()
 endpoint = f"{config.get_url()}/{config.endpoint["pkgCompare"]}"
-http = Http(config.user_agent, config.get_access_token())
+http = BxtSession(config.user_agent, config.get_access_token())
 
 print("bxt_compare : ")
 print("compare request begin    --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
-compare_data = [{"branch": "unstable", "repository": "core", "architecture": "x86_64"},
-                {"branch": "testing", "repository": "core", "architecture": "x86_64"}]
+compare_data = [
+    {"branch": "unstable", "repository": "core", "architecture": "x86_64"},
+    {"branch": "testing", "repository": "core", "architecture": "x86_64"},
+]
 
-comparison = http.compare(endpoint, compare_data)
+comparison = http.compare(endpoint, compare_data, None)
 
 print("compare request response --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
 

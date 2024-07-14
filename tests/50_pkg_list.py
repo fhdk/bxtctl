@@ -30,7 +30,7 @@ from cmd2 import Cmd2ArgumentParser, with_argparser
 import sys
 from Bxt.BxtAcl import BxtAcl
 from Bxt.BxtConfig import BxtConfig
-from Bxt.Http import Http
+from Bxt.BxtSession import BxtSession
 import jwt
 from pprint import pprint
 import os
@@ -42,23 +42,23 @@ from: stable -> extra -> x86_64 repo
 
 config = BxtConfig()
 
-if not config.is_valid():
+if not config.valid_config():
     y = config.configure()
 
 if not config.get_access_token():
     z = config.login()
 
-if config.is_token_expired():
+if config.valid_token():
     if not config.renew_access_token():
         z = config.login()
 
 token = config.get_access_token()
 endpoint = f"{config.get_url()}/{config.endpoint["pkgList"]}"
-http = Http(config.user_agent, config.get_access_token())
+http = BxtSession(config.user_agent, config.get_access_token())
 
 print("bxt_list_pkg : ")
 print("list request begin --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
-pkgs = http.get_packages(endpoint, "unstable", "multilib", "x86_64")
+pkgs = http.get_packages(endpoint, "unstable", "multilib", "x86_64", None)
 for pkg in pkgs:
     print(
         f"{pkg['name']:<30}: {pkg['poolEntries'][pkg['preferredLocation']]['version']}"
