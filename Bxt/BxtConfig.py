@@ -39,7 +39,7 @@ class BxtConfig:
     user_agent = f"{app_name}/{app_version}"
     config_dir = f"{Path.home()}/.config/{app_name}"
     config_file = "config.json"
-    work_dir = f"{Path.home()}/bxt-workspace"
+    workspace = f"{Path.home()}/bxt-workspace"
     endpoint = {
         "auth": "api/auth",
         "refresh": "api/auth/refresh",
@@ -65,8 +65,8 @@ class BxtConfig:
         # create config dir if not existing
         if not os.path.isdir(self.config_dir):
             os.mkdir(self.config_dir)
-        if not os.path.isdir(self.work_dir):
-            os.mkdir(self.work_dir)
+        if not os.path.isdir(self.workspace):
+            os.mkdir(self.workspace)
         # check configstore on disk
         if not os.path.isfile(f"{self.config_dir}/{self.config_file}"):
             # generrate empty default
@@ -75,12 +75,32 @@ class BxtConfig:
             # load config
             self.__load_config()
 
-    def save(self) -> None:
+    def configure(self) -> bool:
         """
-        save config
+        Create BctCtl configuration
         :return:
         """
-        self.__save_config()
+        # get options - username and service url
+        options = self.__get_basic_config()
+        # get password from user
+        password = pwinput(prompt="password: ", mask="")
+        # assign returned option to the configuration
+        self._username = options["name"]
+        self._url = options["url"]
+        # get response from service
+        result = self._http.authenticate(
+            url=f"{self._url}/{self.endpoint["auth"]}",
+            username=self._username,
+            password=password,
+        )
+        # handle result
+        if result.status() == 200:
+            # assign content from result to token
+            self._token = BxtToken(result.content())
+            # save configuration
+            self.__save_config()
+            return True
+        return False
 
     def get_hostname(self) -> str:
         """
@@ -94,6 +114,10 @@ class BxtConfig:
         Return Bxt token
         :return:
         """
+        if self._token.get_access_expiration() <= 15:
+            if not self.renew_access_token():
+                if not self.login():
+                    return ""
         return self._token.get_access_token()
 
     def get_name(self) -> str:
@@ -110,50 +134,11 @@ class BxtConfig:
         """
         return self._url
 
-    def is_valid(self) -> bool:
+    def valid_config(self) -> bool:
         return self._url != "" and self._username != ""
 
-    def is_token_expired(self) -> bool:
-        return self._token.is_access_token_expired()
-
-    def renew_access_token(self) -> bool:
-        if not self._token.is_refresh_token_expired():
-            refresh_token = self._token.get_refresh_token()
-            result = self._http.renew_access_token(url=f"{self._url}/{self.endpoint["refresh"]}",
-                                                   refresh_token=refresh_token)
-            if result.status == 200:
-                self._token = BxtToken(result.content())
-                self.__save_config()
-                return True
-
-        return False
-
-    def configure(self) -> bool:
-        """
-        Create BctCtl configuration
-        :return:
-        """
-        # get options - username and service url
-        options = self.__get_basic_config()
-        # get password from user
-        password = pwinput(prompt="password: ", mask="")
-        # assign returned option to the configuration
-        self._username = options["name"]
-        self._url = options["url"]
-        # get response from service
-        result = self._http.authenticate(
-            url=f"{self._url}/{self.endpoint['auth']}",
-            username=self._username,
-            password=password,
-        )
-        # handle result
-        if result.status() == 200:
-            # assign content from result to token
-            self._token = BxtToken(result.content())
-            # save configuration
-            self.__save_config()
-            return True
-        return False
+    def valid_token(self) -> bool:
+        return self._token.get_access_expired()
 
     def login(self) -> bool:
         """
@@ -170,7 +155,7 @@ class BxtConfig:
         password = pwinput(prompt="password: ", mask="")
         # get reponse from service
         result = self._http.authenticate(
-            url=f"{self._url}/{self.endpoint['auth']}",
+            url=f"{self._url}/{self.endpoint["auth"]}",
             username=username,
             password=password,
         )
@@ -188,15 +173,34 @@ class BxtConfig:
         self.__save_config()
         return False
 
-    def revoke_access(self) -> bool:
-        result = self._http.revoke_refresh_token(
-            f"{self._url}/{self.endpoint['revoke_access']}"
-        )
+    def renew_access_token(self) -> bool:
+        if not self._token.get_refresh_expired():
+            refresh_token = self._token.get_refresh_token()
+            result = self._http.renew_access_token(url=f"{self._url}/{self.endpoint["refresh"]}",
+                                                   refresh_token=refresh_token)
+            if result.status == 200:
+                self._token = BxtToken(result.content())
+                self.__save_config()
+                return True
+
+        return False
+
+    def revoke_refresh_token(self) -> bool:
+        result = (self._http.revoke_refresh_token(
+            f"{self._url}/{self.endpoint["revoke"]}"
+        ))
         if result.status() == 200:
             self._token = {}
             self.__save_config()
             return True
         return False
+
+    def save(self) -> None:
+        """
+        save config
+        :return:
+        """
+        self.__save_config()
 
     def __str__(self):
         """
@@ -216,7 +220,7 @@ class BxtConfig:
                 config = json.load(infile)
             # read workdir
             try:
-                self.work_dir = config["work_dir"]
+                self.workspace = config["work_dir"]
             except KeyError:
                 pass
             # read name
@@ -226,7 +230,7 @@ class BxtConfig:
                 self._username = ""
             # read url
             try:
-                self._url = f"{config['url']}"
+                self._url = f"{config["url"]}"
             except KeyError:
                 self._url = ""
             # read token
@@ -255,7 +259,7 @@ class BxtConfig:
             "url": self._url,
             "username": self._username,
             "token": self._token,
-            "work_dir": self.work_dir
+            "work_dir": self.workspace
         }
         with open(self._configstore, "w") as outfile:
             json.dump(temp, outfile, cls=BxtEncoder)
@@ -275,11 +279,11 @@ class BxtConfig:
         """
         options = {"name": "", "url": ""}
         while True:
-            options["url"] = input(f"bxt service : ").strip()
+            options["url"] = input(f"bxt service  : ").strip()
             options["name"] = input(f"bxt username : ").strip()
             if (
-                options["url"] != ""
-                and options["name"] != ""
-                and options["url"].startswith("http")
+                    options["url"] != ""
+                    and options["name"] != ""
+                    and options["url"].startswith("http")
             ):
                 return options
