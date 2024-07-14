@@ -68,10 +68,7 @@ section_b = {"branch": "unstable", "repository": "extra", "architecture": "x86_6
 
 bxt_copy_pkg = {
     (
-        "to_copy",
-        json.dumps(
-            [{"name": test_pkg, "from_section": section_b, "to_section": section_a}]
-        ),
+        "to_copy", (json.dumps([{"name": test_pkg, "from_section": section_b, "to_section": section_a}])),
     ),
 }
 

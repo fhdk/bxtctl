@@ -67,10 +67,7 @@ section_a = {"branch": "unstable", "repository": "multilib", "architecture": "x8
 section_b = {"branch": "unstable", "repository": "extra", "architecture": "x86_64"}
 bxt_move_pkg = {
     (
-        "to_move",
-        json.dumps(
-            [{"name": test_pkg, "from_section": section_a, "to_section": section_b}]
-        ),
+        "to_move", (json.dumps([{"name": test_pkg, "from_section": section_a, "to_section": section_b}])),
     ),
 }
 
