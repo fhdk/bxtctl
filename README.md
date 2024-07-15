@@ -40,6 +40,13 @@ compare    help     ls_path  move          set     workspace
 configure  history  ls_repo  quit          shell 
 ```
 
+### list configured shortcuts command
+Several of the commands has shortcuts configured. To list the available shortcuts
+
+```
+shortcuts
+```
+
 ### Configure command
 
 The `configure` command is run at first start to create a basic configuration file.
@@ -69,8 +76,34 @@ optional arguments:
   -w, --workspace WORKSPACE
                         Full path to workspace
 ```
+### list workspace content
+List content of the current workspace
+```
+Usage: ls_workspace [-h] [-l]
 
-## Repository commands
+List workspace content
+
+optional arguments:
+  -h, --help  show this help message and exit
+  -l, --long  use long list
+```
+### list content of arbitrary path
+List content of any system paths
+```
+Usage: ls_path [-h] [-l] [path]
+
+List path content
+
+positional arguments:
+  path        Path to list content
+
+optional arguments:
+  -h, --help  show this help message and exit
+  -l, --long  use long list
+```
+
+## Remote BXT Repository commands
+
 The command will only list locations the user has permissions to access
 
 ### List repo contents command
@@ -87,12 +120,14 @@ positional arguments:
 ### Compare command
 
 ```
+Usage: compare [-h] [-l [LOCATION [...]]] [-p [PACKAGE]]
+
 Compare repo package across branches and architectures
 
 optional arguments:
   -h, --help            show this help message and exit
   -l, --location [LOCATION [...]]
-                        {'unstable'}/{'extra', 'multilib', 'core'}/{'x86_64'}
+                        {'unstable'}/{'extra', 'core', 'multilib'}/{'x86_64'}
   -p, --package [PACKAGE]
                         Package(s) to compare (multiple -p can be passed)
 ```
@@ -100,16 +135,17 @@ optional arguments:
 ### Commit command
 
 ```
-Usage: commit [-h] location [package]
+Usage: commit [-h] [-p PACKAGE [...]] location
 
 Commit package(s) to repository
 
 positional arguments:
-  location    {'unstable'}/{'extra', 'multilib', 'core'}/{'x86_64'}
-  package     package name(s) (multiple files can be passed)
+  location              {'unstable'}/{'extra', 'core', 'multilib'}/{'x86_64'}
 
 optional arguments:
-  -h, --help  show this help message and exit
+  -h, --help            show this help message and exit
+  -p, --package PACKAGE [...]
+                        package name(s) (multiple files can be passed)
 ```
 
 ### Copy command
@@ -122,19 +158,7 @@ Copy package(s) inside bxt storage
 optional arguments:
   -h, --help            show this help message and exit
   -p, --package PACKAGE [...]
-                        'pkgname {'unstable'}/{'extra', 'multilib', 'core'}/{'x86_64'} {'unstable'}/{'extra', 'multilib', 'core'}/{'x86_64'}'
-```
-
-### Remove command
-```
-Usage: remove [-h] [-p PACKAGE [...]]
-
-Delete package(s) inside bxt storage
-
-optional arguments:
-  -h, --help            show this help message and exit
-  -p, --package PACKAGE [...]
-                        Package remove from repo: 'pkgname {'unstable'}/{'extra', 'multilib', 'core'}/{'x86_64'}'
+                        'pkgname {'unstable'}/{'extra', 'core', 'multilib'}/{'x86_64'} {'unstable'}/{'extra', 'core', 'multilib'}/{'x86_64'}'
 ```
 
 ### Move command
@@ -146,5 +170,17 @@ Move package(s) inside bxt storage
 optional arguments:
   -h, --help            show this help message and exit
   -p, --package PACKAGE [...]
-                        Package move from repo to repo: 'pkgname {'unstable'}/{'extra', 'multilib', 'core'}/{'x86_64'} {'unstable'}/{'extra', 'multilib', 'core'}/{'x86_64'}'
+                        Package move from repo to repo: 'pkgname {'unstable'}/{'extra', 'core', 'multilib'}/{'x86_64'} {'unstable'}/{'extra', 'core', 'multilib'}/{'x86_64'}'
+```
+
+### Remove command
+```
+Usage: remove [-h] [-p PACKAGE [...]]
+
+Delete package(s) inside bxt storage
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -p, --package PACKAGE [...]
+                        Package remove from repo: 'pkgname {'unstable'}/{'extra', 'core', 'multilib'}/{'x86_64'}'
 ```
