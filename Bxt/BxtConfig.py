@@ -228,7 +228,7 @@ class BxtConfig:
                 config = json.load(infile)
             # read workdir
             try:
-                self.workspace = config["work_dir"]
+                self.workspace = config["workspace"]
             except KeyError:
                 pass
             # read name
@@ -267,10 +267,10 @@ class BxtConfig:
             "url": self._url,
             "username": self._username,
             "token": self._token,
-            "work_dir": self.workspace,
+            "workspace": self.workspace,
         }
         with open(self._configstore, "w") as outfile:
-            json.dump(temp, outfile, cls=BxtEncoder)
+            json.dump(temp, outfile, indent=2, cls=BxtEncoder)
 
     def __validate_owner(self) -> bool:
         """
