@@ -44,23 +44,26 @@ class BxtCtl(cmd2.Cmd):
     """
     Main bctctl shell instance
     """
+
     def __init__(self):
         # shortcuts = dict(cmd2.DEFAULT_SHORTCUTS)
         shortcuts = dict()
-        shortcuts.update({
-            "?": "help",
-            "!": "shell",
-            "cp": "bxtcopy",
-            "exit": "quit",
-            "lsp": "ls_path",
-            "lsr": "ls_repo",
-            "lsw": "ls_workspace",
-            "mv": "move",
-            "rm": "remove",
-            "up": "commit",
-            "upload": "commit",
-            "ws": "workspace"
-        })
+        shortcuts.update(
+            {
+                "?": "help",
+                "cp": "copy",
+                "exit": "quit",
+                "lsp": "ls_path",
+                "lsr": "ls_repo",
+                "lsw": "ls_workspace",
+                "mv": "move",
+                "rm": "remove",
+                "send": "commit",
+                "up": "commit",
+                "upload": "commit",
+                "ws": "workspace",
+            }
+        )
         super().__init__(shortcuts=shortcuts)
         # To remove built-in commands entirely, delete
         # the "do_*" function from the cmd2.Cmd class
@@ -69,6 +72,7 @@ class BxtCtl(cmd2.Cmd):
         del cmd2.Cmd.do_macro
         del cmd2.Cmd.do_run_pyscript
         del cmd2.Cmd.do_run_script
+        del cmd2.Cmd.do_shell
         # if config is uninitialized force setup config
         if self.config.get_url() == "" or self.config.get_name() == "":
             self.poutput("Enter initial configuration")

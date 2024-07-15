@@ -40,6 +40,7 @@ class BxtConfig:
     config_dir = f"{Path.home()}/.config/{app_name}"
     config_file = "config.json"
     workspace = f"{Path.home()}/bxt-workspace"
+
     endpoint = {
         "auth": "api/auth",
         "refresh": "api/auth/refresh",
