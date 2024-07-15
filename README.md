@@ -35,9 +35,9 @@ This issue https://github.com/fhdk/bxtctl/issues/2 is intended to gather feedbac
 ```
 Documented commands (use 'help -v' for verbose/'help <topic>' for details):
 ===========================================================================
-alias    configure  history  macro         run_script  shortcuts
-commit   edit       list     quit          set         sync     
-compare  help       login    run_pyscript  shell    
+commit     copy     login    ls_workspace  remove  shortcuts
+compare    help     ls_path  move          set     workspace
+configure  history  ls_repo  quit          shell 
 ```
 
 ### Configure command
@@ -59,69 +59,92 @@ The password is never stored on the system and there will be no characters echoe
 
 The workspace is where you keep the packages you build. A default workspace `$HOME/bxt-workspace` is created at first
 run.
+```
+Usage: workspace [-h] [-w WORKSPACE]
 
-To show the current workspace
+Get or set workspace
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -w, --workspace WORKSPACE
+                        Full path to workspace
 ```
-workspace
-```
-Use the `sworkspace` command to change the default.
+
+## Repository commands
+The command will only list locations the user has permissions to access
+
+### List repo contents command
 
 ```
-workspace -w /path/to/new/workspace
+Usage: ls_repo [-h] location
+
+List content of remote bxt repository
+
+positional arguments:
+  location    {'unstable'}/{'extra', 'multilib', 'core'}/{'x86_64'}
 ```
 
 ### Compare command
 
 ```
-Usage: compare [-h] [-b [{testing, unstable, stable} [...]]] [-r [{core, extra, multilib} [...]]] [-a [{aarch64, x86_64} [...]]] [-p [PACKAGE]]
-
 Compare repo package across branches and architectures
 
 optional arguments:
   -h, --help            show this help message and exit
-  -b, --branch [{testing, unstable, stable} [...]]
-                        Branches to compare
-  -r, --repo [{core, extra, multilib} [...]]
-                        Repositories to compare
-  -a, --arch [{aarch64, x86_64} [...]]
-                        Architecures to compare
+  -l, --location [LOCATION [...]]
+                        {'unstable'}/{'extra', 'multilib', 'core'}/{'x86_64'}
   -p, --package [PACKAGE]
                         Package(s) to compare (multiple -p can be passed)
-```
-
-### List command
-
-```
-Usage: list [-h] {testing, unstable, stable} {core, extra, multilib} {aarch64, x86_64}
-
-List content of repo branch architecture
-
-positional arguments:
-  {testing, unstable, stable}
-                        Target Branch
-  {core, extra, multilib}
-                        Target Repository
-  {aarch64, x86_64}     Target Artitecture
-
-optional arguments:
-  -h, --help            show this help message and exit
 ```
 
 ### Commit command
 
 ```
-Usage: commit [-h] {testing, unstable, stable} {extra, multilib, core} {aarch64, x86_64} [package]
+Usage: commit [-h] location [package]
 
 Commit package(s) to repository
 
 positional arguments:
-  {testing, unstable, stable}
-                        Target Branch
-  {extra, multilib, core}
-                        Target Repository
-  {aarch64, x86_64}     Target Architecture
-  package               package filename (multiple packages can be passed)
+  location    {'unstable'}/{'extra', 'multilib', 'core'}/{'x86_64'}
+  package     package name(s) (multiple files can be passed)
+
+optional arguments:
+  -h, --help  show this help message and exit
+```
+
+### Copy command
+
+```
+Usage: copy [-h] [-p PACKAGE [...]]
+
+Copy package(s) inside bxt storage
 
 optional arguments:
   -h, --help            show this help message and exit
+  -p, --package PACKAGE [...]
+                        'pkgname {'unstable'}/{'extra', 'multilib', 'core'}/{'x86_64'} {'unstable'}/{'extra', 'multilib', 'core'}/{'x86_64'}'
+```
+
+### Remove command
+```
+Usage: remove [-h] [-p PACKAGE [...]]
+
+Delete package(s) inside bxt storage
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -p, --package PACKAGE [...]
+                        Package remove from repo: 'pkgname {'unstable'}/{'extra', 'multilib', 'core'}/{'x86_64'}'
+```
+
+### Move command
+```
+Usage: move [-h] [-p PACKAGE [...]]
+
+Move package(s) inside bxt storage
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -p, --package PACKAGE [...]
+                        Package move from repo to repo: 'pkgname {'unstable'}/{'extra', 'multilib', 'core'}/{'x86_64'} {'unstable'}/{'extra', 'multilib', 'core'}/{'x86_64'}'
 ```
