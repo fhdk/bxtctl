@@ -46,27 +46,21 @@ if not config.valid_config():
     y = config.configure()
 
 if not config.get_access_token():
-    config.login()
+    z = config.login()
 
 if config.valid_token():
     if not config.renew_access_token():
         z = config.login()
 
 token = config.get_access_token()
-endpoint = f"{config.get_url()}/{config.endpoint["pkgCompare"]}"
-http = BxtSession(config.user_agent, config.get_access_token())
+endpoint = f"{config.get_url()}/{config.endpoint["pkgList"]}"
+http = BxtSession(config.user_agent)
 
-print("bxt_compare : ")
-print("compare request begin    --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
-compare_data = [
-    {"branch": "unstable", "repository": "core", "architecture": "x86_64"},
-    {"branch": "testing", "repository": "core", "architecture": "x86_64"},
-]
-
-comparison = http.compare(endpoint, compare_data, None)
-
-print("compare request response --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
-
-pprint(f"{comparison}")
-
-print("compare response parsed  --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
+print("bxt_list_pkg : ")
+print("list request begin --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
+pkgs = http.get_packages(endpoint, "unstable", "multilib", "x86_64", config.get_access_token())
+for pkg in pkgs:
+    print(
+        f"{pkg['name']:<30}: {pkg['poolEntries'][pkg['preferredLocation']]['version']}"
+    )
+    print(f"source: {pkg}")

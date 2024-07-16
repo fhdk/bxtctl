@@ -54,11 +54,11 @@ if config.valid_token():
 
 token = config.get_access_token()
 endpoint = f"{config.get_url()}/{config.endpoint["pkgList"]}"
-http = BxtSession(config.user_agent, config.get_access_token())
+http = BxtSession(config.user_agent)
 
 print("bxt_list_pkg : ")
 print("list request begin --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
-pkgs = http.get_packages(endpoint, "unstable", "multilib", "x86_64", None)
+pkgs = http.get_packages(endpoint, "unstable", "multilib", "x86_64", config.get_access_token())
 for pkg in pkgs:
     print(
         f"{pkg['name']:<30}: {pkg['poolEntries'][pkg['preferredLocation']]['version']}"
