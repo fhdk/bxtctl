@@ -23,21 +23,15 @@
 import argparse
 import cmd2
 from cmd2 import Cmd2ArgumentParser, with_argparser
+import functools
 import subprocess
 import sys
 import os
 from Bxt.BxtAcl import BxtAcl
 from Bxt.BxtConfig import BxtConfig
 from Bxt.BxtSession import BxtSession
-
-
-def do_ls(args):
-    """
-    List content of workspace
-    :param args:
-    :return:
-    """
-    subprocess.run(["bxt", "ls", args.workspace])
+from Bxt.Utils import path_completion
+from pprint import pprint
 
 
 class BxtCtl(cmd2.Cmd):
@@ -50,18 +44,17 @@ class BxtCtl(cmd2.Cmd):
         shortcuts = dict()
         shortcuts.update(
             {
-                "?": "help",
-                "cp": "copy",
                 "exit": "quit",
-                "lsp": "ls_path",
-                "lsr": "ls_repo",
-                "lsw": "ls_workspace",
-                "mv": "move",
-                "rm": "remove",
-                "send": "commit",
-                "up": "commit",
-                "upload": "commit",
-                "ws": "workspace",
+                "?": "help",
+                "cp": "copy_pkg",
+                "mv": "move_pkg",
+                "rm": "delete_pkg",
+                "lsp": "list_path",
+                "lsr": "list_repo",
+                "lsw": "list_workspace",
+                "cd": "workspace",
+                "upp": "upload",
+                "cpr": "compare",
             }
         )
         super().__init__(shortcuts=shortcuts)
@@ -118,6 +111,7 @@ class BxtCtl(cmd2.Cmd):
     )
 
     acl = BxtAcl(sections)
+    config.paths = path_completion(acl.get_branches, acl.get_repositories, acl.get_architectures)
     # ###############################################################
     # list workspace content
     list_workspace_args = Cmd2ArgumentParser(description="List workspace content")
@@ -224,28 +218,40 @@ class BxtCtl(cmd2.Cmd):
     )
 
     @with_argparser(bxt_delete_args)
-    def do_remove(self, args):
+    def do_delete_pkg(self, args):
         """
         Remove one or more package(s) from bxt storage
         :param args: the package(s) to remove from the target repo
         """
         self.poutput("TODO: implement removal")
 
+    complete_delete_pkg = functools.partialmethod(cmd2.Cmd.delimiter_complete,
+                                                  match_against=config.paths,
+                                                  delimiter='/')
+
     @with_argparser(bxt_copy_args)
-    def do_copy(self, args):
+    def do_copy_pkg(self, args):
         """
         Copy one or more package(s) within bxt storage
         :param args: the package(s) to copy from source to target
         """
         self.poutput("TODO: implement copy")
 
+    complete_copy_pkg = functools.partialmethod(cmd2.Cmd.delimiter_complete,
+                                                match_against=config.paths,
+                                                delimiter='/')
+
     @with_argparser(bxt_move_args)
-    def do_move(self, args):
+    def do_move_pkg(self, args):
         """
         Move one or more package(s) in bxt storage
         :param args: the package(s) to move from source to target
         """
         self.poutput("TODO: implement move")
+
+    complete_move_pkg = functools.partialmethod(cmd2.Cmd.delimiter_complete,
+                                                match_against=config.paths,
+                                                delimiter='/')
 
     @with_argparser(workspace_args)
     def do_workspace(self, args):
@@ -260,7 +266,7 @@ class BxtCtl(cmd2.Cmd):
             self.config.save()
 
     @with_argparser(list_workspace_args)
-    def do_ls_workspace(self, args):
+    def do_list_workspace(self, args):
         """
         List content of current workspace
         """
@@ -272,7 +278,7 @@ class BxtCtl(cmd2.Cmd):
         subprocess.run(cmd)
 
     @with_argparser(list_folder_args)
-    def do_ls_path(self, args):
+    def do_list_path(self, args):
         """
         List content of specified folder
         :param args: full path to folder
@@ -284,7 +290,7 @@ class BxtCtl(cmd2.Cmd):
         subprocess.run(cmd)
 
     @with_argparser(list_repo_args)
-    def do_ls_repo(self, args):
+    def do_list_repo(self, args):
         """
         List content of selected repo
         :param args: path to repo e.g. branch/repo/arch
@@ -302,6 +308,8 @@ class BxtCtl(cmd2.Cmd):
                 f"{pkg['name']:<30}: {pkg['poolEntries'][pkg['preferredLocation']]['version']}"
             )
 
+    complete_list_repo = functools.partialmethod(cmd2.Cmd.delimiter_complete, match_against=config.paths, delimiter='/')
+
     @with_argparser(compare_args)
     def do_compare(self, args):
         """
@@ -309,30 +317,75 @@ class BxtCtl(cmd2.Cmd):
         :param args:
         :return:
         """
-        locations = args.location
-        print(locations)
-        # branches = args.branch
-        # architectures = args.arch
-        #
-        # for branch in branches:
-        #     for arch in architectures:
-        #         archpkgs = self.bxt_session.get_packages(
-        #             f"{self.config.get_url()}/{self.config.endpoint['pkgCompare']}",
-        #             args.branch,
-        #             args.repo,
-        #             arch,
-        #             self.config.get_access_token(),
-        #         )
-        #         if args.package is not None:
-        #             pkgs = [x for x in archpkgs if x["name"] in args.package]
-        #             for pkg in pkgs:
-        #                 self.poutput(pkg)
-        #         else:
-        #             for pkg in archpkgs:
-        #                 self.poutput(pkg)
+        compare_us = []
+        for location in args.location:
+            element = location.strip("/").split("/")
+            branch = element[0]
+            if branch not in self.acl.get_branches():
+                self.perror(f"No permissions: {branch} in {location}")
+                return False
+            repository = element[1]
+            if repository not in self.acl.get_repositories():
+                self.perror(f"No permissions: {repository} in {location}")
+                return False
+            architecture = element[2]
+            if architecture not in self.acl.get_architectures():
+                self.perror(f"No permissions: {architecture} in {location}")
+                return False
+            compare_us.append({"branch": branch, "repository": repository, "architecture": architecture})
+
+        # send request
+        compare_us = sorted(compare_us, key=lambda x: x["repository"])
+        result = self.bxt_session.compare(
+            url=f"{self.config.get_url()}/{self.config.endpoint["pkgCompare"]}",
+            data=compare_us,
+            token=self.config.get_access_token())
+        pprint(result)
+        compare_table = result.content()["compareTable"]
+        pkgname_len = max(len(elm) for elm in compare_table) + 5
+
+        pkg_list = []
+        table_headers = []
+        for target in compare_us:
+            content = f"{target['branch']}/{target['repository']}/{target['architecture']}"
+            table_headers.append(content)
+
+        table_header_len = max(len(elm) for elm in table_headers) + 5
+        compare_header = f"{"Packages":<{pkgname_len}}"
+        for table_header in table_headers:
+            compare_header += f"{table_header:>{table_header_len}}"
+
+        for k, package in enumerate(compare_table.items()):
+            pkg = {"name": package[0], "versions": []}
+            pkg_versions = package[1]
+            for key in pkg_versions.keys():
+                if package[1][key] not in pkg["versions"]:
+                    pkg["versions"].append({"location": key, "version": package[1][key]["overlay"]})
+            missing = [x for x in table_headers if x not in pkg_versions.keys()]
+            for m in missing:
+                pkg["versions"].append({"location": m, "version": "-"})
+            # sort the version list for presentation
+            pkg["versions"] = list(sorted(pkg["versions"], key=lambda x: x["location"]))
+            pkg_list.append(pkg)
+
+        pkg_list = sorted(pkg_list, key=lambda x: x["name"])
+        # ------------ print result to screen -------------------------
+        print(compare_header)
+        print('-' * len(compare_header))
+
+        for pkg in pkg_list:
+            pkg_name = pkg["name"]
+            pkg_versions = pkg["versions"]
+            print(f"{pkg_name:<{pkgname_len}}", end="")
+            for table_header in table_headers:
+                version = next((v["version"] for v in pkg_versions if v["location"] == table_header), "-")
+                print(f"{version:>{table_header_len}}", end="")
+            print()
+
+    complate_compare_repo = functools.partialmethod(cmd2.Cmd.delimiter_complete, match_against=config.paths, delimiter='/')
 
     @with_argparser(commit_args)
-    def do_commit(self, args):
+    def do_upload(self, args):
         """
         Commpit package(s) to repo
         :param args:
@@ -360,6 +413,8 @@ class BxtCtl(cmd2.Cmd):
         for pkg in packages:
             self.pfeedback(f"commit package: {pkg}")
         self.quiet = True
+
+    complete_upload = functools.partialmethod(cmd2.Cmd.delimiter_complete, match_against=config.paths, delimiter='/')
 
     def do_login(self, args):
         """
