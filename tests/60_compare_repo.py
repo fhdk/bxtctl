@@ -70,14 +70,14 @@ print("result : {}".format(result))
 print("------------")
 print("compare request parsing  --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
 compare_table = result.content()["compareTable"]
-pkgname_len = max(len(elm) for elm in compare_table) + 5
+pkgname_len = max(len(elm) for elm in compare_table) + 1
 
 pkg_list = []
 table_headers = []
 for target in compare_repo:
     content = f"{target['branch']}/{target['repository']}/{target['architecture']}"
     table_headers.append(content)
-table_header_len = max(len(elm) for elm in table_headers) + 5
+table_header_len = max(len(elm) for elm in table_headers) + 1
 compare_header = f"{"Packages":<{pkgname_len}}"
 for table_header in table_headers:
     compare_header += f"{table_header:>{table_header_len}}"
