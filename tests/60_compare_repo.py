@@ -58,15 +58,52 @@ http = BxtSession(config.user_agent)
 
 print("bxt_compare : ")
 print("compare request begin    --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
-compare_data = [
-    {"branch": "unstable", "repository": "core", "architecture": "x86_64"},
-    {"branch": "testing", "repository": "core", "architecture": "x86_64"},
+compare_repo = [
+    {"branch": "unstable", "repository": "testing", "architecture": "x86_64"},
+    {"branch": "unstable", "repository": "multilib", "architecture": "x86_64"},
+    {"branch": "unstable", "repository": "extra", "architecture": "x86_64"},
 ]
 
-comparison = http.compare(endpoint, compare_data, config.get_access_token())
+compare_repo = sorted(compare_repo, key=lambda x: x["repository"])
 
+result = http.compare(url=endpoint, data=compare_repo, token=config.get_access_token())
 print("compare request response --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
+pprint("result : {}".format(result))
+print("------------")
+print("compare request parsing  --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
+compare_table = result.content()["compareTable"]
+pkgname_len = max(len(elm) for elm in compare_table) + 5
 
-pprint(f"{comparison}")
+pkg_list = []
+table_headers = []
+for target in compare_repo:
+    content = f"{target['branch']}/{target['repository']}/{target['architecture']}"
+    table_headers.append(content)
+table_header_len = max(len(elm) for elm in table_headers) + 5
+compare_header = f"{"Packages":<{pkgname_len}}"
+for table_header in table_headers:
+    compare_header += f"{table_header:>{table_header_len}}"
+print(compare_header)
+print('-' * len(compare_header))
+for k, package in enumerate(compare_table.items()):
+    pkg = {"name": package[0], "versions": []}
+    pkg_versions = package[1]
+    for key in pkg_versions.keys():
+        if package[1][key] not in pkg["versions"]:
+            pkg["versions"].append({"location": key, "version": package[1][key]["overlay"]})
+    missing = [x for x in table_headers if x not in pkg_versions.keys()]
+    for m in missing:
+        pkg["versions"].append({"location": m, "version": "-"})
+    # sort the version list for presentation
+    pkg["versions"] = list(sorted(pkg["versions"], key=lambda x: x["location"]))
+    pkg_list.append(pkg)
 
-print("compare response parsed  --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
+pkg_list = sorted(pkg_list, key=lambda x: x["name"])
+for pkg in pkg_list:
+    pkg_name = pkg["name"]
+    pkg_versions = pkg["versions"]
+    print(f"{pkg_name:<{pkgname_len}}", end="")
+    for table_header in table_headers:
+        version = next((v["version"] for v in pkg_versions if v["location"] == table_header), "-")
+        print(f"{version:>{table_header_len}}", end="")
+    print()
