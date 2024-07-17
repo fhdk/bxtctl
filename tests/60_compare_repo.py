@@ -83,8 +83,7 @@ table_header_len = max(len(elm) for elm in table_headers) + 5
 compare_header = f"{"Packages":<{pkgname_len}}"
 for table_header in table_headers:
     compare_header += f"{table_header:>{table_header_len}}"
-print(compare_header)
-print('-' * len(compare_header))
+
 for k, package in enumerate(compare_table.items()):
     pkg = {"name": package[0], "versions": []}
     pkg_versions = package[1]
@@ -99,6 +98,10 @@ for k, package in enumerate(compare_table.items()):
     pkg_list.append(pkg)
 
 pkg_list = sorted(pkg_list, key=lambda x: x["name"])
+# ------------ test print result to screen -------------------------
+print(compare_header)
+print('-' * len(compare_header))
+
 for pkg in pkg_list:
     pkg_name = pkg["name"]
     pkg_versions = pkg["versions"]
