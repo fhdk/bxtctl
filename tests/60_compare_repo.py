@@ -102,8 +102,6 @@ pkg_list = sorted(pkg_list, key=lambda x: x["name"])
 # ------------ test print result to screen -------------------------
 print(compare_header)
 print('-' * len(compare_header))
-for pkg in pkg_list:
-    print(pkg)
 
 for pkg in pkg_list:
     pkg_name = pkg["name"]
