@@ -342,7 +342,7 @@ class BxtCtl(cmd2.Cmd):
             token=self.config.get_access_token())
         pprint(result)
         compare_table = result.content()["compareTable"]
-        pkgname_len = max(len(elm) for elm in compare_table) + 5
+        pkgname_len = max(len(elm) for elm in compare_table) + 1
 
         pkg_list = []
         table_headers = []
@@ -350,7 +350,7 @@ class BxtCtl(cmd2.Cmd):
             content = f"{target['branch']}/{target['repository']}/{target['architecture']}"
             table_headers.append(content)
 
-        table_header_len = max(len(elm) for elm in table_headers) + 5
+        table_header_len = max(len(elm) for elm in table_headers) + 1
         compare_header = f"{"Packages":<{pkgname_len}}"
         for table_header in table_headers:
             compare_header += f"{table_header:>{table_header_len}}"
@@ -360,7 +360,10 @@ class BxtCtl(cmd2.Cmd):
             pkg_versions = package[1]
             for key in pkg_versions.keys():
                 if package[1][key] not in pkg["versions"]:
-                    pkg["versions"].append({"location": key, "version": package[1][key]["overlay"]})
+                    try:
+                        pkg["versions"].append({"location": key, "version": package[1][key]["overlay"]})
+                    except KeyError:
+                        pkg["versions"].append({"location": key, "version": package[1][key]["automated"]})
             missing = [x for x in table_headers if x not in pkg_versions.keys()]
             for m in missing:
                 pkg["versions"].append({"location": m, "version": "-"})
