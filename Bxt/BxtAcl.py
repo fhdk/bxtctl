@@ -32,6 +32,9 @@ class BxtAcl:
         :param sections:
         """
         self._sections = sections
+        self._branches = []
+        self._architectures = []
+        self._repos = []
 
     def get(self):
         return self._sections
