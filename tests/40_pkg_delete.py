@@ -68,9 +68,8 @@ test_pkg = "arch-install-scripts"
 section_a = {"branch": "unstable", "repository": "multilib", "architecture": "x86_64"}
 section_b = {"branch": "unstable", "repository": "extra", "architecture": "x86_64"}
 
-form_data = {("to_delete",
-              (None, json.dumps(
-                  [{"name": test_pkg, "section": section_a}, {"name": test_pkg, "section": section_b}])))}
+form_content = json.dumps([{"name": test_pkg, "section": section_a}, {"name": test_pkg, "section": section_b}])
+form_data = {("to_delete", (None, form_content))}
 
 headers = {"Authorization": f"Bearer {token}", "Accept": "application/json", "Content-Type": "multipart/form-data"}
 

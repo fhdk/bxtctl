@@ -70,7 +70,8 @@ from_section = {"branch": "unstable", "repository": "extra", "architecture": "aa
 to_section = {"branch": "unstable", "repository": "extra", "architecture": "x86_64"}
 pkg_name = "arch-install-scripts"
 
-form_data = {("to_copy", (None, json.dumps([{"name": pkg_name, "from_section": from_section, "to_section": to_section}])))}
+form_content = json.dumps([{"name": pkg_name, "from_section": from_section, "to_section": to_section}])
+form_data = {("to_copy", (None, form_content))}
 
 headers = {"Authorization": f"Bearer {token}", "Accept": "application/json", "Content-Type": "multipart/form-data"}
 
