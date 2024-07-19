@@ -36,8 +36,7 @@ from pprint import pprint
 import os
 
 """
-Get a list of packages from 
-from: stable -> extra -> x86_64 repo
+get a token from Bxt
 """
 
 config = BxtConfig()

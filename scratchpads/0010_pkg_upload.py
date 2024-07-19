@@ -34,18 +34,14 @@ from Bxt.BxtSession import BxtSession
 import jwt
 from pprint import pprint
 import os
-from requests import Session
-from requests import Request
 
 """
-part four of four in a series of tests
-deletes the test package
-from: stable -> extra -> x86_64 repo
-from: stable -> multilib -> x86_64 repo
+Part one of four in a series of scratchpads
+Commits a test package to stable -> multilib -> x86_64 repo
 
 For now the result is verified by using the WebUI
 A later update will use the packages list endpoint 
-to verify the package is removed form both targets
+to verify the package exist at the target repo 
 """
 
 config = BxtConfig()
@@ -63,30 +59,41 @@ if config.valid_token():
 token = config.get_access_token()
 endpoint = f"{config.get_url()}/{config.endpoint["pkgCommit"]}"
 
-pkg1 = "arch-install-scripts"
-pkg2 = "abceil-cpp"
+test_repo = config.workspace
+test_pkg_1 = "arch-install-scripts-28-1-any.pkg.tar.zst"
+test_pkg_2 = "abseil-cpp-20240116.2-2-x86_64.pkg.tar.zst"
+upload_section = {
+    "branch": "unstable",
+    "repository": "multilib",
+    "architecture": "x86_64",
+}
 
-from_section1 = {"branch": "unstable", "repository": "multilib", "architecture": "x86_64"}
-from_section2 = {"branch": "unstable", "repository": "multilib", "architecture": "x86_64"}
-
-form_content = json.dumps([{"name": pkg1, "section": from_section1}, {"name": pkg2, "section": from_section2}])
-form_data = {("to_delete", (None, form_content))}
+form_data = {
+    ("package1.file", (test_pkg_1, open(f"{test_repo}/{test_pkg_1}", "rb"))),
+    (
+        "package1.signature",
+        (f"{test_pkg_1}.sig", open(f"{test_repo}/{test_pkg_1}.sig", "rb")),
+    ),
+    ("package1.section", (None, json.dumps(upload_section))),
+    ("package2.file", (test_pkg_2, open(f"{test_repo}/{test_pkg_2}", "rb"))),
+    (
+        "package2.signature",
+        (f"{test_pkg_2}.sig", open(f"{test_repo}/{test_pkg_2}.sig", "rb")),
+    ),
+    ("package2.section", (None, json.dumps(upload_section))),
+}
 
 headers = {"Authorization": f"Bearer {token}", "Accept": "application/json", "Content-Type": "multipart/form-data"}
 
-session = requests.Session()
-request = Request('POST', endpoint, files=form_data, headers=headers)
+req = requests.session()
+req.headers.update(headers)
 
-req = request.prepare()
-
-print("bxt_delete_pkg : ")
-print(f"req headers : {req.headers}")
-print(f"req url     : {req.url}")
-print(f"form data   : {req.body}: ")
-
-print("delete request begin --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
-response = session.send(req)
+print("bxt_upload_form : ")
+pprint(form_data)
+print("upload request begin --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
+response = req.post(endpoint, files=form_data)
 
 print("response recv --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
 print("      headers --> ", response.headers)
 print("       status --> ", response.status_code)
+

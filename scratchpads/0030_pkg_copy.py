@@ -39,7 +39,7 @@ from requests import Request
 
 
 """
-part three of four in a series of tests
+part three of four in a series of scratchpads
 copies the test package
 from: stable -> extra -> x86_64 repo
 to: stable -> multilib -> x86_64 repo

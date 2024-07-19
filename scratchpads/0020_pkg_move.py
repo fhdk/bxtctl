@@ -38,7 +38,7 @@ from pprint import pprint
 import os
 
 """
-part two of four in a series of tests
+part two of four in a series of scratchpads
 moves the test package
 from: stable -> multilib -> x86_64 repo
 to: stable -> extra -> x86_64 repo

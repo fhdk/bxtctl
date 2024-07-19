@@ -29,7 +29,7 @@ file_strs = [
     '/home/user/file space.db',
     '/home/user/another.db',
     '/home/other user/maps.db',
-    '/home/other user/tests.db',
+    '/home/other user/scratchpads.db',
 ]
 
 
