@@ -34,6 +34,8 @@ from Bxt.BxtSession import BxtSession
 import jwt
 from pprint import pprint
 import os
+from requests import Session
+from requests import Request
 
 """
 part four of four in a series of tests
@@ -66,29 +68,25 @@ test_pkg = "arch-install-scripts"
 section_a = {"branch": "unstable", "repository": "multilib", "architecture": "x86_64"}
 section_b = {"branch": "unstable", "repository": "extra", "architecture": "x86_64"}
 
-bxt_delete_pkg = {
-    (
-        "to_delete",
-        (
-            json.dumps(
-                [
-                    {"name": test_pkg, "section": section_a},
-                    {"name": test_pkg, "section": section_b},
-                ]
-            )
-        ),
-    )
-}
+form_data = {("to_delete",
+              (None, json.dumps(
+                  [{"name": test_pkg, "section": section_a}, {"name": test_pkg, "section": section_b}])))}
 
 headers = {"Authorization": f"Bearer {token}", "Accept": "application/json", "Content-Type": "multipart/form-data"}
 
-req = requests.session()
-req.headers.update(headers)
+session = requests.Session()
+request = Request('POST', endpoint, files=form_data, headers=headers)
+
+req = request.prepare()
+print(f"prepped headers : {req.headers}")
+print(f"prepped url     : {req.url}")
+print(f"fprepped data   : {req.body}: ")
 
 print("bxt_delete_pkg : ")
-pprint(bxt_delete_pkg)
+print(f"req.headers : {req.headers}")
+print(f"req.data    : {req.body}")
 print("delete request begin --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
-response = req.post(endpoint, files=bxt_delete_pkg)
+response = session.send(req)
 print("delete response recv --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
-print("                 headers ", response.headers)
-print("                 status  ", response.status_code)
+print("               headers ", response.headers)
+print("               status  ", response.status_code)

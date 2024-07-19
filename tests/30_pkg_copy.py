@@ -34,6 +34,9 @@ from Bxt.BxtSession import BxtSession
 import jwt
 from pprint import pprint
 import os
+from requests import Session
+from requests import Request
+
 
 """
 part three of four in a series of tests
@@ -63,29 +66,36 @@ endpoint = f"{config.get_url()}/{config.endpoint["pkgCommit"]}"
 
 test_pkg = "arch-install-scripts"
 
-section_a = {"branch": "unstable", "repository": "multilib", "architecture": "x86_64"}
-section_b = {"branch": "unstable", "repository": "extra", "architecture": "x86_64"}
+from_section = {"branch": "unstable", "repository": "extra", "architecture": "aarch64"}
+to_section = {"branch": "unstable", "repository": "extra", "architecture": "x86_64"}
+pkg_name = "arch-install-scripts"
 
-bxt_copy_pkg = {
-    (
-        "to_copy",
-        (
-            json.dumps(
-                [{"name": test_pkg, "from_section": section_b, "to_section": section_a}]
-            )
-        ),
-    ),
-}
+form_data = {("to_copy", (None, json.dumps([{"name": pkg_name, "from_section": from_section, "to_section": to_section}])))}
 
 headers = {"Authorization": f"Bearer {token}", "Accept": "application/json", "Content-Type": "multipart/form-data"}
 
-req = requests.session()
-req.headers.update(headers)
 
+session = requests.Session()
+request = Request('POST', endpoint, files=form_data, headers=headers)
+req = request.prepare()
 print("bxt_copy_pkg : ")
-pprint(bxt_copy_pkg)
+print(f"req headers : {req.headers}")
+print(f"req url     : {req.url}")
+print(f"req data    : {req.body}: ")
+
 print("copy request begin --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
-response = req.post(endpoint, files=bxt_copy_pkg)
+response = session.send(req)
+
 print("copy response recv --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
 print("               headers ", response.headers)
 print("               status  ", response.status_code)
+
+# req = requests.session()
+# req.headers.update(headers)
+#
+# print("bxt_copy_pkg : ")
+# print("move request begin --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
+# response = req.post(endpoint, files=form_data)
+# print("move response recv --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
+# print("               headers ", response.headers)
+# print("               status  ", response.status_code)

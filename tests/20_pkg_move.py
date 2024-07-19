@@ -26,6 +26,8 @@ import time
 
 import cmd2
 import requests
+from requests import Session
+from requests import Request
 from cmd2 import Cmd2ArgumentParser, with_argparser
 import sys
 from Bxt.BxtAcl import BxtAcl
@@ -61,30 +63,27 @@ if config.valid_token():
 token = config.get_access_token()
 endpoint = f"{config.get_url()}/{config.endpoint["pkgCommit"]}"
 
-test_pkg = "arch-install-scripts"
+from_section = {"branch": "unstable", "repository": "extra", "architecture": "aarch64"}
+to_section = {"branch": "unstable", "repository": "extra", "architecture": "x86_64"}
+pkg_name = "arch-install-scripts"
 
-section_a = {"branch": "unstable", "repository": "multilib", "architecture": "x86_64"}
-section_b = {"branch": "unstable", "repository": "extra", "architecture": "x86_64"}
-bxt_move_pkg = {
-    (
-        "to_move",
-        (
-            json.dumps(
-                [{"name": test_pkg, "from_section": section_a, "to_section": section_b}]
-            )
-        ),
-    ),
-}
+form_content = json.dumps([{"name": pkg_name, "from_section": from_section, "to_section": to_section}])
 
-headers = {"Authorization": f"Bearer {token}"}
+form_data = {("to_move", (None, form_content))}
 
-req = requests.session()
-req.headers.update(headers)
+headers = {"Authorization": f"Bearer {token}", "Accept": "application/json", "Content-Type": "multipart/form-data"}
 
+session = requests.Session()
+request = Request('POST', endpoint, files=form_data, headers=headers)
+req = request.prepare()
 print("bxt_move_pkg : ")
-pprint(bxt_move_pkg)
+print(f"req headers : {req.headers}")
+print(f"req url     : {req.url}")
+print(f"req data    : {req.body}: ")
+
 print("move request begin --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
-response = req.post(endpoint, files=bxt_move_pkg)
+response = session.send(req)
+
 print("move response recv --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
 print("               headers ", response.headers)
 print("               status  ", response.status_code)

@@ -68,7 +68,7 @@ upload_section = {
     "architecture": "x86_64",
 }
 
-bxt_upload_form = {
+form_data = {
     ("package1.file", (test_pkg_1, open(f"{test_repo}/{test_pkg_1}", "rb"))),
     (
         "package1.signature",
@@ -89,9 +89,9 @@ req = requests.session()
 req.headers.update(headers)
 
 print("bxt_upload_form : ")
-pprint(bxt_upload_form)
+pprint(form_data)
 print("upload request begin --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
-response = req.post(endpoint, files=bxt_upload_form)
+response = req.post(endpoint, files=form_data)
 print("upload response recv --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
 print("                 headers ", response.headers)
 print("                 status  ", response.status_code)
