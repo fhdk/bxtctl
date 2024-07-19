@@ -63,12 +63,13 @@ if config.valid_token():
 token = config.get_access_token()
 endpoint = f"{config.get_url()}/{config.endpoint["pkgCommit"]}"
 
-test_pkg = "arch-install-scripts"
+pkg1 = "arch-install-scripts"
+pkg2 = "abceil-cpp"
 
-section_a = {"branch": "unstable", "repository": "multilib", "architecture": "x86_64"}
-section_b = {"branch": "unstable", "repository": "extra", "architecture": "x86_64"}
+from_section1 = {"branch": "unstable", "repository": "multilib", "architecture": "x86_64"}
+from_section2 = {"branch": "unstable", "repository": "multilib", "architecture": "x86_64"}
 
-form_content = json.dumps([{"name": test_pkg, "section": section_a}, {"name": test_pkg, "section": section_b}])
+form_content = json.dumps([{"name": pkg1, "section": from_section1}, {"name": pkg2, "section": from_section2}])
 form_data = {("to_delete", (None, form_content))}
 
 headers = {"Authorization": f"Bearer {token}", "Accept": "application/json", "Content-Type": "multipart/form-data"}
