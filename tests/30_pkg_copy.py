@@ -75,7 +75,6 @@ form_data = {("to_copy", (None, form_content))}
 
 headers = {"Authorization": f"Bearer {token}", "Accept": "application/json", "Content-Type": "multipart/form-data"}
 
-
 session = requests.Session()
 request = Request('POST', endpoint, files=form_data, headers=headers)
 req = request.prepare()
