@@ -77,7 +77,7 @@ bxt_copy_pkg = {
     ),
 }
 
-headers = {"Authorization": f"Bearer {token}"}
+headers = {"Authorization": f"Bearer {token}", "Accept": "application/json", "Content-Type": "multipart/form-data"}
 
 req = requests.session()
 req.headers.update(headers)

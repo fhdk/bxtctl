@@ -83,7 +83,7 @@ bxt_upload_form = {
     ("package2.section", (None, json.dumps(upload_section))),
 }
 
-headers = {"Authorization": f"Bearer {token}"}
+headers = {"Authorization": f"Bearer {token}", "Accept": "application/json", "Content-Type": "multipart/form-data"}
 
 req = requests.session()
 req.headers.update(headers)
