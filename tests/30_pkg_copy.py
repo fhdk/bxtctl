@@ -78,24 +78,15 @@ headers = {"Authorization": f"Bearer {token}", "Accept": "application/json", "Co
 session = requests.Session()
 request = Request('POST', endpoint, files=form_data, headers=headers)
 req = request.prepare()
+
 print("bxt_copy_pkg : ")
 print(f"req headers : {req.headers}")
 print(f"req url     : {req.url}")
-print(f"req data    : {req.body}: ")
+print(f"form data   : {req.body}: ")
 
 print("copy request begin --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
 response = session.send(req)
 
-print("copy response recv --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
-print("               headers ", response.headers)
-print("               status  ", response.status_code)
-
-# req = requests.session()
-# req.headers.update(headers)
-#
-# print("bxt_copy_pkg : ")
-# print("move request begin --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
-# response = req.post(endpoint, files=form_data)
-# print("move response recv --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
-# print("               headers ", response.headers)
-# print("               status  ", response.status_code)
+print("response recv --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
+print("      headers --> ", response.headers)
+print("       status --> ", response.status_code)

@@ -92,6 +92,8 @@ print("bxt_upload_form : ")
 pprint(form_data)
 print("upload request begin --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
 response = req.post(endpoint, files=form_data)
-print("upload response recv --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
-print("                 headers ", response.headers)
-print("                 status  ", response.status_code)
+
+print("response recv --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
+print("      headers --> ", response.headers)
+print("       status --> ", response.status_code)
+

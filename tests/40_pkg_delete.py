@@ -77,15 +77,15 @@ session = requests.Session()
 request = Request('POST', endpoint, files=form_data, headers=headers)
 
 req = request.prepare()
-print(f"prepped headers : {req.headers}")
-print(f"prepped url     : {req.url}")
-print(f"fprepped data   : {req.body}: ")
 
 print("bxt_delete_pkg : ")
-print(f"req.headers : {req.headers}")
-print(f"req.data    : {req.body}")
+print(f"req headers : {req.headers}")
+print(f"req url     : {req.url}")
+print(f"form data   : {req.body}: ")
+
 print("delete request begin --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
 response = session.send(req)
-print("delete response recv --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
-print("               headers ", response.headers)
-print("               status  ", response.status_code)
+
+print("response recv --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
+print("      headers --> ", response.headers)
+print("       status --> ", response.status_code)
