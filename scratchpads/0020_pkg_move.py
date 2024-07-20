@@ -63,11 +63,13 @@ if config.valid_token():
 token = config.get_access_token()
 endpoint = f"{config.get_url()}/{config.endpoint["pkgCommit"]}"
 
-from_section = {"branch": "unstable", "repository": "multilib", "architecture": "x86_64"}
-to_section = {"branch": "testing", "repository": "multilib", "architecture": "x86_64"}
-pkg_name = "arch-install-scripts"
+from_section = {"branch": "unstable", "repository": "extra", "architecture": "x86_64"}
+to_section = {"branch": "testing", "repository": "extra", "architecture": "x86_64"}
 
-form_content = json.dumps([{"name": pkg_name, "from_section": from_section, "to_section": to_section}])
+dummy1 = "a-dummy1"
+dummy2 = "a-dummy2"
+
+form_content = json.dumps([{"name": dummy1, "from_section": from_section, "to_section": to_section}])
 
 form_data = {("to_move", (None, form_content))}
 

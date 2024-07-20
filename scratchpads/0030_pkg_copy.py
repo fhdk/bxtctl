@@ -66,11 +66,13 @@ endpoint = f"{config.get_url()}/{config.endpoint["pkgCommit"]}"
 
 test_pkg = "arch-install-scripts"
 
-from_section = {"branch": "unstable", "repository": "multilib", "architecture": "x86_64"}
+from_section = {"branch": "unstable", "repository": "extra", "architecture": "x86_64"}
 to_section = {"branch": "testing", "repository": "extra", "architecture": "x86_64"}
-pkg_name = "arch-install-scripts"
 
-form_content = json.dumps([{"name": pkg_name, "from_section": from_section, "to_section": to_section}])
+dummy1 = "a-dummy1"
+dummy2 = "a-dummy2"
+
+form_content = json.dumps([{"name": dummy1, "from_section": from_section, "to_section": to_section}])
 form_data = {("to_copy", (None, form_content))}
 
 headers = {"Authorization": f"Bearer {token}", "Accept": "application/json", "Content-Type": "multipart/form-data"}

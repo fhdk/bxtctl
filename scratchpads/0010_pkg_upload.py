@@ -60,11 +60,11 @@ token = config.get_access_token()
 endpoint = f"{config.get_url()}/{config.endpoint["pkgCommit"]}"
 
 test_repo = config.workspace
-test_pkg_1 = "arch-install-scripts-28-1-any.pkg.tar.zst"
-test_pkg_2 = "abseil-cpp-20240116.2-2-x86_64.pkg.tar.zst"
+test_pkg_1 = "a-dummy1-0-0-any.pkg.tar.zst"
+test_pkg_2 = "a-dummy2-0-0-any.pkg.tar.zst"
 upload_section = {
     "branch": "unstable",
-    "repository": "multilib",
+    "repository": "extra",
     "architecture": "x86_64",
 }
 
