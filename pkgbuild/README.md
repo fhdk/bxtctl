@@ -19,9 +19,9 @@ Sign the files with your key (assuming you create an env variable with that name
 ## Using the test packages
 Place the dummy packages in the repo folder
 
-    .../pkgbuild $ cp *.pkg.tar.zst.* ../repo
-    .../pkgbuild $ cd ..
-    .../bxtctl $ ls ./repo
+    /.../pkgbuild $  cp *.pkg.tar.zst.* ../repo
+    /.../pkgbuild $  cd ..
+    /.../bxtctl $  ls ./repo
     a-dummy1-0-0-any.pkg.tar.zst  a-dummy1-0-0-any.pkg.tar.zst.sig  a-dummy2-0-0-any.pkg.tar.zst  a-dummy2-0-0-any.pkg.tar.zst.sig
 
 The scratchpads folder contains scripts which use the files to
