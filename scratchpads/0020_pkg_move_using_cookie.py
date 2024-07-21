@@ -78,14 +78,18 @@ headers = {
 }
 
 session = requests.Session()
+# add token with name 'token'
 session.cookies.update({"token": token})
+# add token with name 'access_token'
+session.cookies.update({"access_token": token})
 request = Request('POST', endpoint, files=form_data, headers=headers)
 
 req = request.prepare()
 
 cookie_jar = requests.utils.dict_from_cookiejar(session.cookies)
-print("bxt_move_pkg   : CookieAuth")
-print(f"cookiejar     : token = {cookie_jar["token"][:15]}...{cookie_jar["token"][-15:]}")
+print("bxt_upload_pkg : CookieAuth")
+print(f"cookiejar     : token: {cookie_jar["token"][:15]}...{cookie_jar["token"][-15:]}")
+print(f"cookiejar     : access_token: {cookie_jar["access_token"][:15]}...{cookie_jar["access_token"][-15:]}")
 print(f"req headers   : {headers}")
 print(f"req url       : {req.url}")
 print(f"form data     : {req.body}")
