@@ -98,14 +98,14 @@ req = request.prepare()
 
 print("bxt_delete_pkg : BearerAuth")
 headers["Authorization"] = f"Bearer {token[:15]}...{token[-15:]}"
-print(f"req headers : {headers}")
-print(f"req url     : {req.url}")
-print(f"form data   : {req.body}")
+print(f"req headers   : {headers}")
+print(f"req url       : {req.url}")
+print(f"form data     : {req.body}")
 
-print("bearer request begin --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
+print("request begin    --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
 response = session.send(req, stream=True)
 
-print("bearer response recv --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
-print("    response headers --> ", response.headers)
-print("     response status --> ", response.status_code)
-print("    response content --> ", response.content)
+print("response recv    --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
+print("response headers --> ", response.headers)
+print("response status  --> ", response.status_code)
+print("response content --> ", response.content)
