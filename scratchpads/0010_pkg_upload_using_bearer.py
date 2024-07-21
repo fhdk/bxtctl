@@ -26,8 +26,6 @@ import time
 
 import cmd2
 import requests
-from requests import Session
-from requests import Request
 from cmd2 import Cmd2ArgumentParser, with_argparser
 import sys
 from Bxt.BxtAcl import BxtAcl
@@ -36,16 +34,17 @@ from Bxt.BxtSession import BxtSession
 import jwt
 from pprint import pprint
 import os
+from requests import Session
+from requests import Request
+
 
 """
-part two of four in a series of scratchpads
-moves the test package
-from: stable -> multilib -> x86_64 repo
-to: stable -> extra -> x86_64 repo
+Part one of four in a series of scratchpads
+Commits a test package to stable -> multilib -> x86_64 repo
 
 For now the result is verified by using the WebUI
 A later update will use the packages list endpoint 
-to verify the package moved to the target repo 
+to verify the package exist at the target repo 
 """
 
 config = BxtConfig()
@@ -63,31 +62,49 @@ if config.valid_token():
 token = config.get_access_token()
 endpoint = f"{config.get_url()}/{config.endpoint["pkgCommit"]}"
 
-from_section = {"branch": "unstable", "repository": "extra", "architecture": "x86_64"}
-to_section = {"branch": "testing", "repository": "extra", "architecture": "x86_64"}
+test_repo = config.workspace
+test_pkg_1 = "a-dummy1-0-0-any.pkg.tar.zst"
+test_pkg_2 = "a-dummy2-0-0-any.pkg.tar.zst"
 
-dummy1 = "a-dummy1"
-dummy2 = "a-dummy2"
+to_section = {
+    "branch": "testing",
+    "repository": "extra",
+    "architecture": "x86_64",
+}
 
-form_content = json.dumps([{"name": dummy1, "from_section": from_section, "to_section": to_section}])
+form_data = {
+    ("package1.file", (test_pkg_1, open(f"{test_repo}/{test_pkg_1}", "rb"))),
+    ("package1.signature",
+     (f"{test_pkg_1}.sig", open(f"{test_repo}/{test_pkg_1}.sig", "rb"))),
+    ("package1.section", (None, json.dumps(to_section))),
+    ("package2.file", (test_pkg_2, open(f"{test_repo}/{test_pkg_2}", "rb"))),
+    ("package2.signature",
+     (f"{test_pkg_2}.sig", open(f"{test_repo}/{test_pkg_2}.sig", "rb"))),
+    ("package2.section", (None, json.dumps(to_section))),
+}
 
-form_data = {("to_move", (None, form_content))}
-
-headers = {"Authorization": f"Bearer {token}", "Accept": "application/json", "Content-Type": "multipart/form-data"}
+headers = {
+    "Authorization": f"Bearer {token}",
+    "Accept": "application/json",
+    "Content-Type": "multipart/form-data"
+}
 
 session = requests.Session()
 request = Request('POST', endpoint, files=form_data, headers=headers)
+
 req = request.prepare()
 
-print("bxt_move_pkg : ")
-print(f"req headers : {req.headers}")
+print("bxt_upload_pkg : BearerAuth")
+headers["Authorization"] = f"Bearer {token[:15]}...{token[-15:]}"
+print(f"req headers : {headers}")
 print(f"req url     : {req.url}")
-print(f"req data    : {req.body}: ")
+print(f"form data   : {req.body}")
 
-print("move request begin --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
-response = session.send(req)
+print("bearer request begin --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
+response = session.send(req, stream=True)
 
-print("response recv --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
-print("      headers --> ", response.headers)
-print("       status --> ", response.status_code)
+print("bearer response recv --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
+print("    response headers --> ", response.headers)
+print("     response status --> ", response.status_code)
+print("    response content --> ", response.content)
 

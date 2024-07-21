@@ -34,14 +34,17 @@ from Bxt.BxtSession import BxtSession
 import jwt
 from pprint import pprint
 import os
+from requests import Session
+from requests import Request
+
 
 """
-Part one of four in a series of scratchpads
-Commits a test package to stable -> multilib -> x86_64 repo
+part three of four in a series of scratchpads
+copies the test package
 
 For now the result is verified by using the WebUI
 A later update will use the packages list endpoint 
-to verify the package exist at the target repo 
+to verify the package now exist at both targets
 """
 
 config = BxtConfig()
@@ -59,41 +62,49 @@ if config.valid_token():
 token = config.get_access_token()
 endpoint = f"{config.get_url()}/{config.endpoint["pkgCommit"]}"
 
-test_repo = config.workspace
-test_pkg_1 = "a-dummy1-0-0-any.pkg.tar.zst"
-test_pkg_2 = "a-dummy2-0-0-any.pkg.tar.zst"
-upload_section = {
-    "branch": "unstable",
+test_pkg = "arch-install-scripts"
+
+from_section = {
+    "branch": "testing",
     "repository": "extra",
-    "architecture": "x86_64",
+    "architecture": "x86_64"
+}
+to_section = {
+    "branch": "testing",
+    "repository": "extra",
+    "architecture": "aarch64"
 }
 
-form_data = {
-    ("package1.file", (test_pkg_1, open(f"{test_repo}/{test_pkg_1}", "rb"))),
-    (
-        "package1.signature",
-        (f"{test_pkg_1}.sig", open(f"{test_repo}/{test_pkg_1}.sig", "rb")),
-    ),
-    ("package1.section", (None, json.dumps(upload_section))),
-    ("package2.file", (test_pkg_2, open(f"{test_repo}/{test_pkg_2}", "rb"))),
-    (
-        "package2.signature",
-        (f"{test_pkg_2}.sig", open(f"{test_repo}/{test_pkg_2}.sig", "rb")),
-    ),
-    ("package2.section", (None, json.dumps(upload_section))),
-}
 
-headers = {"Authorization": f"Bearer {token}", "Accept": "application/json", "Content-Type": "multipart/form-data"}
+dummy1 = "a-dummy1"
+dummy2 = "a-dummy2"
 
-req = requests.session()
-req.headers.update(headers)
+form_content = json.dumps(
+    [{"name": dummy1, "from_section": from_section, "to_section": to_section},
+     {"name": dummy2, "from_section": from_section, "to_section": to_section}])
 
-print("bxt_upload_form : ")
-pprint(form_data)
-print("upload request begin --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
-response = req.post(endpoint, files=form_data)
+form_data = {("to_copy", (None, form_content))}
 
-print("response recv --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
-print("      headers --> ", response.headers)
-print("       status --> ", response.status_code)
+headers = {
+    "Authorization": f"Bearer {token}",
+    "Accept": "application/json",
+    "Content-Type": "multipart/form-data"}
 
+session = requests.Session()
+request = Request('POST', endpoint, files=form_data, headers=headers)
+
+req = request.prepare()
+
+print("bxt_copy_pkg : BearerAuth")
+headers["Authorization"] = f"Bearer {token[:15]}...{token[-15:]}"
+print(f"req headers : {headers}")
+print(f"req url     : {req.url}")
+print(f"form data   : {req.body}")
+
+print("bearer request begin --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
+response = session.send(req, stream=True)
+
+print("bearer response recv --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
+print("    response headers --> ", response.headers)
+print("     response status --> ", response.status_code)
+print("    response content --> ", response.content)

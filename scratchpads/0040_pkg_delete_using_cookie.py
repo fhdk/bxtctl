@@ -20,33 +20,21 @@
 # Authors: Frede Hundewadt https://github.com/fhdk/bxtctl
 #
 
-import argparse
 import json
 import time
-
-import cmd2
 import requests
-from cmd2 import Cmd2ArgumentParser, with_argparser
-import sys
-from Bxt.BxtAcl import BxtAcl
 from Bxt.BxtConfig import BxtConfig
-from Bxt.BxtSession import BxtSession
-import jwt
-from pprint import pprint
-import os
-from requests import Session
-from requests import Request
-
+from requests import Request, utils
 
 """
-part three of four in a series of scratchpads
-copies the test package
+part four of four in a series of scratchpads
+deletes the test package
 from: stable -> extra -> x86_64 repo
-to: stable -> multilib -> x86_64 repo
+from: stable -> multilib -> x86_64 repo
 
 For now the result is verified by using the WebUI
 A later update will use the packages list endpoint 
-to verify the package now exist at both targets
+to verify the package is removed form both targets
 """
 
 config = BxtConfig()
@@ -64,31 +52,51 @@ if config.valid_token():
 token = config.get_access_token()
 endpoint = f"{config.get_url()}/{config.endpoint["pkgCommit"]}"
 
-test_pkg = "arch-install-scripts"
-
-from_section = {"branch": "unstable", "repository": "extra", "architecture": "x86_64"}
-to_section = {"branch": "testing", "repository": "extra", "architecture": "x86_64"}
-
 dummy1 = "a-dummy1"
 dummy2 = "a-dummy2"
 
-form_content = json.dumps([{"name": dummy1, "from_section": from_section, "to_section": to_section}])
-form_data = {("to_copy", (None, form_content))}
+from_section1 = {
+    "branch": "testing",
+    "repository": "extra",
+    "architecture": "x86_64"
+}
+from_section2 = {
+    "branch": "testing",
+    "repository": "extra",
+    "architecture": "aarch64"
+}
 
-headers = {"Authorization": f"Bearer {token}", "Accept": "application/json", "Content-Type": "multipart/form-data"}
+form_content = json.dumps([
+    {"name": dummy1, "section": from_section1},
+    {"name": dummy2, "section": from_section1},
+    {"name": dummy1, "section": from_section2},
+    {"name": dummy2, "section": from_section2}])
+
+form_data = {("to_delete", (None, form_content))}
+
+headers = {
+    "Accept": "application/json",
+    "Content-Type": "multipart/form-data"
+}
 
 session = requests.Session()
+session.cookies.update({"token": token})
 request = Request('POST', endpoint, files=form_data, headers=headers)
+
 req = request.prepare()
 
-print("bxt_copy_pkg : ")
-print(f"req headers : {req.headers}")
+cookie_jar = requests.utils.dict_from_cookiejar(session.cookies)
+
+print("bxt_upload_pkg : CookieAuth")
+print(f"cookiejar   : token = {cookie_jar["token"][:15]}...{cookie_jar["token"][-15:]}")
+print(f"req headers : {headers}")
 print(f"req url     : {req.url}")
-print(f"form data   : {req.body}: ")
+print(f"form data   : {req.body}")
 
-print("copy request begin --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
-response = session.send(req)
+print("bearer request begin --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
+response = session.send(req, stream=True)
 
-print("response recv --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
-print("      headers --> ", response.headers)
-print("       status --> ", response.status_code)
+print("bearer response recv --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
+print("    response headers --> ", response.headers)
+print("     response status --> ", response.status_code)
+print("    response content --> ", response.content)

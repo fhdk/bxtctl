@@ -66,27 +66,46 @@ endpoint = f"{config.get_url()}/{config.endpoint["pkgCommit"]}"
 dummy1 = "a-dummy1"
 dummy2 = "a-dummy2"
 
-from_section1 = {"branch": "unstable", "repository": "extra", "architecture": "x86_64"}
-from_section2 = {"branch": "unstable", "repository": "extra", "architecture": "x86_64"}
+from_section1 = {
+    "branch": "testing",
+    "repository": "extra",
+    "architecture": "x86_64"
+}
+from_section2 = {
+    "branch": "testing",
+    "repository": "extra",
+    "architecture": "aarch64"
+}
 
-form_content = json.dumps([{"name": dummy1, "section": from_section1}, {"name": dummy2, "section": from_section2}])
+form_content = json.dumps([
+    {"name": dummy1, "section": from_section1},
+    {"name": dummy2, "section": from_section1},
+    {"name": dummy1, "section": from_section2},
+    {"name": dummy2, "section": from_section2}])
+
 form_data = {("to_delete", (None, form_content))}
 
-headers = {"Authorization": f"Bearer {token}", "Accept": "application/json", "Content-Type": "multipart/form-data"}
+headers = {
+    "Authorization": f"Bearer {token}",
+    "Accept": "application/json",
+    "Content-Type": "multipart/form-data"
+}
 
 session = requests.Session()
 request = Request('POST', endpoint, files=form_data, headers=headers)
 
 req = request.prepare()
 
-print("bxt_delete_pkg : ")
-print(f"req headers : {req.headers}")
+print("bxt_delete_pkg : BearerAuth")
+headers["Authorization"] = f"Bearer {token[:15]}...{token[-15:]}"
+print(f"req headers : {headers}")
 print(f"req url     : {req.url}")
-print(f"form data   : {req.body}: ")
+print(f"form data   : {req.body}")
 
-print("delete request begin --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
-response = session.send(req)
+print("bearer request begin --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
+response = session.send(req, stream=True)
 
-print("response recv --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
-print("      headers --> ", response.headers)
-print("       status --> ", response.status_code)
+print("bearer response recv --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
+print("    response headers --> ", response.headers)
+print("     response status --> ", response.status_code)
+print("    response content --> ", response.content)
