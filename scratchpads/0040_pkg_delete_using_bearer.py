@@ -40,8 +40,6 @@ from requests import Request
 """
 part four of four in a series of scratchpads
 deletes the test package
-from: stable -> extra -> x86_64 repo
-from: stable -> multilib -> x86_64 repo
 
 For now the result is verified by using the WebUI
 A later update will use the packages list endpoint 
