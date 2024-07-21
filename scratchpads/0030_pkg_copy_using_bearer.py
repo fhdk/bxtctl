@@ -83,7 +83,12 @@ form_content = json.dumps(
     [{"name": dummy1, "from_section": from_section, "to_section": to_section},
      {"name": dummy2, "from_section": from_section, "to_section": to_section}])
 
-form_data = {("to_copy", (None, form_content))}
+# formdata can be either a tuple or a dictionary
+# tuple preserves the order the elements
+# dictionary posts the data in arbitrary order
+form_data = {
+    ("to_copy", (None, form_content))
+}
 
 headers = {
     "Authorization": f"Bearer {token}",

@@ -72,7 +72,10 @@ to_section = {
     "architecture": "x86_64",
 }
 
-form_data = {
+# formdata can be either a tuple or a dictionary
+# tuple preserves the order the elements
+# dictionary posts the data in arbitrary order
+form_data = (
     ("package1.file", (test_pkg_1, open(f"{test_repo}/{test_pkg_1}", "rb"))),
     ("package1.signature",
      (f"{test_pkg_1}.sig", open(f"{test_repo}/{test_pkg_1}.sig", "rb"))),
@@ -81,7 +84,7 @@ form_data = {
     ("package2.signature",
      (f"{test_pkg_2}.sig", open(f"{test_repo}/{test_pkg_2}.sig", "rb"))),
     ("package2.section", (None, json.dumps(to_section))),
-}
+)
 
 headers = {
     "Authorization": f"Bearer {token}",

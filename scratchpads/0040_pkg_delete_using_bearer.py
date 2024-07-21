@@ -81,7 +81,12 @@ form_content = json.dumps([
     {"name": dummy1, "section": from_section2},
     {"name": dummy2, "section": from_section2}])
 
-form_data = {("to_delete", (None, form_content))}
+# formdata can be either a tuple or a dictionary
+# tuple preserves the order the elements
+# dictionary posts the data in arbitrary order
+form_data = {
+    ("to_delete", (None, form_content))
+}
 
 headers = {
     "Authorization": f"Bearer {token}",
