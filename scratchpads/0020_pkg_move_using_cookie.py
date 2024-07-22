@@ -22,7 +22,6 @@
 
 import json
 import time
-
 import requests
 from requests import Request, utils
 from Bxt.BxtConfig import BxtConfig

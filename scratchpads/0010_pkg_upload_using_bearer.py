@@ -20,23 +20,11 @@
 # Authors: Frede Hundewadt https://github.com/fhdk/bxtctl
 #
 
-import argparse
 import json
 import time
-
-import cmd2
 import requests
-from cmd2 import Cmd2ArgumentParser, with_argparser
-import sys
-from Bxt.BxtAcl import BxtAcl
 from Bxt.BxtConfig import BxtConfig
-from Bxt.BxtSession import BxtSession
-import jwt
-from pprint import pprint
-import os
-from requests import Session
 from requests import Request
-
 
 """
 Part one of four in a series of scratchpads
@@ -110,5 +98,3 @@ print("response recv    --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
 print("response headers --> ", response.headers)
 print("response status  --> ", response.status_code)
 print("response content --> ", response.content)
-
-

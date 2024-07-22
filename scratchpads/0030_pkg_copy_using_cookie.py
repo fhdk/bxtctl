@@ -26,7 +26,6 @@ import requests
 from Bxt.BxtConfig import BxtConfig
 from requests import Request, utils
 
-
 """
 part three of four in a series of scratchpads
 copies the test packages

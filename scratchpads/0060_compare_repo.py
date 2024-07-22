@@ -20,20 +20,9 @@
 # Authors: Frede Hundewadt https://github.com/fhdk/bxtctl
 #
 
-import argparse
-import json
 import time
-
-import cmd2
-import requests
-from cmd2 import Cmd2ArgumentParser, with_argparser
-import sys
-from Bxt.BxtAcl import BxtAcl
 from Bxt.BxtConfig import BxtConfig
 from Bxt.BxtSession import BxtSession
-import jwt
-from pprint import pprint
-import os
 
 """
 Get a list of packages from 

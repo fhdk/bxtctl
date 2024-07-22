@@ -26,7 +26,6 @@ import requests
 from Bxt.BxtConfig import BxtConfig
 from requests import Request, utils
 
-
 """
 Part one of four in a series of scratchpads
 Commits a test package to stable -> multilib -> x86_64 repo
