@@ -25,6 +25,7 @@ import time
 import requests
 from Bxt.BxtConfig import BxtConfig
 from requests import Request
+from requests_toolbelt import MultipartEncoder
 
 """
 part three of four in a series of scratchpads
@@ -55,12 +56,12 @@ test_pkg = "arch-install-scripts"
 from_section = {
     "branch": "testing",
     "repository": "extra",
-    "architecture": "x86_64"
+    "architecture": "aarch64"
 }
 to_section = {
     "branch": "testing",
     "repository": "extra",
-    "architecture": "aarch64"
+    "architecture": "x86_64"
 }
 
 
@@ -74,30 +75,34 @@ form_content = json.dumps(
 # formdata can be either a tuple or a dictionary
 # tuple preserves the order the elements
 # dictionary posts the data in arbitrary order
-form_data = {
-    ("to_copy", (None, form_content))
-}
+multipart_data = MultipartEncoder(
+    fields={
+        ("to_copy", form_content)
+    }
+)
 
 headers = {
     "Authorization": f"Bearer {token}",
     "Accept": "application/json",
-    "Content-Type": "multipart/form-data"}
+    "Content-Type": multipart_data.content_type
+}
 
 session = requests.Session()
-request = Request('POST', endpoint, files=form_data, headers=headers)
+request = Request('POST', endpoint, data=multipart_data, headers=headers)
 
 req = request.prepare()
 
-print("bxt_copy_pkg   : BearerAuth")
+print("bxt_copy_pkg  : BearerAuth")
 headers["Authorization"] = f"Bearer {token[:15]}...{token[-15:]}"
 print(f"req headers   : {headers}")
 print(f"req url       : {req.url}")
 print(f"form data     : {req.body}")
+print(f"multipart_data: {multipart_data.to_string()}")
 
-print("request begin    --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
-response = session.send(req, stream=True)
-
-print("response recv    --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
-print("response headers --> ", response.headers)
-print("response status  --> ", response.status_code)
-print("response content --> ", response.content)
+# print("request begin    --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
+# response = session.send(req, stream=True)
+#
+# print("response recv    --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
+# print("response headers --> ", response.headers)
+# print("response status  --> ", response.status_code)
+# print("response content --> ", response.content)

@@ -25,6 +25,7 @@ import time
 import requests
 from requests import Request
 from Bxt.BxtConfig import BxtConfig
+from requests_toolbelt.multipart.encoder import MultipartEncoder
 
 """
 part two of four in a series of scratchpads
@@ -71,26 +72,28 @@ form_content = json.dumps(
 # formdata can be either a tuple or a dictionary
 # tuple preserves the order the elements
 # dictionary posts the data in arbitrary order
-form_data = {
-    ("to_move", (None, form_content))
-}
-
+multipart_data = MultipartEncoder(
+    fields={
+        ("to_move", (form_content, "text/plain"))
+    }
+)
 headers = {
     "Authorization": f"Bearer {token}",
     "Accept": "application/json",
-    "Content-Type": "multipart/form-data"
+    "Content-Type": multipart_data.content_type
 }
 
 session = requests.Session()
-request = Request('POST', endpoint, files=form_data, headers=headers)
+request = Request('POST', endpoint, data=multipart_data, headers=headers)
 
 req = request.prepare()
 
-print("bxt_move_pkg   : BearerAuth")
+print("bxt_move_pkg  : BearerAuth")
 headers["Authorization"] = f"Bearer {token[:15]}...{token[-15:]}"
 print(f"req headers   : {headers}")
 print(f"req url       : {req.url}")
 print(f"form data     : {req.body}")
+print(f"multipart_data: {multipart_data.to_string()}")
 
 print("request begin    --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
 response = session.send(req, stream=True)

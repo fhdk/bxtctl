@@ -25,6 +25,7 @@ import time
 import requests
 from Bxt.BxtConfig import BxtConfig
 from requests import Request
+from requests_toolbelt.multipart.encoder import MultipartEncoder
 
 """
 Part one of four in a series of scratchpads
@@ -63,38 +64,49 @@ to_section = {
 # formdata can be either a tuple or a dictionary
 # tuple preserves the order the elements
 # dictionary posts the data in arbitrary order
-form_data = (
-    ("package1.file", (test_pkg_1, open(f"{test_repo}/{test_pkg_1}", "rb"))),
-    ("package1.signature",
-     (f"{test_pkg_1}.sig", open(f"{test_repo}/{test_pkg_1}.sig", "rb"))),
-    ("package1.section", (None, json.dumps(to_section))),
-    ("package2.file", (test_pkg_2, open(f"{test_repo}/{test_pkg_2}", "rb"))),
-    ("package2.signature",
-     (f"{test_pkg_2}.sig", open(f"{test_repo}/{test_pkg_2}.sig", "rb"))),
-    ("package2.section", (None, json.dumps(to_section))),
-)
+# form_data = (
+#     ("package1.file", (test_pkg_1, open(f"{test_repo}/{test_pkg_1}", "rb"))),
+#     ("package1.signature",
+#      (f"{test_pkg_1}.sig", open(f"{test_repo}/{test_pkg_1}.sig", "rb"))),
+#     ("package1.section", (None, json.dumps(to_section))),
+#     ("package2.file", (test_pkg_2, open(f"{test_repo}/{test_pkg_2}", "rb"))),
+#     ("package2.signature",
+#      (f"{test_pkg_2}.sig", open(f"{test_repo}/{test_pkg_2}.sig", "rb"))),
+#     ("package2.section", (None, json.dumps(to_section))),
+# )
 
+multipart_data = MultipartEncoder(
+    fields={
+        ("package1.file", (test_pkg_1, open(f"{test_repo}/{test_pkg_1}", "rb"), 'application/octet-stream')),
+        ("package1.signature", (f"{test_pkg_1}.sig", open(f"{test_repo}/{test_pkg_1}.sig", "rb"), 'application/octet-stream')),
+        ("package1.section", (json.dumps(to_section), "text/plain")),
+        ("package2.file", (test_pkg_2, open(f"{test_repo}/{test_pkg_2}", "rb"), 'application/octet-stream')),
+        ("package2.signature", (f"{test_pkg_2}.sig", open(f"{test_repo}/{test_pkg_2}.sig", "rb"), 'application/octet-stream')),
+        ("package2.section", (json.dumps(to_section), "text/plain")),
+    }
+)
 headers = {
     "Authorization": f"Bearer {token}",
     "Accept": "application/json",
-    "Content-Type": "multipart/form-data"
+    "Content-Type": multipart_data.content_type
 }
 
 session = requests.Session()
-request = Request('POST', endpoint, files=form_data, headers=headers)
+request = Request('POST', endpoint, data=multipart_data, headers=headers)
 
 req = request.prepare()
 
-print("bxt_upload_pkg : BearerAuth")
+print("bxt_upload_pkg: BearerAuth")
 headers["Authorization"] = f"Bearer {token[:15]}...{token[-15:]}"
 print(f"req headers   : {headers}")
 print(f"req url       : {req.url}")
 print(f"form data     : {req.body}")
+print(f"multipart_data: {multipart_data.to_string()}")
 
-print("request begin    --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
-response = session.send(req, stream=True)
-
-print("response recv    --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
-print("response headers --> ", response.headers)
-print("response status  --> ", response.status_code)
-print("response content --> ", response.content)
+# print("request begin    --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
+# response = session.send(req, stream=True)
+#
+# print("response recv    --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
+# print("response headers --> ", response.headers)
+# print("response status  --> ", response.status_code)
+# print("response content --> ", response.content)
