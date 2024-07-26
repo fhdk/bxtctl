@@ -68,7 +68,7 @@ dummy2 = "a-dummy2"
 
 form_content = json.dumps(
     [{"name": dummy1, "from_section": from_section, "to_section": to_section},
-     {"name": dummy2, "from_section": from_section, "to_section": to_section}], separators=(":", ","))
+     {"name": dummy2, "from_section": from_section, "to_section": to_section}])
 
 # formdata can be either a tuple or a dictionary
 # tuple preserves the order the elements
