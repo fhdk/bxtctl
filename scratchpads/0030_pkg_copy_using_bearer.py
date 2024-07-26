@@ -52,8 +52,6 @@ if config.valid_token():
 token = config.get_access_token()
 endpoint = f"{config.get_url()}/{config.endpoint["pkgCommit"]}"
 
-test_pkg = "arch-install-scripts"
-
 from_section = {
     "branch": "testing",
     "repository": "extra",
