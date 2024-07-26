@@ -425,7 +425,7 @@ class BxtCtl(cmd2.Cmd):
         """
         if not self.config.login():
             self.perror("Login failed!")
-
+        # update prompt
         self.prompt = f"({self.config.get_name()}@{self.config.get_hostname()}) $ "
 
     def do_configure(self, args):
@@ -434,6 +434,8 @@ class BxtCtl(cmd2.Cmd):
         """
         if not self.config.configure():
             self.perror("Configuration failed!")
+        # update prompt
+        self.prompt = f"({self.config.get_name()}@{self.config.get_hostname()}) $ "
 
 
 def start():

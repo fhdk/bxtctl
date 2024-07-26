@@ -24,6 +24,7 @@ import json
 import time
 import requests
 from requests import Request
+from requests import RequestException
 from Bxt.BxtConfig import BxtConfig
 from requests_toolbelt.multipart.encoder import MultipartEncoder
 
@@ -67,14 +68,14 @@ dummy2 = "a-dummy2"
 
 form_content = json.dumps(
     [{"name": dummy1, "from_section": from_section, "to_section": to_section},
-     {"name": dummy2, "from_section": from_section, "to_section": to_section}])
+     {"name": dummy2, "from_section": from_section, "to_section": to_section}], separators=(":", ","))
 
 # formdata can be either a tuple or a dictionary
 # tuple preserves the order the elements
 # dictionary posts the data in arbitrary order
 multipart_data = MultipartEncoder(
     fields={
-        ("to_move", (form_content, "text/plain"))
+        ("to_move", form_content)
     }
 )
 headers = {
@@ -95,10 +96,12 @@ print(f"req url       : {req.url}")
 print(f"form data     : {req.body}")
 print(f"multipart_data: {multipart_data.to_string()}")
 
-print("request begin    --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
-response = session.send(req, stream=True)
-
-print("response recv    --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
-print("response headers --> ", response.headers)
-print("response status  --> ", response.status_code)
-print("response content --> ", response.content)
+try:
+    response = session.send(req, stream=True)
+    print("response recv    --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
+    print("response headers --> ", response.headers)
+    print("response status  --> ", response.status_code)
+    print("response content --> ", response.content)
+except RequestException as e:
+    print("response recv    --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
+    print(e)
