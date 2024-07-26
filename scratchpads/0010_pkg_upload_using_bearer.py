@@ -112,6 +112,6 @@ try:
     print("response status  --> ", response.status_code)
     print("response content --> ", response.content)
 except RequestException as e:
-    print("response recv    --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
+    print("RequestException --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
     print(e)
 
