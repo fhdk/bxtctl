@@ -102,6 +102,7 @@ print(f"req url       : {req.url}")
 print(f"form data     : {req.body}")
 print(f"multipart_data: {multipart_data.to_string()}")
 
+print("request begin    --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
 try:
     response = session.send(req, stream=True)
     print("response recv    --> ", time.strftime("%Y-%m-%d %H:%M:%S"))

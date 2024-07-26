@@ -96,12 +96,13 @@ print(f"req url       : {req.url}")
 print(f"form data     : {req.body}")
 print(f"multipart_data: {multipart_data.to_string()}")
 
+print("request begin    --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
 try:
-    response = session.send(req, stream=True)
+    response = session.send(req, stream=True, timeout=30)
     print("response recv    --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
     print("response headers --> ", response.headers)
     print("response status  --> ", response.status_code)
     print("response content --> ", response.content)
 except RequestException as e:
-    print("response recv    --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
+    print("Exception        --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
     print(e)
