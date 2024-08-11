@@ -79,6 +79,12 @@ headers = {
     "Content-Type": "multipart/form-data"
 }
 
+# reminder on token handling
+# basic token handling
+# cookie_jar = request.utils.dict_from_cookiejar(session.cookies)
+# token = cookie_jar["token"]
+# session.cookies.update({"token": self._token})
+
 session = requests.Session()
 # add token with name 'token'
 session.cookies.update({"token": token})
