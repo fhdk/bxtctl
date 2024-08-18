@@ -19,6 +19,8 @@
 # Authors: Frede Hundewadt https://github.com/fhdk/bxtctl
 #
 from typing import List
+import os
+import logging
 
 
 def path_completion(branches, repos, archs) -> List[str]:

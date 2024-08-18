@@ -68,3 +68,6 @@ class BxtAcl:
         for section in self._sections:
             repositories.append(section["repository"])
         return set(repositories)
+
+    def __str__(self):
+        return str(self._sections)

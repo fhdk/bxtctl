@@ -21,6 +21,7 @@
 
 import requests
 from json import JSONDecodeError
+
 from .BxtException import BxtException
 from .HttpResult import HttpResult
 from .LogEntry import LogEntry
