@@ -1,6 +1,7 @@
-requests~=2.31.0
+requests~=2.32.3
 pwinput~=1.0.3
 cmd2~=2.4.3
-pyjwt~=2.8.0
+pyjwt~=2.9.0
 prettytable~=3.10.2
 wcwidth~=0.2.13
+requests_toolbelt~=1.0.0
