@@ -30,7 +30,7 @@ import os
 from Bxt.BxtAcl import BxtAcl
 from Bxt.BxtConfig import BxtConfig
 from Bxt.BxtSession import BxtSession
-from Bxt.Utils import path_completion
+from Bxt.Utils import path_completion, fix_path
 from Bxt.BxtWorkspace import BxtWorkspace
 from pprint import pprint
 import logging
@@ -67,6 +67,7 @@ class BxtCtl(cmd2.Cmd):
         del cmd2.Cmd.do_run_pyscript
         del cmd2.Cmd.do_run_script
         del cmd2.Cmd.do_shell
+
         # if config is uninitialized force setup config
         if self.config.get_url() == "" or self.config.get_name() == "":
             self.poutput("Enter initial configuration")
@@ -105,9 +106,9 @@ class BxtCtl(cmd2.Cmd):
 
     prompt = f"({config.get_name()}@{config.get_hostname()}) $ "
     # initialize a session object
-    bxt_session = BxtSession(BxtConfig.user_agent)
+    bxt_session = BxtSession(config.user_agent)
     sections = bxt_session.get_sections(
-        f"{config.get_url()}/{BxtConfig.endpoint['pkgSection']}",
+        f"{config.get_url()}/{config.endpoint['pkgSection']}",
         config.get_access_token(),
     )
 
@@ -265,13 +266,14 @@ class BxtCtl(cmd2.Cmd):
         if not args.workspace:
             self.poutput(f"Current workspace is: {self.config.workspace}")
         else:
-            ws = BxtWorkspace(args.workspace, self.config.repos)
-            if ws.init_workspace_structure():
-                self.poutput(f"Workspace {args.workspace} created")
-                self.config.workspace = args.workspace
+            ws_path = fix_path(args.workspace)
+            ws = BxtWorkspace(ws_path, self.config.repos)
+            if ws.init_workspace_tree():
+                self.poutput(f"Workspace {ws_path} created")
+                self.config.workspace = ws_path
                 self.config.save()
             else:
-                self.perror(F"No permission on workspace: {args.workspace}")
+                self.perror(F"No permission on workspace: {ws_path}")
 
     @with_argparser(bxt_list_workspace_args)
     def do_list_workspace(self, args):
@@ -498,19 +500,25 @@ def main():
     parser.add_argument("-s", "--set-ws", help="Set active workspace. The full path to the workspace")
     parser.add_argument("-g", "--get-ws", help="Get active workspace", action="store_true")
     parser.add_argument("-c", "--commit", help="Commit active workspace", action="store_true")
+    parser.add_argument("--debug", help="Show debug log", action="store_true")
     # parser.add_argument("-p", "--pull", help="Pull active workspace", action="store_true")
 
     acl = BxtAcl(sections)
     cfg.repos = path_completion(acl.get_branches, acl.get_repositories, acl.get_architectures)
+
+    if parser.parse_args().debug:
+        logging.basicConfig(level=logging.DEBUG)
+    else:
+        logging.basicConfig(level=logging.INFO)
 
     if parser.parse_args().get_ws:
         print(cfg.workspace)
         exit(0)
 
     if parser.parse_args().set_ws:
-        cfg.workspace = parser.parse_args().set_ws
+        cfg.workspace = fix_path(parser.parse_args().set_ws)
         ws = BxtWorkspace(cfg.workspace, cfg.repos)
-        if not ws.init_workspace_structure():
+        if not ws.init_workspace_tree():
             logging.error(f"Failed to initialize workspace: {cfg.workspace}")
             exit(1)
         print(f"Workspace set to: {cfg.workspace}")
@@ -518,6 +526,10 @@ def main():
         exit(0)
 
     if parser.parse_args().upload:
+        ws = BxtWorkspace(cfg.workspace, cfg.repos)
+        if not ws.init_workspace_tree():
+            logging.error(f"Workspace has not been initialized: {cfg.workspace}")
+            exit(1)
         print("Uploading packages... please stand by")
 
         exit(0)

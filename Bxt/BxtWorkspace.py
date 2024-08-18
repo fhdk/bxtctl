@@ -25,22 +25,62 @@ import os
 import logging
 
 class BxtWorkspace:
-    def __init__(self, path: str, permissions: List[str]):
+    def __init__(self, path: str, repos: List[str]):
         """
         BxtWorkspace
         """
         self._path = path
-        self._permissions = permissions
+        self._repos = repos
 
-    def init_workspace_structure(self) -> bool:
+    def check_workspace(self) -> bool:
+        """
+        Check workspace structure
+        :return:
+        """
+        for repo in self._repos:
+            if not os.path.exists(f"{self._path}/{repo}"):
+                logging.error(f"Repo {repo} has not been fully initialized!")
+                return False
+        return True
+
+    def get_files(self, path: str = None) -> list:
+        """
+        Get the files from the given path
+        :return:
+        """
+        result = []
+        if not path in self._repos:
+            logging.error(f"Path {path} not in repos {self._repos}")
+            return result
+
+        if path is not None:
+            for file in os.listdir(path):
+                if file.endswith(".pkg.tar.zst"):
+                    result.append({
+                        "pkg": f"{self._path}/{path}/{file}",
+                        "sig": f"{self._path}/{path}/{file}.sig"}
+                    )
+            return result
+
+        for repo in self._repos:
+            for file in os.listdir(f"{self._path}/{repo}"):
+                if file.endswith(".pkg.tar.zst"):
+                    result.append({
+                        "pkg": f"{self._path}/{repo}/{file}",
+                        "sig": f"{self._path}/{repo}/{file}.sig"}
+                    )
+
+        return result
+
+    def init_workspace_tree(self) -> bool:
         """
         Initialize workspace structure
         :return:
         """
         try:
-            for perm in self._permissions:
-                logging.debug("Path: " + perm)
-                Path(f"{self._path}/{perm}").mkdir(parents=True, exist_ok=True)
+            for repo in self._repos:
+                logging.debug("Path: " + repo)
+                Path(f"{self._path}/{repo}").mkdir(parents=True, exist_ok=True)
             return True
         except PermissionError:
             logging.error(f"You do not have write permissions: {self._path}")
@@ -48,39 +88,3 @@ class BxtWorkspace:
         except Exception as e:
             logging.error(f"Unexpected error: {e}")
             return False
-
-    def get_files(self) -> list:
-        """
-        Get the files from the given path
-        :return:
-        """
-        result = []
-        for perm in self._permissions:
-            for file in os.listdir(f"{self._path}/{perm}"):
-                if file.endswith(".pkg.tar.zst"):
-                    result.append({
-                        "pkg": f"{self._path}/{perm}/{file}",
-                        "sig": f"{self._path}/{perm}/{file}.sig"}
-                    )
-        return result
-
-    # def check_workspace(ws_path: str, permissions: List[str]) -> bool:
-    #     """
-    #     Check workspace match permisions.
-    #     :param ws_path:
-    #     :param permissions:
-    #     :return:
-    #     """
-    #     for perm in permissions:
-    #         try:
-    #             if not os.path.exists(os.path.join(ws_path, perm)):
-    #                 os.makedirs(os.path.join(ws_path, perm))
-    #             return True
-    #         except FileExistsError as err:
-    #             logging.debug(err)
-    #         except FileNotFoundError as err:
-    #             logging.debug(err)
-    #         except NotADirectoryError as err:
-    #             logging.debug(err)
-    #
-    #     return False

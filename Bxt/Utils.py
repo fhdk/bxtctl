@@ -20,7 +20,6 @@
 #
 from typing import List
 import os
-import logging
 
 
 def path_completion(branches, repos, archs) -> List[str]:
@@ -40,3 +39,15 @@ def path_completion(branches, repos, archs) -> List[str]:
             for arch in archs:
                 result.append(f"{branch}/{repo}/{arch}")
     return result
+
+def fix_path(path: str) -> str:
+    """
+    Expand home path
+    :param path:
+    :rtype: str
+    :return: fixed path
+    """
+    if "~" in path:
+        path = path.replace("~", os.path.expanduser("~"))
+    return path
+
