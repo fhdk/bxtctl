@@ -21,7 +21,6 @@
 from typing import List
 import os
 import json
-from requests_toolbelt import MultipartEncoder
 from .BxtFile import BxtFile
 
 def path_completion(branches, repos, archs) -> List[str]:
@@ -54,6 +53,12 @@ def fix_path(path: str) -> str:
     return path
 
 def encode_package_data(file: BxtFile, idx: int = 1):
+    """
+    Create dictionary to be consumed by MultipartEncoder
+    :param file:
+    :param idx:
+    :return:
+    """
     return {
         (f"package{idx}", (file.pkg(), open(file.pkg(), "rb"), 'application/octet-stream')),
         (f"package{idx}.signature", (file.sig, open(file.sig, "rb"), 'application/octet-stream')),

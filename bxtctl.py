@@ -557,15 +557,17 @@ def main():
                                                 headers={"Content-Type": multipart_data.content_type}
                                                 )
                     if result.status() != 200:
-                        print(f"Failed to upload '{file.pkg()}' -> '{result.status()}")
+                        print(f"Failed to upload '{file.pkg()}' -> '{result.status()}'")
                         print(f"{result.content()}")
                         exit(1)
                     else:
                         file_count += 1
 
                 print(f"Done! {file_count} packages uploaded to '{args.commit}'")
+
             else:
                 print(f"Nothing to do in '{args.commit}'")
+
         else:
             print("checking all repos", end="\r")
             for repo in cfg.repos:
