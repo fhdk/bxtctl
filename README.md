@@ -45,6 +45,21 @@ A few arguments has been added to main entry to
 - debug loggin argument
 - interactive shell
 
+```
+usage: bxtctl [-h] [-s SET_WS] [-g] [-c [COMMIT]] [-d] [-i]
+
+options:
+  -h, --help            show this help message and exit
+  -s SET_WS, --set-ws SET_WS
+                        Set active workspace. The full path to the workspace
+  -g, --get-ws          Get active workspace
+  -c [COMMIT], --commit [COMMIT]
+                        Commit packages
+  -d, --debug           Create logfile
+  -i, --interactive     Load interactive shell
+  
+```
+
 ### Help command
 
 ```

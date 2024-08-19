@@ -68,51 +68,57 @@ class BxtCtl(cmd2.Cmd):
         del cmd2.Cmd.do_shell
 
         # if config is uninitialized force setup config
-        if self.config.get_url() == "" or self.config.get_name() == "":
+        if self.cfg.get_url() == "" or self.cfg.get_name() == "":
             self.poutput("Enter initial configuration")
-            if not self.config.configure():
+            if not self.cfg.configure():
                 self.perror("Initialization failed")
                 exit(1)
 
         # if token is empty - login
-        if self.config.get_access_token() == "":
+        if self.cfg.get_access_token() == "":
             self.poutput("First time login")
-            if not self.config.login():
+            if not self.cfg.login():
                 self.perror("Login failed")
                 exit(1)
 
-        self.prompt = f"({self.config.get_name()}@{self.config.get_hostname()}) $ "
+        self.prompt = f"({self.cfg.get_name()}@{self.cfg.get_hostname()}) $ "
 
         self.pwarning(f"TODO - remove this block")
         self.pwarning(f"---------- PERMISSIONS ---------- ")
-        self.pwarning(f"bxt user: '{self.config.get_name()}' has access to:")
+        self.pwarning(f"bxt user: '{self.cfg.get_name()}' has access to:")
         self.pwarning(f"Branches      : {self.acl.get_branches()}")
         self.pwarning(f"Repositories  : {self.acl.get_repositories()}")
         self.pwarning(f"Architectures : {self.acl.get_architectures()}")
         self.pwarning(f"--------------------------------- ")
 
     prompt = f"nn@bxt $ "
-    config = BxtConfig()
-    if not config.valid_config():
-        config.configure()
+    cfg = BxtConfig()
+    if not cfg.valid_config():
+        cfg.configure()
 
-    if not config.get_access_token():
-        z = config.login()
+    if not cfg.get_access_token():
+        z = cfg.login()
 
-    if config.valid_token():
-        if not config.renew_access_token():
-            z = config.login()
+    if cfg.valid_token():
+        if not cfg.renew_access_token():
+            z = cfg.login()
 
-    prompt = f"({config.get_name()}@{config.get_hostname()}) $ "
+    prompt = f"({cfg.get_name()}@{cfg.get_hostname()}) $ "
     # initialize a session object
-    bxt_session = BxtSession(config.user_agent)
+    bxt_session = BxtSession(cfg.user_agent)
     sections = bxt_session.get_sections(
-        f"{config.get_url()}/{config.endpoint['pkgSection']}",
-        config.get_access_token(),
+        f"{cfg.get_url()}/{cfg.endpoint['pkgSection']}",
+        cfg.get_access_token(),
     )
 
     acl = BxtAcl(sections)
-    config.repos = path_completion(acl.get_branches, acl.get_repositories, acl.get_architectures)
+    cfg.repos = path_completion(acl.get_branches, acl.get_repositories, acl.get_architectures)
+    repo_choices = ["*"] + cfg.repos
+    bxt_cli_args = cmd2.Cmd2ArgumentParser("Execute action an exit the shell")
+    bxt_cli_args.add_argument("-s", "--set-ws", help="Set active workspace. The full path to the workspace")
+    bxt_cli_args.add_argument("-d", "--debug", action="store_true", help="Create logfile")
+    bxt_cli_args.add_argument("-g", "--get-ws", action="store_true", help="Get active workspace")
+    bxt_cli_args.add_argument("-c", "--commit", type=str, nargs='?', help=f"Commit active workspace", choices=repo_choices)
 
     # ###############################################################
     # list workspace content
@@ -220,6 +226,89 @@ class BxtCtl(cmd2.Cmd):
         help=f"Package remove from repo: 'pkgname {acl.get_branches()}/{acl.get_repositories()}/{acl.get_architectures()}'",
     )
 
+
+    if bxt_cli_args.parse_args().debug:
+        logging.basicConfig(level=logging.DEBUG, filename=f"{fix_path(cfg.config_dir)}/bxtctl.log", filemode="w")
+        print("Logging level set to DEBUG")
+        logging.debug("Logging level set to DEBUG")
+    else:
+        logging.basicConfig(level=logging.INFO)
+        print("Logging level set to DEBUG")
+        logging.info("Logging level set to INFO")
+
+    if bxt_cli_args.parse_args().get_ws:
+        print(cfg.workspace)
+        exit(0)
+
+    if bxt_cli_args.parse_args().set_ws:
+        cfg.workspace = fix_path(bxt_cli_args.parse_args().set_ws)
+        ws = BxtWorkspace(cfg.workspace, cfg.repos)
+        if not ws.init_repo_tree():
+            logging.error(f"Failed to initialize workspace: {cfg.workspace}")
+            exit(1)
+        print(f"Workspace set to: {cfg.workspace}")
+        cfg.save()
+        exit(0)
+
+    if bxt_cli_args.parse_args().commit:
+        ws = BxtWorkspace(cfg.workspace, cfg.repos)
+        if not ws.init_repo_tree():
+            logging.error(f"Workspace has not been initialized: {cfg.workspace}")
+            exit(1)
+        to_commit = bxt_cli_args.parse_args().commit
+        if to_commit != "*":
+            print(f"checking '{to_commit}'", end="\r")
+            files = ws.get_packages(to_commit)
+            if len(files) > 0:
+                print(f"Uploading repo: '{to_commit}'")
+                file_count = 0
+                for file in files:
+                    if file.sig is None:
+                        print(f"'{file.pkg()}' has no signature... skipping", end="\n")
+                        continue
+
+                    print(f"Sending -> {file.pkg()}...", end="\n")
+                    encoded = encode_package_data(file)
+                    multipart_data = MultipartEncoder(fields=encoded)
+
+                    logging.debug(multipart_data.content_type)
+                    logging.debug(multipart_data.to_string())
+
+                    result = bxt_session.commit(url=f"{cfg.get_url()}/{cfg.endpoint["pkgCommit"]}",
+                                                data=multipart_data,
+                                                token=cfg.get_access_token(),
+                                                headers={"Content-Type": multipart_data.content_type}
+                                                )
+                    if result.status() != 200:
+                        print(f"Failed to upload '{file.pkg()}' -> '{result.status()}'")
+                        print(f"{result.content()}")
+                        exit(1)
+                    else:
+                        file_count += 1
+
+                print(f"Done! {file_count} packages uploaded to '{to_commit}'")
+
+            else:
+                print(f"Nothing to do in '{to_commit}'")
+
+        else:
+            print("checking all repos", end="\r")
+            for repo in cfg.repos:
+                files = ws.get_packages(repo)
+                if len(files) > 0:
+                    print(f"Uploading repo: '{repo}'")
+                    file_count = 0
+                    for file in files:
+                        if file.sig is None:
+                            print(f"'{file.pkg()}' has no signature... skipping", end="\n")
+                            continue
+                        print(f"Sending -> {file.pkg()}", end="\n")
+                        file_count += 1
+                    print(f"Done! {file_count} packages uploaded to '{repo}'")
+                else:
+                    print(f"Nothing to do in '{repo}'")
+        exit(0)
+
     @with_argparser(bxt_delete_args)
     def do_delete_pkg(self, args):
         """
@@ -263,14 +352,14 @@ class BxtCtl(cmd2.Cmd):
         :param args: optional path to new workspace
         """
         if not args.workspace:
-            self.poutput(f"Current workspace is: {self.config.workspace}")
+            self.poutput(f"Current workspace is: {self.cfg.workspace}")
         else:
             ws_path = fix_path(args.workspace)
-            ws = BxtWorkspace(ws_path, self.config.repos)
+            ws = BxtWorkspace(ws_path, self.cfg.repos)
             if ws.init_repo_tree():
                 self.poutput(f"Workspace {ws_path} created")
-                self.config.workspace = ws_path
-                self.config.save()
+                self.cfg.workspace = ws_path
+                self.cfg.save()
             else:
                 self.perror(F"No permission on workspace: {ws_path}")
 
@@ -279,11 +368,11 @@ class BxtCtl(cmd2.Cmd):
         """
         List content of current workspace
         """
-        self.poutput("Current workspace is: " + self.config.workspace)
+        self.poutput("Current workspace is: " + self.cfg.workspace)
         cmd = ["ls"]
         if args.long:
             cmd.insert(len(cmd) + 1, "-l")
-        cmd.insert(len(cmd) + 1, self.config.workspace)
+        cmd.insert(len(cmd) + 1, self.cfg.workspace)
         subprocess.run(cmd)
 
     @with_argparser(bxt_list_folder_args)
@@ -306,11 +395,11 @@ class BxtCtl(cmd2.Cmd):
         """
         location = args.location.split("/")
         pkgs = self.bxt_session.get_packages(
-            f"{self.config.get_url()}/{self.config.endpoint['pkgList']}",
+            f"{self.cfg.get_url()}/{self.cfg.endpoint['pkgList']}",
             location[0],
             location[1],
             location[2],
-            self.config.get_access_token(),
+            self.cfg.get_access_token(),
         )
         for pkg in pkgs:
             self.poutput(
@@ -349,9 +438,9 @@ class BxtCtl(cmd2.Cmd):
         # send request
         compare_us = sorted(compare_us, key=lambda x: x["repository"])
         result = self.bxt_session.compare(
-            url=f"{self.config.get_url()}/{self.config.endpoint["pkgCompare"]}",
+            url=f"{self.cfg.get_url()}/{self.cfg.endpoint["pkgCompare"]}",
             data=compare_us,
-            token=self.config.get_access_token())
+            token=self.cfg.get_access_token())
         print(result)
         compare_table = result.content()["compareTable"]
         pkgname_len = max(len(elm) for elm in compare_table) + 1
@@ -425,8 +514,8 @@ class BxtCtl(cmd2.Cmd):
         # packages = args.package
         self.quiet = False
         # self.pfeedback(f"TODO - commit package to repo - using {packages}")
-        self.pfeedback(f"Reading files from workspace: {self.config.workspace}")
-        self.pfeedback(f"Commit endpoint is: {self.config.endpoint['pkgCommit']}")
+        self.pfeedback(f"Reading files from workspace: {self.cfg.workspace}")
+        self.pfeedback(f"Commit endpoint is: {self.cfg.endpoint['pkgCommit']}")
         self.pfeedback(f"Commit package(s) to: {branch}/{repo}/{arch}")
         # for pkg in packages:
         #     self.pfeedback(f"commit package: {pkg}")
@@ -441,19 +530,19 @@ class BxtCtl(cmd2.Cmd):
         """
         Retrieve JWT credentials for the configured bxt service
         """
-        if not self.config.login():
+        if not self.cfg.login():
             self.perror("Login failed!")
         # update prompt
-        self.prompt = f"({self.config.get_name()}@{self.config.get_hostname()}) $ "
+        self.prompt = f"({self.cfg.get_name()}@{self.cfg.get_hostname()}) $ "
 
     def do_configure(self, args):
         """
         Configure endpoint and credentials
         """
-        if not self.config.configure():
+        if not self.cfg.configure():
             self.perror("Configuration failed!")
         # update prompt
-        self.prompt = f"({self.config.get_name()}@{self.config.get_hostname()}) $ "
+        self.prompt = f"({self.cfg.get_name()}@{self.cfg.get_hostname()}) $ "
 
 
 def start_cmd2():
@@ -469,128 +558,10 @@ def start_cmd2():
 
 
 def main():
-    """
-    parse command line arguments and start application
-    :return:
-    """
-    cfg = BxtConfig()
-    # if config is uninitialized force setup config
-    if cfg.get_url() == "" or cfg.get_name() == "":
-        print("Enter initial configuration")
-        if not cfg.configure():
-            print("Initialization failed")
-            exit(1)
-
-    # if token is empty - login
-    if cfg.get_access_token() == "":
-        print("First time login")
-        if not cfg.login():
-            print("Login failed")
-            exit(1)
-
-    # initialize a session object
-    bxt_session = BxtSession(BxtConfig.user_agent)
-    sections = bxt_session.get_sections(
-        f"{cfg.get_url()}/{BxtConfig.endpoint['pkgSection']}",
-        cfg.get_access_token(),
-    )
-    acl = BxtAcl(sections)
-    cfg.repos = path_completion(acl.get_branches, acl.get_repositories, acl.get_architectures)
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-s", "--set-ws", help="Set active workspace. The full path to the workspace")
-    parser.add_argument("-g", "--get-ws", action="store_true", help="Get active workspace")
-    parser.add_argument("-c", "--commit", type=str, nargs='?', default="*", const="*", help=f"Commit packages")
-    parser.add_argument("-d", "--debug", action="store_true", help="Create logfile")
-    parser.add_argument("-i", "--interactive", action="store_true", help="Load interactive shell")
-
-    args = parser.parse_args()
-    if len(sys.argv) == 1:
-        parser.print_help()
-        exit(1)
-
-    if args.debug:
-        logging.basicConfig(level=logging.DEBUG)
-    else:
-        logging.basicConfig(level=logging.INFO)
-
-    if args.get_ws:
-        print(cfg.workspace)
-        exit(0)
-
-    if args.set_ws:
-        cfg.workspace = fix_path(parser.parse_args().set_ws)
-        ws = BxtWorkspace(cfg.workspace, cfg.repos)
-        if not ws.init_repo_tree():
-            logging.error(f"Failed to initialize workspace: {cfg.workspace}")
-            exit(1)
-        print(f"Workspace set to: {cfg.workspace}")
-        cfg.save()
-        exit(0)
-
-    if args.commit:
-        ws = BxtWorkspace(cfg.workspace, cfg.repos)
-        if not ws.init_repo_tree():
-            logging.error(f"Workspace has not been initialized: {cfg.workspace}")
-            exit(1)
-        if args.commit != "*":
-            print(f"checking '{args.commit}'", end="\r")
-            files = ws.get_packages(args.commit)
-            if len(files) > 0:
-                print(f"Uploading repo: '{args.commit}'")
-                file_count = 0
-                for file in files:
-                    if file.sig is None:
-                        print(f"'{file.pkg()}' has no signature... skipping", end="\n")
-                        continue
-
-                    print(f"Sending -> {file.pkg()}...", end="\n")
-                    encoded = encode_package_data(file)
-                    multipart_data = MultipartEncoder(fields=encoded)
-
-                    logging.debug(multipart_data.content_type)
-                    logging.debug(multipart_data.to_string())
-
-                    result = bxt_session.commit(url=f"{cfg.get_url()}/{cfg.endpoint["pkgCommit"]}",
-                                                data=multipart_data,
-                                                token=cfg.get_access_token(),
-                                                headers={"Content-Type": multipart_data.content_type}
-                                                )
-                    if result.status() != 200:
-                        print(f"Failed to upload '{file.pkg()}' -> '{result.status()}'")
-                        print(f"{result.content()}")
-                        exit(1)
-                    else:
-                        file_count += 1
-
-                print(f"Done! {file_count} packages uploaded to '{args.commit}'")
-
-            else:
-                print(f"Nothing to do in '{args.commit}'")
-
-        else:
-            print("checking all repos", end="\r")
-            for repo in cfg.repos:
-                files = ws.get_packages(repo)
-                if len(files) > 0:
-                    print(f"Uploading repo: '{repo}'")
-                    file_count = 0
-                    for file in files:
-                        if file.sig is None:
-                            print(f"'{file.pkg()}' has no signature... skipping", end="\n")
-                            continue
-                        print(f"Sending -> {file.pkg()}", end="\n")
-                        file_count += 1
-                    print(f"Done! {file_count} packages uploaded to '{repo}'")
-                else:
-                    print(f"Nothing to do in '{repo}'")
-        exit(0)
-
-    if args.interactive:
-        start_cmd2()
+    start_cmd2()
 
 if __name__ == "__main__":
     """
     Main entry point
     """
-    main()
+    start_cmd2()
