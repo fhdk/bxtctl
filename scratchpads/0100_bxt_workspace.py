@@ -57,4 +57,4 @@ print(config.repos)
 
 ws = BxtWorkspace(config.workspace, config.repos)
 
-print("init_repos: ", ws.init_workspace_tree())
+print("init_repos: ", ws.init_repo_tree())

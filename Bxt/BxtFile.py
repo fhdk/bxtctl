@@ -19,11 +19,45 @@
 # Authors: Frede Hundewadt https://github.com/fhdk/bxtctl
 #
 
-from json import JSONEncoder
+from typing import Dict
 
-from requests_toolbelt import MultipartEncoder
+class BxtFile:
+    """
+    BxtFile object
+    """
+    def __init__(self, section: Dict[str,str], pkg: str, sig: str):
+        self._section = section
+        self._pkg = pkg
+        self._sig = sig
 
+    def section(self):
+        """
+        Get Section
+        :return:
+        """
+        return self._section
 
-class BxtEncoder(JSONEncoder):
-    def default(self, obj):
-        return obj.__dict__
+    def pkg(self):
+        """
+        Get Package File Name and Path
+        :return: 
+        """""
+        return self._pkg
+
+    @property
+    def sig(self):
+        """
+        Get Signature File Name
+        :return:
+        """
+        return self._sig
+
+    @sig.setter
+    def sig(self, sig: str):
+        """
+        Set Signature File Name
+        :param sig:
+        :return:
+        """
+        self._sig = sig
+

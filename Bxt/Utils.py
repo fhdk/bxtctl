@@ -20,7 +20,9 @@
 #
 from typing import List
 import os
-
+import json
+from requests_toolbelt import MultipartEncoder
+from .BxtFile import BxtFile
 
 def path_completion(branches, repos, archs) -> List[str]:
     """
@@ -51,3 +53,9 @@ def fix_path(path: str) -> str:
         path = path.replace("~", os.path.expanduser("~"))
     return path
 
+def encode_package_data(file: BxtFile, idx: int = 1):
+    return {
+        (f"package{idx}", (file.pkg(), open(file.pkg(), "rb"), 'application/octet-stream')),
+        (f"package{idx}.signature", (file.sig, open(file.sig, "rb"), 'application/octet-stream')),
+        (f"package{idx}.section", (json.dumps(file.section()), "text/plain")),
+    }

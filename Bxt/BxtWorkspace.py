@@ -24,7 +24,11 @@ from pathlib import Path
 import os
 import logging
 
+from Bxt.BxtFile import BxtFile
+
+
 class BxtWorkspace:
+
     def __init__(self, path: str, repos: List[str]):
         """
         BxtWorkspace
@@ -32,7 +36,7 @@ class BxtWorkspace:
         self._path = path
         self._repos = repos
 
-    def check_workspace(self) -> bool:
+    def valid_workspace(self) -> bool:
         """
         Check workspace structure
         :return:
@@ -43,36 +47,45 @@ class BxtWorkspace:
                 return False
         return True
 
-    def get_files(self, path: str = None) -> list:
+    def get_packages(self, repo: str) -> List[BxtFile]:
         """
-        Get the files from the given path
+        Get the files from the given repository
+        :param repo:
         :return:
         """
         result = []
-        if not path in self._repos:
-            logging.error(f"Path {path} not in repos {self._repos}")
+        if not repo in self._repos:
+            logging.error(f"The '{repo}' was not found in repos {self._repos}")
             return result
-
-        if path is not None:
-            for file in os.listdir(path):
-                if file.endswith(".pkg.tar.zst"):
-                    result.append({
-                        "pkg": f"{self._path}/{path}/{file}",
-                        "sig": f"{self._path}/{path}/{file}.sig"}
-                    )
-            return result
-
-        for repo in self._repos:
+        section = self.get_section_from_repo(repo)
+        try:
             for file in os.listdir(f"{self._path}/{repo}"):
                 if file.endswith(".pkg.tar.zst"):
-                    result.append({
-                        "pkg": f"{self._path}/{repo}/{file}",
-                        "sig": f"{self._path}/{repo}/{file}.sig"}
-                    )
+                    bxt_file = BxtFile(section, f"{self._path}/{repo}/{file}", f"{self._path}/{repo}/{file}.sig")
+                    if not os.path.exists(bxt_file.sig):
+                        bxt_file.sig = None
+                    result.append(bxt_file)
+            return result
+        except NotADirectoryError:
+            return result
+        except FileNotFoundError:
+            return result
 
-        return result
+    @staticmethod
+    def get_section_from_repo(repo: str) -> dict:
+        """
+        Get the section from the given repository
+        :param repo:
+        :return:
+        """
+        data = repo.split("/")
+        return {
+            "branch": data[0],
+            "repository": data[1],
+            "architecture": data[2],
+        }
 
-    def init_workspace_tree(self) -> bool:
+    def init_repo_tree(self) -> bool:
         """
         Initialize workspace structure
         :return:
@@ -88,3 +101,16 @@ class BxtWorkspace:
         except Exception as e:
             logging.error(f"Unexpected error: {e}")
             return False
+
+    @staticmethod
+    def pkg_remove(file: BxtFile):
+        """
+        Remove package files after successful upload
+        :param file:
+        :return:
+        """
+        try:
+            os.remove(file.pkg())
+            os.remove(file.sig)
+        except FileNotFoundError:
+            pass

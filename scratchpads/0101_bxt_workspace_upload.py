@@ -22,12 +22,15 @@
 
 import json
 import time
+
+from requests_toolbelt import MultipartEncoder
+
 from Bxt.BxtAcl import BxtAcl
 from Bxt.BxtConfig import BxtConfig
+from Bxt.BxtFile import BxtFile
 from Bxt.BxtSession import BxtSession
 from Bxt.BxtWorkspace import BxtWorkspace
-from Bxt.Utils import path_completion
-
+from Bxt.Utils import path_completion, encode_package_data
 
 """
 This file is to test the correct creating of a workspace
@@ -56,7 +59,21 @@ print(config.workspace)
 print(config.repos)
 
 ws = BxtWorkspace(config.workspace, config.repos)
-ws.get_files()
+files = ws.get_packages("testing/extra/x86_64")
 
+# PoC create form with multiple packages for uploading in one request
+form_data = MultipartEncoder(fields={})
+# placeholder for fields
+encodings = {}
+for idx, file in enumerate(files):
+    # use a function to return the fields for the package
+    # remember to increment index to create unique form references
+    encoded = encode_package_data(file, idx + 1)
+    # add the encoded element to the placeholder
+    encodings.update(encoded)
 
-
+# encode the fields to a multipart/form-data
+form_data = MultipartEncoder(fields=encodings)
+print(form_data)
+print(form_data.content_type)
+print(form_data.to_string())

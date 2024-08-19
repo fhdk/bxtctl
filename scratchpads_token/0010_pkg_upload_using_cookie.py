@@ -51,8 +51,8 @@ token = config.get_access_token()
 endpoint = f"{config.get_url()}/{config.endpoint["pkgCommit"]}"
 
 test_repo = config.workspace
-test_pkg_1 = "a-dummy1-0-0-any.pkg.tar.zst"
-test_pkg_2 = "a-dummy2-0-0-any.pkg.tar.zst"
+test_pkg_1 = "a-dummy3-0-0-any.pkg.tar.zst"
+# test_pkg_2 = "a-dummy2-0-0-any.pkg.tar.zst"
 
 to_section = {
     "branch": "testing",
@@ -68,10 +68,10 @@ form_data = (
     ("package1.signature",
      (f"{test_pkg_1}.sig", open(f"{test_repo}/{test_pkg_1}.sig", "rb"))),
     ("package1.section", (None, json.dumps(to_section))),
-    ("package2.file", (test_pkg_2, open(f"{test_repo}/{test_pkg_2}", "rb"))),
-    ("package2.signature",
-     (f"{test_pkg_2}.sig", open(f"{test_repo}/{test_pkg_2}.sig", "rb"))),
-    ("package2.section", (None, json.dumps(to_section))),
+    # ("package2.file", (test_pkg_2, open(f"{test_repo}/{test_pkg_2}", "rb"))),
+    # ("package2.signature",
+    #  (f"{test_pkg_2}.sig", open(f"{test_repo}/{test_pkg_2}.sig", "rb"))),
+    # ("package2.section", (None, json.dumps(to_section))),
 )
 
 headers = {
@@ -103,7 +103,7 @@ print(f"req url       : {req.url}")
 print(f"form data     : {req.body}")
 
 print("request begin    --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
-response = session.send(req, stream=True)
+response = session.send(req, stream=True, timeout=30)
 
 print("response recv    --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
 print("response headers --> ", response.headers)

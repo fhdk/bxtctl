@@ -23,17 +23,16 @@
 import argparse
 import cmd2
 from cmd2 import Cmd2ArgumentParser, with_argparser
-import functools
 import subprocess
 import sys
-import os
+import logging
+import json
+from requests_toolbelt.multipart.encoder import MultipartEncoder
 from Bxt.BxtAcl import BxtAcl
 from Bxt.BxtConfig import BxtConfig
 from Bxt.BxtSession import BxtSession
-from Bxt.Utils import path_completion, fix_path
+from Bxt.Utils import path_completion, fix_path, encode_package_data
 from Bxt.BxtWorkspace import BxtWorkspace
-from pprint import pprint
-import logging
 
 class BxtCtl(cmd2.Cmd):
     """
@@ -268,7 +267,7 @@ class BxtCtl(cmd2.Cmd):
         else:
             ws_path = fix_path(args.workspace)
             ws = BxtWorkspace(ws_path, self.config.repos)
-            if ws.init_workspace_tree():
+            if ws.init_repo_tree():
                 self.poutput(f"Workspace {ws_path} created")
                 self.config.workspace = ws_path
                 self.config.save()
@@ -353,7 +352,7 @@ class BxtCtl(cmd2.Cmd):
             url=f"{self.config.get_url()}/{self.config.endpoint["pkgCompare"]}",
             data=compare_us,
             token=self.config.get_access_token())
-        pprint(result)
+        print(result)
         compare_table = result.content()["compareTable"]
         pkgname_len = max(len(elm) for elm in compare_table) + 1
 
@@ -457,7 +456,7 @@ class BxtCtl(cmd2.Cmd):
         self.prompt = f"({self.config.get_name()}@{self.config.get_hostname()}) $ "
 
 
-def start_cmd():
+def start_cmd2():
     """
     Poetry entry point
     :return:
@@ -495,49 +494,101 @@ def main():
         f"{cfg.get_url()}/{BxtConfig.endpoint['pkgSection']}",
         cfg.get_access_token(),
     )
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-s", "--set-ws", help="Set active workspace. The full path to the workspace")
-    parser.add_argument("-g", "--get-ws", help="Get active workspace", action="store_true")
-    parser.add_argument("-c", "--commit", help="Commit active workspace", action="store_true")
-    parser.add_argument("--debug", help="Show debug log", action="store_true")
-    # parser.add_argument("-p", "--pull", help="Pull active workspace", action="store_true")
-
     acl = BxtAcl(sections)
     cfg.repos = path_completion(acl.get_branches, acl.get_repositories, acl.get_architectures)
 
-    if parser.parse_args().debug:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-s", "--set-ws", help="Set active workspace. The full path to the workspace")
+    parser.add_argument("-g", "--get-ws", action="store_true", help="Get active workspace")
+    parser.add_argument("-c", "--commit", type=str, nargs='?', default="*", const="*", help=f"Commit packages")
+    parser.add_argument("--debug", action="store_true", help="Create logfile")
+    parser.add_argument("-i", "--interactive", action="store_true", help="Load interactive shell")
+
+    args = parser.parse_args()
+    if len(sys.argv) == 1:
+        parser.print_help()
+        exit(1)
+
+    if args.debug:
         logging.basicConfig(level=logging.DEBUG)
     else:
         logging.basicConfig(level=logging.INFO)
 
-    if parser.parse_args().get_ws:
+    if args.get_ws:
         print(cfg.workspace)
         exit(0)
 
-    if parser.parse_args().set_ws:
+    if args.set_ws:
         cfg.workspace = fix_path(parser.parse_args().set_ws)
         ws = BxtWorkspace(cfg.workspace, cfg.repos)
-        if not ws.init_workspace_tree():
+        if not ws.init_repo_tree():
             logging.error(f"Failed to initialize workspace: {cfg.workspace}")
             exit(1)
         print(f"Workspace set to: {cfg.workspace}")
         cfg.save()
         exit(0)
 
-    if parser.parse_args().upload:
+    if args.commit:
         ws = BxtWorkspace(cfg.workspace, cfg.repos)
-        if not ws.init_workspace_tree():
+        if not ws.init_repo_tree():
             logging.error(f"Workspace has not been initialized: {cfg.workspace}")
             exit(1)
-        print("Uploading packages... please stand by")
+        if args.commit != "*":
+            print(f"checking '{args.commit}'", end="\r")
+            files = ws.get_packages(args.commit)
+            if len(files) > 0:
+                print(f"Uploading repo: '{args.commit}'")
+                file_count = 0
+                for file in files:
+                    if file.sig is None:
+                        print(f"'{file.pkg()}' has no signature... skipping", end="\n")
+                        continue
 
+                    print(f"Sending -> {file.pkg()}...", end="\n")
+                    encoded = encode_package_data(file)
+                    multipart_data = MultipartEncoder(fields=encoded)
+
+                    logging.debug(multipart_data.content_type)
+                    logging.debug(multipart_data.to_string())
+
+                    result = bxt_session.commit(url=f"{cfg.get_url()}/{cfg.endpoint["pkgCommit"]}",
+                                                data=multipart_data,
+                                                token=cfg.get_access_token(),
+                                                headers={"Content-Type": multipart_data.content_type}
+                                                )
+                    if result.status() != 200:
+                        print(f"Failed to upload '{file.pkg()}' -> '{result.status()}")
+                        print(f"{result.content()}")
+                        exit(1)
+                    else:
+                        file_count += 1
+
+                print(f"Done! {file_count} packages uploaded to '{args.commit}'")
+            else:
+                print(f"Nothing to do in '{args.commit}'")
+        else:
+            print("checking all repos", end="\r")
+            for repo in cfg.repos:
+                files = ws.get_packages(repo)
+                if len(files) > 0:
+                    print(f"Uploading repo: '{repo}'")
+                    file_count = 0
+                    for file in files:
+                        if file.sig is None:
+                            print(f"'{file.pkg()}' has no signature... skipping", end="\n")
+                            continue
+                        print(f"Sending -> {file.pkg()}", end="\n")
+                        file_count += 1
+                    print(f"Done! {file_count} packages uploaded to '{args.commit}'")
+                else:
+                    print(f"Nothing to do in '{repo}'")
         exit(0)
 
-    start_cmd()
+    if args.interactive:
+        start_cmd2()
 
 if __name__ == "__main__":
     """
     Main entry point
     """
-    start_cmd()
+    main()

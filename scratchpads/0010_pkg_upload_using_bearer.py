@@ -53,8 +53,8 @@ token = config.get_access_token()
 endpoint = f"{config.get_url()}/{config.endpoint["pkgCommit"]}"
 
 test_repo = config.workspace
-test_pkg_1 = "a-dummy1-0-0-any.pkg.tar.zst"
-test_pkg_2 = "a-dummy2-0-0-any.pkg.tar.zst"
+test_pkg_1 = "a-dummy3-0-0-any.pkg.tar.zst"
+# test_pkg_2 = "a-dummy2-0-0-any.pkg.tar.zst"
 
 to_section = {
     "branch": "testing",
@@ -78,14 +78,24 @@ to_section = {
 
 multipart_data = MultipartEncoder(
     fields={
-        ("package1.file", (test_pkg_1, open(f"{test_repo}/{test_pkg_1}", "rb"), 'application/octet-stream')),
+        ("package1", (test_pkg_1, open(f"{test_repo}/{test_pkg_1}", "rb"), 'application/octet-stream')),
         ("package1.signature", (f"{test_pkg_1}.sig", open(f"{test_repo}/{test_pkg_1}.sig", "rb"), 'application/octet-stream')),
         ("package1.section", (json.dumps(to_section), "text/plain")),
-        ("package2.file", (test_pkg_2, open(f"{test_repo}/{test_pkg_2}", "rb"), 'application/octet-stream')),
-        ("package2.signature", (f"{test_pkg_2}.sig", open(f"{test_repo}/{test_pkg_2}.sig", "rb"), 'application/octet-stream')),
-        ("package2.section", (json.dumps(to_section), "text/plain")),
+        # ("package2.file", (test_pkg_2, open(f"{test_repo}/{test_pkg_2}", "rb"), 'application/octet-stream')),
+        # ("package2.signature", (f"{test_pkg_2}.sig", open(f"{test_repo}/{test_pkg_2}.sig", "rb"), 'application/octet-stream')),
+        # ("package2.section", (json.dumps(to_section), "text/plain")),
     }
 )
+
+form_data = {
+        ("package1", (test_pkg_1, open(f"{test_repo}/{test_pkg_1}", "rb"), 'application/octet-stream')),
+        ("package1.signature", (f"{test_pkg_1}.sig", open(f"{test_repo}/{test_pkg_1}.sig", "rb"), 'application/octet-stream')),
+        ("package1.section", (json.dumps(to_section), "text/plain")),
+        # ("package2.file", (test_pkg_2, open(f"{test_repo}/{test_pkg_2}", "rb"), 'application/octet-stream')),
+        # ("package2.signature", (f"{test_pkg_2}.sig", open(f"{test_repo}/{test_pkg_2}.sig", "rb"), 'application/octet-stream')),
+        # ("package2.section", (json.dumps(to_section), "text/plain")),
+    }
+
 headers = {
     "Authorization": f"Bearer {token}",
     "Accept": "application/json",
@@ -106,7 +116,7 @@ print(f"multipart_data: {multipart_data.to_string()}")
 
 print("request begin    --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
 try:
-    response = session.send(req, stream=True)
+    response = session.send(req, stream=True, timeout=30)
     print("response recv    --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
     print("response headers --> ", response.headers)
     print("response status  --> ", response.status_code)

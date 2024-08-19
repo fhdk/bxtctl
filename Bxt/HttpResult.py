@@ -23,18 +23,42 @@ from typing import Dict, Any, List
 
 
 class HttpResult:
+    """
+    HTTP response class
+    """
     def __init__(self, content: Dict[str, Any], status: int):
+        """
+        Constructor
+        :param content:
+        :param status:
+        """
         self._content = content
         self._status = status
 
     def content(self) -> Dict[str, Any]:
+        """
+        Response content
+        :return:
+        """
         return self._content
 
     def status(self) -> int:
+        """
+        Response status code
+        :return:
+        """
         return self._status
 
     def get(self):
+        """
+        Response as dict
+        :return:
+        """
         return {"json": self._content, "status": self._status}
 
     def __str__(self) -> str:
+        """
+        Response as string
+        :return:
+        """
         return f"Status: {self._status}, Content: '{self._content}'"
