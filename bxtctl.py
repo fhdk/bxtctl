@@ -501,7 +501,7 @@ def main():
     parser.add_argument("-s", "--set-ws", help="Set active workspace. The full path to the workspace")
     parser.add_argument("-g", "--get-ws", action="store_true", help="Get active workspace")
     parser.add_argument("-c", "--commit", type=str, nargs='?', default="*", const="*", help=f"Commit packages")
-    parser.add_argument("--debug", action="store_true", help="Create logfile")
+    parser.add_argument("-d", "--debug", action="store_true", help="Create logfile")
     parser.add_argument("-i", "--interactive", action="store_true", help="Load interactive shell")
 
     args = parser.parse_args()
@@ -581,7 +581,7 @@ def main():
                             continue
                         print(f"Sending -> {file.pkg()}", end="\n")
                         file_count += 1
-                    print(f"Done! {file_count} packages uploaded to '{args.commit}'")
+                    print(f"Done! {file_count} packages uploaded to '{repo}'")
                 else:
                     print(f"Nothing to do in '{repo}'")
         exit(0)
