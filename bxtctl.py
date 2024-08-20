@@ -460,6 +460,9 @@ class BxtCtl(cmd2.Cmd):
             pkg = {"name": package[0], "versions": []}
             pkg_versions = package[1]
             for key in pkg_versions.keys():
+                # TODO implement the available locations
+                # TODO: names describing where the version is placed
+                locations = ("automated", "overlay", "sync")
                 if package[1][key] not in pkg["versions"]:
                     try:
                         pkg["versions"].append({"location": key, "version": package[1][key]["overlay"]})
