@@ -18,6 +18,27 @@
 #
 # Authors: Frede Hundewadt https://github.com/fhdk/bxtctl
 #
+
+"""
+                            ACHTUNG!
+               ALLES CODEMONKEYS UND DEVELOPERS!
+
+Das codemachine ist nicht fuer gefingerpoken und mittengrappen.
+You might end up schnappen the crashtest, blowenfusen und debuggen
+with the headashbang.
+
+Es ist nicht fuer gevurken by das dumkopfen. Das rubbernecken
+sightseeren, und das peering at this file without knowledge macht
+bigge troubles und loss of sleepen. Das beste practice ist:
+keepen das fingers out of das unkaesslich code unless you know
+what you are doing.
+
+Relaxen und trusten das previouser coders, und if du must change,
+make sure you commitzen and testzen. If du breaken, fixen it schnell!
+
+                                        ~ The Code Elfen
+"""
+
 import base64
 import json
 import os
@@ -41,6 +62,10 @@ class BxtConfig:
     config_file = "config.json"
     workspace = f"{Path.home()}/bxt-workspace"
     repos = []
+    logevents = ("commits", "syncs", "deploys")
+    locations = ("automated", "overlay", "sync")
+    commitevents = ("added", "deleted", "moved", "copied", "syncs")
+    committypes = ("Add", "Remove", "Update", "Copy", "Move")
 
     endpoint = {
         "auth": "api/auth",

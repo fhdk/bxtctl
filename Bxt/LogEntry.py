@@ -18,47 +18,50 @@
 #
 # Authors: Frede Hundewadt https://github.com/fhdk/bxtctl
 #
-from .Package import Package
 
+"""
+                            ACHTUNG!
+               ALLES CODEMONKEYS UND DEVELOPERS!
+
+Das codemachine ist nicht fuer gefingerpoken und mittengrappen.
+You might end up schnappen the crashtest, blowenfusen und debuggen
+with the headashbang.
+
+Es ist nicht fuer gevurken by das dumkopfen. Das rubbernecken
+sightseeren, und das peering at this file without knowledge macht
+bigge troubles und loss of sleepen. Das beste practice ist:
+keepen das fingers out of das unkaesslich code unless you know
+what you are doing.
+
+Relaxen und trusten das previouser coders, und if du must change,
+make sure you commitzen and testzen. If du breaken, fixen it schnell!
+
+                                        ~ The Code Elfen
+"""
+
+from enum import Enum
+from enum import auto
 
 class LogEntry:
-    def __init__(self, logid: str, time: int, package: Package, entrytype: str):
-        self._id = logid
-        self._time = time
-        self._package = package
-        self._entrytype = entrytype
+    def __init__(self, time: str, commit_username: str):
+        """
+        LogEntryCommit
+        """
 
-    def get(self):
-        return {
-            "id": self._id,
-            "time": self._time,
-            "package": self._package,
-            "type": self._entrytype,
-        }
+class EntryClass(Enum):
+    commits = auto()
+    deploys = auto()
+    syncs = auto()
 
-    # [
-    #   {
-    #     "id": "string",
-    #     "time": 0,
-    #     "type": "Add",
-    #     "package": {
-    #       "name": "string",
-    #       "section": "string",
-    #       "poolEntries": {
-    #         "additionalProp1": {
-    #           "version": "string",
-    #           "signaturePath": true
-    #         },
-    #         "additionalProp2": {
-    #           "version": "string",
-    #           "signaturePath": true
-    #         },
-    #         "additionalProp3": {
-    #           "version": "string",
-    #           "signaturePath": true
-    #         }
-    #       },
-    #       "preferredLocation": "string"
-    #     }
-    #   }
-    # ]
+class EntryAction(Enum):
+    added = auto()
+    copied = auto()
+    deleted = auto()
+    moved = auto()
+
+class EntryType(Enum):
+    Add = auto()
+    Copy = auto()
+    Move = auto()
+    Remove = auto()
+    Update = auto()

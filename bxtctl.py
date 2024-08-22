@@ -20,6 +20,26 @@
 # Authors: Frede Hundewadt https://github.com/fhdk/bxtctl
 #
 
+"""
+                            ACHTUNG!
+               ALLES CODEMONKEYS UND DEVELOPERS!
+
+Das codemachine ist nicht fuer gefingerpoken und mittengrappen.
+You might end up schnappen the crashtest, blowenfusen und debuggen
+with the headashbang.
+
+Es ist nicht fuer gevurken by das dumkopfen. Das rubbernecken
+sightseeren, und das peering at this file without knowledge macht
+bigge troubles und loss of sleepen. Das beste practice ist:
+keepen das fingers out of das unkaesslich code unless you know
+what you are doing.
+
+Relaxen und trusten das previouser coders, und if du must change,
+make sure you commitzen and testzen. If du breaken, fixen it schnell!
+
+                                        ~ The Code Elfen
+"""
+
 import argparse
 import cmd2
 from cmd2 import Cmd2ArgumentParser, with_argparser
@@ -462,7 +482,8 @@ class BxtCtl(cmd2.Cmd):
             for key in pkg_versions.keys():
                 # TODO implement the available locations
                 # TODO: names describing where the version is placed
-                locations = ("automated", "overlay", "sync")
+                # TODO: stored in config.locations
+
                 if package[1][key] not in pkg["versions"]:
                     try:
                         pkg["versions"].append({"location": key, "version": package[1][key]["overlay"]})
