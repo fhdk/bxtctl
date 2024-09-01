@@ -49,7 +49,6 @@ if config.valid_token():
     if not config.renew_access_token():
         z = config.login()
 
-token = config.get_access_token()
 endpoint = f"{config.get_url()}/{config.endpoint["pkgCommit"]}"
 
 dummy1 = "a-dummy1"
@@ -63,7 +62,7 @@ from_section1 = {
 from_section2 = {
     "branch": "testing",
     "repository": "extra",
-    "architecture": "aarch64"
+    "architecture": "x86_64"
 }
 
 form_content = json.dumps(
@@ -85,7 +84,7 @@ multipart_data = MultipartEncoder(
 )
 
 headers = {
-    "Authorization": f"Bearer {token}",
+    "Authorization": f"Bearer {config.get_access_token()}",
     "Accept": "application/json",
     "Content-Type": multipart_data.content_type
 }
@@ -96,12 +95,13 @@ request = Request('POST', endpoint, data=multipart_data, headers=headers)
 req = request.prepare()
 
 print("bxt_delete_pkg: BearerAuth")
-headers["Authorization"] = f"Bearer {token[:15]}...{token[-15:]}"
-print(f"req headers   : {headers}")
+to_be_printed = headers
+to_be_printed["Authorization"] = f"Bearer {config.get_access_token()[:15]}...{config.get_access_token()[-15:]}"
+print(f"req headers   : {to_be_printed}")
 print(f"req url       : {req.url}")
 print(f"form data     : {req.body}")
 print(f"multipart_data: {multipart_data.to_string()}")
-
+print("--------------------------------------------------------------")
 print("request begin    --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
 try:
     response = session.send(req, timeout=30)
