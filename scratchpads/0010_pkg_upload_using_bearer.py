@@ -49,22 +49,24 @@ if config.valid_token():
     if not config.renew_access_token():
         z = config.login()
 
-token = config.get_access_token()
+# endpoint
 endpoint = f"{config.get_url()}/{config.endpoint["pkgCommit"]}"
-
-test_repo = config.workspace
-test_pkg_1 = "a-dummy3-0-0-any.pkg.tar.zst"
-# test_pkg_2 = "a-dummy2-0-0-any.pkg.tar.zst"
-
+# the path is provided when executing the path in the CLI
 to_section = {
     "branch": "testing",
     "repository": "extra",
     "architecture": "x86_64",
 }
 
-# formdata can be either a tuple or a dictionary
-# tuple preserves the order the elements
-# dictionary posts the data in arbitrary order
+# workspace with $branch/$repo/$arch
+workspace = f"{config.workspace}/testing/extra/x86_64"
+
+test_pkg_1 = "a-dummy1-0-0-any.pkg.tar.zst"
+test_pkg_2 = "a-dummy2-0-0-any.pkg.tar.zst"
+
+# internal note: formdata can be either a tuple or a dictionary
+#  tuple preserves the order the elements
+#  dictionary posts the data in arbitrary order
 # form_data = (
 #     ("package1.file", (test_pkg_1, open(f"{test_repo}/{test_pkg_1}", "rb"))),
 #     ("package1.signature",
@@ -75,53 +77,51 @@ to_section = {
 #      (f"{test_pkg_2}.sig", open(f"{test_repo}/{test_pkg_2}.sig", "rb"))),
 #     ("package2.section", (None, json.dumps(to_section))),
 # )
-
+# Using the MultipartEncoder ensures the form is encoded correct
 multipart_data = MultipartEncoder(
     fields={
-        ("package1", (test_pkg_1, open(f"{test_repo}/{test_pkg_1}", "rb"), 'application/octet-stream')),
-        ("package1.signature", (f"{test_pkg_1}.sig", open(f"{test_repo}/{test_pkg_1}.sig", "rb"), 'application/octet-stream')),
+        ("package1", (test_pkg_1, open(f"{workspace}/{test_pkg_1}", "rb"), 'application/octet-stream')),
+        ("package1.signature", (f"{test_pkg_1}.sig", open(f"{workspace}/{test_pkg_1}.sig", "rb"), 'application/octet-stream')),
         ("package1.section", (json.dumps(to_section), "text/plain")),
-        # ("package2.file", (test_pkg_2, open(f"{test_repo}/{test_pkg_2}", "rb"), 'application/octet-stream')),
-        # ("package2.signature", (f"{test_pkg_2}.sig", open(f"{test_repo}/{test_pkg_2}.sig", "rb"), 'application/octet-stream')),
-        # ("package2.section", (json.dumps(to_section), "text/plain")),
+        ("package2.file", (test_pkg_2, open(f"{workspace}/{test_pkg_2}", "rb"), 'application/octet-stream')),
+        ("package2.signature", (f"{test_pkg_2}.sig", open(f"{workspace}/{test_pkg_2}.sig", "rb"), 'application/octet-stream')),
+        ("package2.section", (json.dumps(to_section), "text/plain")),
     }
 )
-
-form_data = {
-        ("package1", (test_pkg_1, open(f"{test_repo}/{test_pkg_1}", "rb"), 'application/octet-stream')),
-        ("package1.signature", (f"{test_pkg_1}.sig", open(f"{test_repo}/{test_pkg_1}.sig", "rb"), 'application/octet-stream')),
-        ("package1.section", (json.dumps(to_section), "text/plain")),
-        # ("package2.file", (test_pkg_2, open(f"{test_repo}/{test_pkg_2}", "rb"), 'application/octet-stream')),
-        # ("package2.signature", (f"{test_pkg_2}.sig", open(f"{test_repo}/{test_pkg_2}.sig", "rb"), 'application/octet-stream')),
-        # ("package2.section", (json.dumps(to_section), "text/plain")),
-    }
-
+# headers
 headers = {
-    "Authorization": f"Bearer {token}",
+    "Authorization": f"Bearer {config.get_access_token()}",
     "Accept": "application/json",
     "Content-Type": multipart_data.content_type
 }
-
+# create session object
 session = requests.Session()
+# populate request with endpoint data and headers
 request = Request('POST', endpoint, data=multipart_data, headers=headers)
-
+# prepare request
 req = request.prepare()
-
-print("bxt_upload_pkg: BearerAuth")
-headers["Authorization"] = f"Bearer {token[:15]}...{token[-15:]}"
+# print some info about the request
+print("bxt_upload_pkg : BearerAuth")
+# copy headers to separate object to obscure the token data string
+header_to_print = headers
+header_to_print["Authorization"] = f"Bearer {config.get_access_token()[:15]}...{config.get_access_token()[-15:]}"
 print(f"req headers   : {headers}")
 print(f"req url       : {req.url}")
 print(f"form data     : {req.body}")
 print(f"multipart_data: {multipart_data.to_string()}")
-
+print("--------------------------------------------------------------")
 print("request begin    --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
 try:
+    # use ssion object to send the request
     response = session.send(req, stream=True, timeout=30)
     print("response recv    --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
     print("response headers --> ", response.headers)
     print("response status  --> ", response.status_code)
     print("response content --> ", response.content)
 except RequestException as e:
+    # no response fro service
     print("RequestException --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
     print(e)
-
+except (Exception,) as e:
+    print("Exception --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
+    print(e)
