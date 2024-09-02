@@ -40,6 +40,8 @@ make sure you commitzen and testzen. If du breaken, fixen it schnell!
 """
 
 import logging
+from datetime import datetime
+
 import requests
 from json import JSONDecodeError
 from typing import Any
@@ -62,20 +64,24 @@ class BxtSession:
     def __init__(self, user_agent: str):
         self._user_agent = user_agent
 
-    def authenticate(self, url: str, username: str, password: str, response_type: str ="bearer") -> HttpResult:
+    def authenticate(self, url: str, username: str, password: str) -> HttpResult:
         """
         Authenticate from username and password
         :param url:
         :param username:
         :param password:
-        :param response_type:
         :return: HttpResult
         """
-        data = {"name": username, "password": password, "response_type": response_type}
-        return self.make_http_request(method="post",
-                                      url=url,
-                                      json=data
-                                      )
+        data = {
+            "name": username,
+            "password": password,
+            "response_type": "bearer"
+        }
+        return self.make_http_request(
+            method="post",
+            url=url,
+            json=data
+        )
 
     def commit(self, url: str, data: Any, token: str, headers: dict = None) -> HttpResult:
         """
@@ -87,16 +93,16 @@ class BxtSession:
         :param token:
         :return: HttpResult
         """
-        print(data)
         if headers is not None:
             headers.update({"Authorization": f"Bearer {token}"})
         else:
             headers = {"Authorization": f"Bearer {token}"}
-        return self.make_http_request(method="post",
-                                      url=url,
-                                      headers=headers,
-                                      data=data
-                                      )
+        return self.make_http_request(
+            method="post",
+            url=url,
+            headers=headers,
+            data=data
+        )
 
     def compare(self, url: str, data: list, token: str) -> HttpResult:
         """
@@ -107,11 +113,12 @@ class BxtSession:
         :return: HttpResult
         """
         headers = {"Authorization": f"Bearer {token}"}
-        return self.make_http_request(method="post",
-                                      url=url,
-                                      headers=headers,
-                                      json=data
-                                      )
+        return self.make_http_request(
+            method="post",
+            url=url,
+            headers=headers,
+            json=data
+        )
 
     def make_http_request(
         self,
@@ -135,17 +142,17 @@ class BxtSession:
         :return: HttpResult
         """
         session = requests.session()
-        request = Request(method=method,
-                          url=url,
-                          params=params,
-                          json=json,
-                          data=data,
-                          files=files,
-                          headers=headers
-                          )
+        request = Request(
+            method=method,
+            url=url,
+            params=params,
+            json=json,
+            data=data,
+            files=files,
+            headers=headers
+        )
         req = request.prepare()
         req.headers.update({"User-Agent": self._user_agent})
-
         logging.info(f"BxtSession: Making HTTP request: {method} {url}")
         logging.debug(f"data: {data}")
         logging.debug(f"files: {files}")
@@ -180,18 +187,21 @@ class BxtSession:
                 "error": "Request error",
                 "message": e}, 500)
 
-    def get_logs(self, url: str, token: str) -> [LogEntry]:
+    def get_logs(self, url: str, params: dict, token: str) -> [LogEntry]:
         """
         Get package logs
+        :param params:
         :param token:
         :param url:
         :return: list of log entries
         """
         headers = {"Authorization": f"Bearer {token}"}
-        result = self.make_http_request(method="get",
-                                        url = url,
-                                        headers=headers
-                                        )
+        result = self.make_http_request(
+            method="get",
+            url = url,
+            headers=headers,
+            params=params,
+        )
         try:
             if result.status() == 200:
                 return result.content()
@@ -203,27 +213,20 @@ class BxtSession:
             print(f"{e}\n{e.errors}")
         return []
 
-    def get_packages(
-        self,
-        url: str,
-        branch: str,
-        repositoriy: str,
-        architectue: str,
-        token: str,
-    ) -> [Package]:
+    def get_packages(self, url: str, branch: str, repository: str, architectue: str, token: str) -> [Package]:
         """
         get a list of packages
         :param token:
         :param url:
         :param branch:
-        :param repositoriy:
+        :param repository:
         :param architectue:
         :return: List of Package
         """
         headers = {"Authorization": f"Bearer {token}"}
         params = {
             "branch": branch,
-            "repository": repositoriy,
+            "repository": repository,
             "architecture": architectue,
         }
         try:
