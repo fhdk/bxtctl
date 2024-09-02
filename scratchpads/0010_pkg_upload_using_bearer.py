@@ -19,11 +19,12 @@
 #
 # Authors: Frede Hundewadt https://github.com/fhdk/bxtctl
 #
-
+import datetime
 import json
 import time
 import requests
 from Bxt.BxtConfig import BxtConfig
+from Bxt.BxtSession import BxtSession
 from requests import Request
 from requests import RequestException
 from requests_toolbelt.multipart.encoder import MultipartEncoder
@@ -111,6 +112,7 @@ print(f"form data     : {req.body}")
 print(f"multipart_data: {multipart_data.to_string()}")
 print("--------------------------------------------------------------")
 print("request begin    --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
+logstart = datetime.datetime.now()
 try:
     # use ssion object to send the request
     response = session.send(req, stream=True, timeout=30)
@@ -122,6 +124,14 @@ except RequestException as e:
     # no response fro service
     print("RequestException --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
     print(e)
+    exit(1)
 except (Exception,) as e:
     print("Exception --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
     print(e)
+    exit(1)
+
+# getting here implies a 200 OK response.
+# using the get_logs http function to query for the first package
+bxt_session = BxtSession(BxtConfig.user_agent)
+logs = bxt_session.get_logs(f"{config.get_url()}/{config.endpoint["logs"]}",, config.get_access_token()
+print(logs)

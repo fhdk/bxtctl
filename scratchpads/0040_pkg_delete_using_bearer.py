@@ -22,6 +22,10 @@
 
 import json
 import time
+import uuid
+from typing import List, Dict
+from uuid import uuid5
+
 import requests
 from Bxt.BxtConfig import BxtConfig
 from requests import Request
@@ -51,6 +55,7 @@ if config.valid_token():
 
 endpoint = f"{config.get_url()}/{config.endpoint["pkgCommit"]}"
 
+
 dummy1 = "a-dummy1"
 dummy2 = "a-dummy2"
 
@@ -67,27 +72,31 @@ from_section2 = {
 
 form_content = json.dumps(
     [
-        {"name": dummy1, "section": from_section1},
+        # {"name": dummy1, "section": from_section1},
         {"name": dummy2, "section": from_section1},
         # {"name": dummy1, "section": from_section2},
         # {"name": dummy2, "section": from_section2},
     ]
 )
 
+# to_delete: list[dict[str, str | dict[str, str]]] = [{"name": "dummy1", "section": {"branch":"testing","repository":"extra","architecture":"x86_64"}}]
+
 # formdata can be either a tuple or a dictionary
 # tuple preserves the order the elements
 # dictionary posts the data in arbitrary order
 multipart_data = MultipartEncoder(
     fields={
-        ("to_delete", form_content)
+        ("to_delete", form_content),
     }
 )
 
 headers = {
     "Authorization": f"Bearer {config.get_access_token()}",
     "Accept": "application/json",
-    "Content-Type": multipart_data.content_type
+    "Content-Type": "multipart/form-data",
+    "X-bxtctl-token": str(uuid.uuid4())
 }
+
 
 session = requests.Session()
 request = Request('POST', endpoint, data=multipart_data, headers=headers)
@@ -99,8 +108,11 @@ to_be_printed = headers
 to_be_printed["Authorization"] = f"Bearer {config.get_access_token()[:15]}...{config.get_access_token()[-15:]}"
 print(f"req headers   : {to_be_printed}")
 print(f"req url       : {req.url}")
+print("-----------------------------")
 print(f"form data     : {req.body}")
+print("-----------------------------")
 print(f"multipart_data: {multipart_data.to_string()}")
+
 print("--------------------------------------------------------------")
 print("request begin    --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
 try:

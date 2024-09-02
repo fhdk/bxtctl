@@ -47,7 +47,7 @@ http = BxtSession(config.user_agent)
 
 print("bxt_list_pkg : ")
 print("list request begin --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
-pkgs = http.get_packages(endpoint, "unstable", "multilib", "x86_64", config.get_access_token())
+pkgs = http.get_packages(endpoint, "testing", "extra", "x86_64", config.get_access_token())
 for pkg in pkgs:
     print(
         f"{pkg['name']:<30}: {pkg['poolEntries'][pkg['preferredLocation']]['version']}"

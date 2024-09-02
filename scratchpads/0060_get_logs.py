@@ -20,32 +20,43 @@
 # Authors: Frede Hundewadt https://github.com/fhdk/bxtctl
 #
 
-import argparse
-import json
 import time
-
-import cmd2
-import requests
-from cmd2 import Cmd2ArgumentParser, with_argparser
-import sys
-from Bxt.BxtAcl import BxtAcl
 from Bxt.BxtConfig import BxtConfig
 from Bxt.BxtSession import BxtSession
-import jwt
-from pprint import pprint
-import os
 
 """
-get a token from Bxt
+Get a list of packages from 
+from: stable -> extra -> x86_64 repo
 """
 
 config = BxtConfig()
 
 if not config.valid_config():
-    config.configure()
+    y = config.configure()
 
-# if not config.get_access_token():
-config.login()
+if not config.get_access_token():
+    z = config.login()
 
+if config.valid_token():
+    if not config.renew_access_token():
+        z = config.login()
 
-print(config.get_access_token())
+token = config.get_access_token()
+endpoint = f"{config.get_url()}/{config.endpoint["pkgLog"]}"
+http = BxtSession(config.user_agent)
+params = {
+    "branch": "testing",
+    "repo": "extra",
+    "arch": "x86_64",
+    "since": '2024-08-01T00:00:00.0Z',
+    "until": '2024-09-02T00:00:00.0Z',
+    "text": "dummy"
+}
+print("bxt_list_pkg : ")
+print("list request begin --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
+pkgs = http.get_logs(endpoint, params, config.get_access_token())
+for pkg in pkgs:
+    print(
+        f"{pkg['name']:<30}: {pkg['poolEntries'][pkg['preferredLocation']]['version']}"
+    )
+    print(f"source: {pkg}")
