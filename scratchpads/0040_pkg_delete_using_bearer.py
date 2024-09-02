@@ -59,25 +59,12 @@ endpoint = f"{config.get_url()}/{config.endpoint["pkgCommit"]}"
 dummy1 = "a-dummy1"
 dummy2 = "a-dummy2"
 
-from_section1 = {
+from_section = {
     "branch": "testing",
     "repository": "extra",
     "architecture": "x86_64"
 }
-from_section2 = {
-    "branch": "testing",
-    "repository": "extra",
-    "architecture": "x86_64"
-}
-
-form_content = json.dumps(
-    [
-        # {"name": dummy1, "section": from_section1},
-        {"name": dummy2, "section": from_section1},
-        # {"name": dummy1, "section": from_section2},
-        # {"name": dummy2, "section": from_section2},
-    ]
-)
+form_content = json.dumps([{"name": dummy2, "section": from_section}]).replace(" ", "")
 
 # to_delete: list[dict[str, str | dict[str, str]]] = [{"name": "dummy1", "section": {"branch":"testing","repository":"extra","architecture":"x86_64"}}]
 
@@ -85,16 +72,16 @@ form_content = json.dumps(
 # tuple preserves the order the elements
 # dictionary posts the data in arbitrary order
 multipart_data = MultipartEncoder(
+    boundary=f"------{uuid.uuid4()}",
     fields={
-        ("to_delete", form_content),
+        ("to_delete", form_content)
     }
 )
 
 headers = {
     "Authorization": f"Bearer {config.get_access_token()}",
-    "Accept": "application/json",
     "Content-Type": "multipart/form-data",
-    "X-bxtctl-token": str(uuid.uuid4())
+    "x-bxtctl-token": str(uuid.uuid4())
 }
 
 
@@ -111,6 +98,7 @@ print(f"req url       : {req.url}")
 print("-----------------------------")
 print(f"form data     : {req.body}")
 print("-----------------------------")
+print(f"Content-Length: {multipart_data.len}")
 print(f"multipart_data: {multipart_data.to_string()}")
 
 print("--------------------------------------------------------------")
@@ -122,5 +110,6 @@ try:
     print("response status  --> ", response.status_code)
     print("response content --> ", response.content)
 except RequestException as e:
+
     print("RequestException --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
     print(e)
