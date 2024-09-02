@@ -38,24 +38,23 @@ make sure you commitzen and testzen. If du breaken, fixen it schnell!
 
                                         ~ The Code Elfen
 """
+from enum import Enum
+from enum import auto
 
-from .LogEntryEnums import EntryClass, EntryAction, EntryType
+class EntryClass(Enum):
+    commits = auto()
+    deploys = auto()
+    syncs = auto()
+    
+class EntryType(Enum):
+    Add = auto()
+    Copy = auto()
+    Move = auto()
+    Remove = auto()
+    Update = auto()
 
-class PkgLocation:
-    def __init__(self, branch: str, repository: str, architecture: str):
-        self.branch = branch
-        self.repository = repository
-        self.architecture = architecture
-
-
-class LogEntry:
-    def __init__(self, entry_class: EntryClass, time: str, commit_username: str, added: list, deleted: list, moved: list, c):
-        """
-        LogEntryCommit
-        """
-        self.time = time
-        self.commit_username = commit_username
-        self.added = added
-        self.deleted = deleted
-        self.moved = moved
-        self.sopied = c
+class EntryAction(Enum):
+    added = auto()
+    copied = auto()
+    deleted = auto()
+    moved = auto()
