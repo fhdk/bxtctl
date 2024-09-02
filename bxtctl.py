@@ -68,10 +68,10 @@ class BxtCtl(cmd2.Cmd):
                 "cmp": "compare",
                 "cpp": "copy_pkg",
                 "cfg": "configure",
-                "mvp": "move_pkg",
                 "lsp": "list_path",
                 "lsr": "list_repo",
                 "lsw": "list_workspace",
+                "mvp": "move_pkg",
                 "rmp": "delete_pkg",
                 "upp": "upload",
                 "ws": "workspace",
@@ -249,11 +249,11 @@ class BxtCtl(cmd2.Cmd):
 
     if bxt_cli_args.parse_args().debug:
         logging.basicConfig(level=logging.DEBUG, filename=f"{fix_path(cfg.config_dir)}/bxtctl.log", filemode="w")
-        print("Logging level set to DEBUG")
+        print("Logging level set to DEGUG")
         logging.debug("Logging level set to DEBUG")
     else:
         logging.basicConfig(level=logging.INFO)
-        print("Logging level set to DEBUG")
+        print("Logging level set to INFO")
         logging.info("Logging level set to INFO")
 
     if bxt_cli_args.parse_args().get_ws:
@@ -414,13 +414,8 @@ class BxtCtl(cmd2.Cmd):
         :param args: path to repo e.g. branch/repo/arch
         """
         location = args.location.split("/")
-        pkgs = self.bxt_session.get_packages(
-            f"{self.cfg.get_url()}/{self.cfg.endpoint['pkgList']}",
-            location[0],
-            location[1],
-            location[2],
-            self.cfg.get_access_token(),
-        )
+        pkgs = self.bxt_session.get_packages(f"{self.cfg.get_url()}/{self.cfg.endpoint['pkgList']}", location[0],
+                                             location[1], location[2], self.cfg.get_access_token())
         for pkg in pkgs:
             self.poutput(
                 f"{pkg['name']:<30}: {pkg['poolEntries'][pkg['preferredLocation']]['version']}"
