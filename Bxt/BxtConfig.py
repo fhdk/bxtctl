@@ -56,7 +56,7 @@ class BxtConfig:
 
     license_url = "https://www.gnu.org/licenses/agpl.html"
     app_name = "bxtctl"
-    app_version = "0.4.0"
+    app_version = "0.5.0"
     user_agent = f"{app_name}/{app_version}"
     config_dir = f"{Path.home()}/.config/{app_name}"
     config_file = "config.json"
@@ -118,9 +118,7 @@ class BxtConfig:
         # get response from service
         result = self._http.authenticate(url=f"{self._url}/{self.endpoint["auth"]}",
                                          username=self._username,
-                                         password=password,
-                                         response_type="bearer"
-                                         )
+                                         password=password)
         # handle result
         if result.status() == 200:
             # assign content from result to token
@@ -163,27 +161,6 @@ class BxtConfig:
         """
         return self._url
 
-    def valid_config(self) -> bool:
-        """
-        Verify if config is valid
-        :return:
-        """
-        return self._url != "" and self._username != ""
-
-    def valid_refresh(self) -> bool:
-        """
-        Verify if refresh token is valid
-        :return:
-        """
-        return self._token.get_refresh_expired()
-
-    def valid_token(self) -> bool:
-        """
-        Verify if access token is valid
-        :return:
-        """
-        return self._token.get_access_expired()
-
     def login(self) -> bool:
         """
         request login credentials to get a token
@@ -200,8 +177,7 @@ class BxtConfig:
         # get reponse from service
         result = self._http.authenticate(url=f"{self._url}/{self.endpoint["auth"]}",
                                          username=username,
-                                         password=password,
-                                         response_type="bearer")
+                                         password=password)
         # handle result
         if result.status() == 200:
             # assign username - could have been changed
@@ -253,6 +229,27 @@ class BxtConfig:
         :return:
         """
         self.__save_config__()
+
+    def valid_config(self) -> bool:
+        """
+        Verify if config is valid
+        :return:
+        """
+        return self._url != "" and self._username != ""
+
+    def valid_refresh(self) -> bool:
+        """
+        Verify if refresh token is valid
+        :return:
+        """
+        return self._token.get_refresh_expired()
+
+    def valid_token(self) -> bool:
+        """
+        Verify if access token is valid
+        :return:
+        """
+        return self._token.get_access_expired()
 
     def __str__(self):
         """
