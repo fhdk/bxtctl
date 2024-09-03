@@ -1,20 +1,28 @@
 # Maintainer: bxtctl
 
 pkgbase=a-dummies
-pkgname=(a-dummy1 a-dummy2)
-pkgver=0
-pkgrel=0
+pkgname=(a-dummy1 a-dummy2 a-dummy3)
+pkgver=20240903.1817
+pkgrel=1
 pkgdesc="dummy packages for testing bxtctl functionality"
 url="https://github.com/fhdk/bxtctl"
 arch=('any')
 license=('MIT')
 
+pkgver(){
+  date -d "today" +"%Y%m%d.%H%M"
+}
+
 package_a-dummy1() {
-  pkgdesc="dummy1 package for testing bxtctl functionality"
+  pkgdesc="a dummy1 package for testing bxtctl functionality"
 }
 
 package_a-dummy2() {
-  pkgdesc="dummy2 package for testing bxtctl functionality"
+  pkgdesc="a dummy2 package for testing bxtctl functionality"
+}
+
+package_a-dummy3() {
+  pkgdesc="a dummy3 package for testing bxtctl functionality"
 }
 
 # vim:set ts=2 sw=2 et:
