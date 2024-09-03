@@ -53,41 +53,21 @@ if config.valid_token():
 token = config.get_access_token()
 endpoint = f"{config.get_url()}/{config.endpoint["pkgCommit"]}"
 
-from_section = {
-    "branch": "testing",
-    "repository": "extra",
-    "architecture": "aarch64"
-}
-to_section = {
-    "branch": "testing",
-    "repository": "extra",
-    "architecture": "x86_64"
-}
-
+from_section = {"branch": "testing", "repository": "extra", "architecture": "aarch64"}
+to_section = {"branch": "testing", "repository": "extra", "architecture": "x86_64"}
 
 dummy1 = "a-dummy1"
 dummy2 = "a-dummy2"
-
+dummy3 = "a-dummy3"
 form_content = json.dumps(
     [
-        {"name": dummy1, "from_section": from_section, "to_section": to_section},
-        {"name": dummy2, "from_section": from_section, "to_section": to_section}
+        {"name": dummy3, "from_section": from_section, "to_section": to_section}
     ]
 )
 
-form_content_test = [
-    {"name": dummy1, "from_section": from_section, "to_section": to_section},
-    {"name": dummy2, "from_section": from_section, "to_section": to_section}
-]
-
-# formdata can be either a tuple or a dictionary
-# tuple preserves the order the elements
-# dictionary posts the data in arbitrary order
-multipart_data = MultipartEncoder(
-    fields={
-        ("to_copy", form_content_test),
-    }
-)
+files = {
+    ("to_copy", (None, form_content, "application/json"))
+}
 
 headers = {
     "Authorization": f"Bearer {token}",
@@ -96,7 +76,7 @@ headers = {
 }
 
 session = requests.Session()
-request = Request('POST', endpoint, data=multipart_data, headers=headers)
+request = Request('POST', endpoint, headers=headers, files=files)
 
 req = request.prepare()
 
@@ -104,9 +84,7 @@ print("bxt_copy_pkg  : BearerAuth")
 headers["Authorization"] = f"Bearer {token[:15]}...{token[-15:]}"
 print(f"req headers   : {headers}")
 print(f"req url       : {req.url}")
-print("Content-Length: ", req.headers["Content-Length"])
-print("--------------------------------------------------------------")
-print(multipart_data.to_string())
+print(f"req body      : {req.body}")
 print("--------------------------------------------------------------")
 print("request begin    --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
 

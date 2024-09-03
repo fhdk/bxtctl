@@ -77,30 +77,32 @@ test_pkg_2 = "a-dummy2-0-0-any.pkg.tar.zst"
 #     ("package1.section", (None, json.dumps(to_section))),
 # )
 bxt_token = str(uuid.uuid4())
-boundary = f"------{bxt_token}"
-multipart_data = MultipartEncoder(
-    boundary=boundary,
-    fields=(
-        ("package1", (test_pkg_1, open(f"{workspace}/{test_pkg_1}", "rb"), "application/octet-stream")),
-        ("package1.signature", (f"{test_pkg_1}.sig", open(f"{workspace}/{test_pkg_1}.sig", "rb"), "application/octet-stream")),
-        ("package1.section", (json.dumps(to_section), "application/json")),
-    )
-)
+# boundary = f"------{bxt_token}"
+# multipart_data = MultipartEncoder(
+#     boundary=boundary,
+#     fields=(
+#         ("package1", (test_pkg_1, open(f"{workspace}/{test_pkg_1}", "rb"), "application/octet-stream")),
+#         ("package1.signature", (f"{test_pkg_1}.sig", open(f"{workspace}/{test_pkg_1}.sig", "rb"), "application/octet-stream")),
+#         ("package1.section", (None, json.dumps(to_section))),
+#     )
+# )
+
+files = {
+    ("package1", (test_pkg_1, open(f"{workspace}/{test_pkg_1}", "rb"), "application/octet-stream")),
+    ("package1.signature", (f"{test_pkg_1}.sig", open(f"{workspace}/{test_pkg_1}.sig", "rb"), "application/octet-stream")),
+    ("package1.section", (None, json.dumps(to_section), "application/json")),
+}
 
 # headers
 headers = {
     "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:10.0) Gecko/20100101 Firefox/10.0",
     "Authorization": f"Bearer {config.get_access_token()}",
-    "Content-Type": "multipart/form-data; boundary=" + boundary,
-    "Accept": "application/json",
-    "Accept-Encoding": "gzip, deflate, br",
     "x-bxtctl-token": bxt_token,
-    "Connection": "keep-alive",
 }
 # create session object
 session = requests.Session()
 # populate request with endpoint data and headers
-request = Request('post', endpoint, headers=headers, data=multipart_data)
+request = Request('POST', endpoint, headers=headers, files=files)
 
 # prepare request
 req = request.prepare()
@@ -111,9 +113,7 @@ header_to_print = headers
 header_to_print["Authorization"] = f"Bearer {config.get_access_token()[:15]}...{config.get_access_token()[-15:]}"
 print(f"req headers   : {headers}")
 print(f"req url       : {req.url}")
-print("Content-Length: ", req.headers["Content-Length"])
-print(multipart_data.to_string())
-
+print(f"req body      : {req.body}")
 print("--------------------------------------------------------------")
 print("request begin    --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
 logstart = datetime.datetime.now()
