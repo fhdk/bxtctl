@@ -52,6 +52,7 @@ if config.valid_token():
     if not config.renew_access_token():
         z = config.login()
 
+
 # endpoint
 endpoint = f"{config.get_url()}/{config.endpoint["pkgCommit"]}"
 # the path is provided when executing the path in the CLI
@@ -63,7 +64,6 @@ to_section = {
 
 # workspace with $branch/$repo/$arch
 workspace = f"{config.workspace}/testing/extra/x86_64"
-
 test_pkg_1 = "a-dummy1-0-0-any.pkg.tar.zst"
 test_pkg_2 = "a-dummy2-0-0-any.pkg.tar.zst"
 
@@ -118,12 +118,9 @@ print("--------------------------------------------------------------")
 print("request begin    --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
 logstart = datetime.datetime.now()
 try:
-    # use session object to send the request
-    response = session.send(req, stream=True, timeout=30)
-    print("response recv    --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
-    print("response headers --> ", response.headers)
-    print("response status  --> ", response.status_code)
-    print("response content --> ", response.content)
+
+    response = session.send(req, timeout=30)
+
 except RequestException as e:
     # no response fro service
     print("RequestException --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
@@ -133,3 +130,8 @@ except (Exception,) as e:
     print("Exception --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
     print(e)
     exit(1)
+
+print("response recv    --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
+print("response headers --> ", response.headers)
+print("response status  --> ", response.status_code)
+print("response content --> ", response.content)

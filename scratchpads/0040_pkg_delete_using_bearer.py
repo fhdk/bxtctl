@@ -95,18 +95,22 @@ to_be_printed = headers
 to_be_printed["Authorization"] = f"Bearer {config.get_access_token()[:15]}...{config.get_access_token()[-15:]}"
 print(f"req headers   : {to_be_printed}")
 print(f"req url       : {req.url}")
+print(f"Content-Length: {multipart_data.len}")
 print("--------------------------------------------------------------")
-print(f"multipart_data: {multipart_data.to_string()}")
-
+print(multipart_data.to_string())
 print("--------------------------------------------------------------")
 print("request begin    --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
 try:
-    response = session.send(req, timeout=30)
-    print("response recv    --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
-    print("response headers --> ", response.headers)
-    print("response status  --> ", response.status_code)
-    print("response content --> ", response.content)
-except RequestException as e:
 
+    response = session.send(req, timeout=30)
+
+except RequestException as e:
     print("RequestException --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
     print(e)
+    exit(1)
+
+print("response recv    --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
+print("response headers --> ", response.headers)
+print("response status  --> ", response.status_code)
+print("response content --> ", response.content)
+
