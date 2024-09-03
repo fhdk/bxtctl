@@ -56,40 +56,16 @@ if config.valid_token():
 # endpoint
 endpoint = f"{config.get_url()}/{config.endpoint["pkgCommit"]}"
 # the path is provided when executing the path in the CLI
-to_section = {
-    "branch": "testing",
-    "repository": "extra",
-    "architecture": "x86_64",
-}
-
+to_section = {"branch": "testing", "repository": "extra", "architecture": "aarch64",}
 # workspace with $branch/$repo/$arch
-workspace = f"{config.workspace}/testing/extra/x86_64"
-test_pkg_1 = "a-dummy1-0-0-any.pkg.tar.zst"
-test_pkg_2 = "a-dummy2-0-0-any.pkg.tar.zst"
-
-# internal note: formdata can be either a tuple or a dictionary
-#  tuple preserves the order the elements
-#  dictionary posts the data in arbitrary order
-# form_data = (
-#     ("package1", (test_pkg_1, open(f"{test_repo}/{test_pkg_1}", "rb"))),
-#     ("package1.signature",
-#      (f"{test_pkg_1}.sig", open(f"{test_repo}/{test_pkg_1}.sig", "rb"))),
-#     ("package1.section", (None, json.dumps(to_section))),
-# )
+workspace = f"{config.workspace}/testing/extra/aarch64"
+dummy1 = "a-dummy1-0-0-any.pkg.tar.zst"
+dummy2 = "a-dummy2-0-0-any.pkg.tar.zst"
+dummy3 = "a-dummy3-0-0-any.pkg.tar.zst"
 bxt_token = str(uuid.uuid4())
-# boundary = f"------{bxt_token}"
-# multipart_data = MultipartEncoder(
-#     boundary=boundary,
-#     fields=(
-#         ("package1", (test_pkg_1, open(f"{workspace}/{test_pkg_1}", "rb"), "application/octet-stream")),
-#         ("package1.signature", (f"{test_pkg_1}.sig", open(f"{workspace}/{test_pkg_1}.sig", "rb"), "application/octet-stream")),
-#         ("package1.section", (None, json.dumps(to_section))),
-#     )
-# )
-
 files = {
-    ("package1", (test_pkg_1, open(f"{workspace}/{test_pkg_1}", "rb"), "application/octet-stream")),
-    ("package1.signature", (f"{test_pkg_1}.sig", open(f"{workspace}/{test_pkg_1}.sig", "rb"), "application/octet-stream")),
+    ("package1", (dummy3, open(f"{workspace}/{dummy3}", "rb"), "application/octet-stream")),
+    ("package1.signature", (f"{dummy3}.sig", open(f"{workspace}/{dummy3}.sig", "rb"), "application/octet-stream")),
     ("package1.section", (None, json.dumps(to_section), "application/json")),
 }
 
