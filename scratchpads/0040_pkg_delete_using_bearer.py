@@ -54,11 +54,12 @@ if config.valid_token():
         z = config.login()
 
 endpoint = f"{config.get_url()}/{config.endpoint["pkgCommit"]}"
-dummy1 = "a-dummy1"
-dummy2 = "a-dummy2"
-dummy3 = "a-dummy3"
-from_section = {"branch": "testing", "repository": "extra", "architecture": "x86_64"}
-form_content = json.dumps([{"name": dummy2, "section": from_section}])
+from_section = {"branch": "testing", "repository": "extra", "architecture": "aarch64"}
+form_content = json.dumps([
+    {"name": "a-dummy1", "section": from_section},
+    {"name": "a-dummy2", "section": from_section},
+    {"name": "a-dummy3", "section": from_section}
+])
 
 files = {
     ("to_delete", (None, form_content, "application/json"))
