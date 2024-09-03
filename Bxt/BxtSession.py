@@ -163,29 +163,25 @@ class BxtSession:
         try:
             # execute request
             response = session.send(req, stream=True, timeout=30)
-            # return response data and status
-            return HttpResult(response.json(), response.status_code)
-
-        except JSONDecodeError as e:
-            return HttpResult({
-                "error": "Invalid JSON format",
-                "message": e
-            }, 400)
+            logging.debug(response.text)
+            if response.status_code == 200:
+                # return response data and status
+                return HttpResult(response.json(), response.status_code)
+            if response.status_code == 401:
+                return HttpResult({"content": "Unauthorized"}, response.status_code)
+            if response.status_code == 403:
+                return HttpResult({"content": "Forbidden"}, response.status_code)
+            if response.status_code == 404:
+                return HttpResult({"content": "Not found",}, response.status_code)
 
         except requests.exceptions.ConnectionError as e:
-            return HttpResult({
-                "error": "Connection error",
-                "message": e}, 503)
+            return HttpResult({"Connection Error": e}, 503)
 
         except requests.exceptions.Timeout as e:
-            return HttpResult({
-                "error": "Timeout error",
-                "message": e }, 408)
+            return HttpResult({"Conntection Timeout": e}, 408)
 
         except RequestException as e:
-            return HttpResult({
-                "error": "Request error",
-                "message": e}, 500)
+            return HttpResult({"Internal Server Error": e}, 500)
 
     def get_logs(self, url: str, params: dict, token: str) -> [LogEntry]:
         """
@@ -196,12 +192,10 @@ class BxtSession:
         :return: list of log entries
         """
         headers = {"Authorization": f"Bearer {token}"}
-        result = self.make_http_request(
-            method="get",
-            url = url,
-            headers=headers,
-            params=params,
-        )
+        result = self.make_http_request(method="get",
+                                        url = url,
+                                        headers=headers,
+                                        params=params)
         try:
             if result.status() == 200:
                 return result.content()
