@@ -53,15 +53,14 @@ if config.valid_token():
 token = config.get_access_token()
 endpoint = f"{config.get_url()}/{config.endpoint["pkgCommit"]}"
 
-from_section = {"branch": "testing", "repository": "extra", "architecture": "aarch64"}
-to_section = {"branch": "testing", "repository": "extra", "architecture": "x86_64"}
+from_section = {"branch": "testing", "repository": "extra", "architecture": "x86_64"}
+to_section = {"branch": "testing", "repository": "extra", "architecture": "aarch64"}
 
-dummy1 = "a-dummy1"
-dummy2 = "a-dummy2"
-dummy3 = "a-dummy3"
 form_content = json.dumps(
     [
-        {"name": dummy3, "from_section": from_section, "to_section": to_section}
+        {"name": "a-dummy1", "from_section": from_section, "to_section": to_section},
+        {"name": "a-dummy2", "from_section": from_section, "to_section": to_section},
+        {"name": "a-dummy3", "from_section": from_section, "to_section": to_section}
     ]
 )
 
