@@ -58,17 +58,26 @@ endpoint = f"{config.get_url()}/{config.endpoint["pkgCommit"]}"
 # the path is provided when executing the path in the CLI
 to_section = {"branch": "testing", "repository": "extra", "architecture": "aarch64",}
 # workspace with $branch/$repo/$arch
-workspace = f"{config.workspace}/testing/extra/aarch64"
-dummy1 = "a-dummy1-0-0-any.pkg.tar.zst"
-dummy2 = "a-dummy2-0-0-any.pkg.tar.zst"
-dummy3 = "a-dummy3-0-0-any.pkg.tar.zst"
+# workspace = f"{config.workspace}/testing/extra/aarch64"
+workspace = f"{config.workspace}/testing/extra/x86_64"
+# dummies
+dummy1 = "a-dummy1-20240903.1817-1-any.pkg.tar.zst"
+dummy2 = "a-dummy2-20240903.1817-1-any.pkg.tar.zst"
+dummy3 = "a-dummy3-20240903.1817-1-any.pkg.tar.zst"
+# request identification
 bxt_token = str(uuid.uuid4())
+# files
 files = {
-    ("package1", (dummy3, open(f"{workspace}/{dummy3}", "rb"), "application/octet-stream")),
-    ("package1.signature", (f"{dummy3}.sig", open(f"{workspace}/{dummy3}.sig", "rb"), "application/octet-stream")),
+    ("package1", (dummy1, open(f"{workspace}/{dummy1}", "rb"), "application/octet-stream")),
+    ("package1.signature", (f"{dummy1}.sig", open(f"{workspace}/{dummy1}.sig", "rb"), "application/octet-stream")),
     ("package1.section", (None, json.dumps(to_section), "application/json")),
+    ("package2", (dummy2, open(f"{workspace}/{dummy2}", "rb"), "application/octet-stream")),
+    ("package2.signature", (f"{dummy2}.sig", open(f"{workspace}/{dummy2}.sig", "rb"), "application/octet-stream")),
+    ("package2.section", (None, json.dumps(to_section), "application/json")),
+    ("package3", (dummy3, open(f"{workspace}/{dummy3}", "rb"), "application/octet-stream")),
+    ("package3.signature", (f"{dummy3}.sig", open(f"{workspace}/{dummy3}.sig", "rb"), "application/octet-stream")),
+    ("package3.section", (None, json.dumps(to_section), "application/json")),
 }
-
 # headers
 headers = {
     "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:10.0) Gecko/20100101 Firefox/10.0",
