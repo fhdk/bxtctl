@@ -64,17 +64,17 @@ from_section = {
     "repository": "extra",
     "architecture": "x86_64"
 }
-form_content = json.dumps([{"name": dummy2, "section": from_section}]).replace(" ", "")
+form_content = json.dumps([{"name": dummy2, "section": from_section}])
 
 # to_delete: list[dict[str, str | dict[str, str]]] = [{"name": "dummy1", "section": {"branch":"testing","repository":"extra","architecture":"x86_64"}}]
-
+to_delete = "to_delete"
 # formdata can be either a tuple or a dictionary
 # tuple preserves the order the elements
 # dictionary posts the data in arbitrary order
 multipart_data = MultipartEncoder(
     boundary=f"------{uuid.uuid4()}",
     fields={
-        ("to_delete", form_content)
+        (to_delete, form_content)
     }
 )
 
@@ -95,10 +95,7 @@ to_be_printed = headers
 to_be_printed["Authorization"] = f"Bearer {config.get_access_token()[:15]}...{config.get_access_token()[-15:]}"
 print(f"req headers   : {to_be_printed}")
 print(f"req url       : {req.url}")
-print("-----------------------------")
-print(f"form data     : {req.body}")
-print("-----------------------------")
-print(f"Content-Length: {multipart_data.len}")
+print("--------------------------------------------------------------")
 print(f"multipart_data: {multipart_data.to_string()}")
 
 print("--------------------------------------------------------------")

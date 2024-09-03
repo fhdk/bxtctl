@@ -22,9 +22,11 @@
 import datetime
 import json
 import time
+import uuid
+from pprint import pprint
+
 import requests
 from Bxt.BxtConfig import BxtConfig
-from Bxt.BxtSession import BxtSession
 from requests import Request
 from requests import RequestException
 from requests_toolbelt.multipart.encoder import MultipartEncoder
@@ -69,52 +71,54 @@ test_pkg_2 = "a-dummy2-0-0-any.pkg.tar.zst"
 #  tuple preserves the order the elements
 #  dictionary posts the data in arbitrary order
 # form_data = (
-#     ("package1.file", (test_pkg_1, open(f"{test_repo}/{test_pkg_1}", "rb"))),
+#     ("package1", (test_pkg_1, open(f"{test_repo}/{test_pkg_1}", "rb"))),
 #     ("package1.signature",
 #      (f"{test_pkg_1}.sig", open(f"{test_repo}/{test_pkg_1}.sig", "rb"))),
 #     ("package1.section", (None, json.dumps(to_section))),
-#     ("package2.file", (test_pkg_2, open(f"{test_repo}/{test_pkg_2}", "rb"))),
-#     ("package2.signature",
-#      (f"{test_pkg_2}.sig", open(f"{test_repo}/{test_pkg_2}.sig", "rb"))),
-#     ("package2.section", (None, json.dumps(to_section))),
 # )
-# Using the MultipartEncoder ensures the form is encoded correct
+bxt_token = str(uuid.uuid4())
+boundary = f"------{bxt_token}"
 multipart_data = MultipartEncoder(
-    fields={
-        ("package1", (test_pkg_1, open(f"{workspace}/{test_pkg_1}", "rb"), 'application/octet-stream')),
-        ("package1.signature", (f"{test_pkg_1}.sig", open(f"{workspace}/{test_pkg_1}.sig", "rb"), 'application/octet-stream')),
-        ("package1.section", (json.dumps(to_section), "text/plain")),
-        ("package2.file", (test_pkg_2, open(f"{workspace}/{test_pkg_2}", "rb"), 'application/octet-stream')),
-        ("package2.signature", (f"{test_pkg_2}.sig", open(f"{workspace}/{test_pkg_2}.sig", "rb"), 'application/octet-stream')),
-        ("package2.section", (json.dumps(to_section), "text/plain")),
-    }
+    boundary=boundary,
+    fields=(
+        ("package1", (test_pkg_1, open(f"{workspace}/{test_pkg_1}", "rb"))),
+        ("package1.signature", (f"{test_pkg_1}.sig", open(f"{workspace}/{test_pkg_1}.sig", "rb"))),
+        ("package1.section", json.dumps(to_section)),
+    )
 )
+
 # headers
 headers = {
+    "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:10.0) Gecko/20100101 Firefox/10.0",
     "Authorization": f"Bearer {config.get_access_token()}",
+    "Content-Type": "multipart/form-data; boundary=" + boundary,
     "Accept": "application/json",
-    "Content-Type": multipart_data.content_type
+    "Accept-Encoding": "gzip, deflate, br",
+    "x-bxtctl-token": bxt_token,
+    "Connection": "keep-alive",
 }
 # create session object
 session = requests.Session()
 # populate request with endpoint data and headers
-request = Request('POST', endpoint, data=multipart_data, headers=headers)
+request = Request('post', endpoint, headers=headers, data=multipart_data)
+
 # prepare request
 req = request.prepare()
 # print some info about the request
-print("bxt_upload_pkg : BearerAuth")
+print("bxt_upload_pkg: BearerAuth")
 # copy headers to separate object to obscure the token data string
 header_to_print = headers
 header_to_print["Authorization"] = f"Bearer {config.get_access_token()[:15]}...{config.get_access_token()[-15:]}"
 print(f"req headers   : {headers}")
 print(f"req url       : {req.url}")
-print(f"form data     : {req.body}")
-print(f"multipart_data: {multipart_data.to_string()}")
+print("Content-Length: ", req.headers["Content-Length"])
+print(multipart_data.to_string())
+
 print("--------------------------------------------------------------")
 print("request begin    --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
 logstart = datetime.datetime.now()
 try:
-    # use ssion object to send the request
+    # use session object to send the request
     response = session.send(req, stream=True, timeout=30)
     print("response recv    --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
     print("response headers --> ", response.headers)
@@ -129,9 +133,3 @@ except (Exception,) as e:
     print("Exception --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
     print(e)
     exit(1)
-
-# getting here implies a 200 OK response.
-# using the get_logs http function to query for the first package
-bxt_session = BxtSession(BxtConfig.user_agent)
-logs = bxt_session.get_logs(f"{config.get_url()}/{config.endpoint["logs"]}",, config.get_access_token()
-print(logs)
