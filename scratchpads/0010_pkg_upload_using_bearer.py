@@ -81,9 +81,9 @@ boundary = f"------{bxt_token}"
 multipart_data = MultipartEncoder(
     boundary=boundary,
     fields=(
-        ("package1", (test_pkg_1, open(f"{workspace}/{test_pkg_1}", "rb"))),
-        ("package1.signature", (f"{test_pkg_1}.sig", open(f"{workspace}/{test_pkg_1}.sig", "rb"))),
-        ("package1.section", json.dumps(to_section)),
+        ("package1", (test_pkg_1, open(f"{workspace}/{test_pkg_1}", "rb"), "application/octet-stream")),
+        ("package1.signature", (f"{test_pkg_1}.sig", open(f"{workspace}/{test_pkg_1}.sig", "rb"), "application/octet-stream")),
+        ("package1.section", json.dumps(to_section), "application/json"),
     )
 )
 
