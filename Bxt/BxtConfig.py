@@ -71,7 +71,7 @@ class BxtConfig:
         "auth": "api/auth",
         "refresh": "api/auth/refresh",
         "revoke": "api/auth/revoke",
-        "pkgLog": "api/logs/packages",
+        "pkgLog": "api/logs",
         "pkgList": "api/packages",
         "pkgCommit": "api/packages/commit",
         "pkgSection": "api/sections",
