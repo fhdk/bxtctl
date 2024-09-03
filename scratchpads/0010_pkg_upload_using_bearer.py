@@ -83,7 +83,7 @@ multipart_data = MultipartEncoder(
     fields=(
         ("package1", (test_pkg_1, open(f"{workspace}/{test_pkg_1}", "rb"), "application/octet-stream")),
         ("package1.signature", (f"{test_pkg_1}.sig", open(f"{workspace}/{test_pkg_1}.sig", "rb"), "application/octet-stream")),
-        ("package1.section", json.dumps(to_section), "application/json"),
+        ("package1.section", (json.dumps(to_section), "application/json")),
     )
 )
 
