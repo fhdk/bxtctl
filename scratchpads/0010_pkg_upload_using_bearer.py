@@ -79,15 +79,15 @@ headers = {
 session = requests.Session()
 # populate request with endpoint data and headers
 request = Request('POST', endpoint, headers=headers, files=files)
-
+token = config.get_access_token()
 # prepare request
 req = request.prepare()
 # print some info about the request
 print("bxt_upload_pkg: BearerAuth")
 # copy headers to separate object to obscure the token data string
-header_to_print = headers
-header_to_print["Authorization"] = f"Bearer {config.get_access_token()[:15]}...{config.get_access_token()[-15:]}"
-print(f"req headers   : {headers}")
+to_be_printed = req.headers.copy()
+to_be_printed["Authorization"] = f"Bearer {token[:15]}...{token[-15:]}"
+print(f"req headers   : {to_be_printed}")
 print(f"req url       : {req.url}")
 print(f"req body      : {req.body}")
 print("--------------------------------------------------------------")

@@ -81,8 +81,9 @@ request = Request('POST', endpoint, headers=headers, files=files)
 req = request.prepare()
 
 print("bxt_move_pkg  : BearerAuth")
-headers["Authorization"] = f"Bearer {token[:15]}...{token[-15:]}"
-print(f"req headers   : {headers}")
+to_be_printed = req.headers.copy()
+to_be_printed["Authorization"] = f"Bearer {token[:15]}...{token[-15:]}"
+print(f"req headers   : {to_be_printed}")
 print(f"req url       : {req.url}")
 print(f"req body      : {req.body}")
 print("--------------------------------------------------------------")
