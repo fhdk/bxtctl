@@ -54,29 +54,15 @@ if config.valid_token():
         z = config.login()
 
 endpoint = f"{config.get_url()}/{config.endpoint["pkgCommit"]}"
-
-
 dummy1 = "a-dummy1"
 dummy2 = "a-dummy2"
-
-from_section = {
-    "branch": "testing",
-    "repository": "extra",
-    "architecture": "x86_64"
-}
+dummy3 = "a-dummy3"
+from_section = {"branch": "testing", "repository": "extra", "architecture": "x86_64"}
 form_content = json.dumps([{"name": dummy2, "section": from_section}])
 
-# to_delete: list[dict[str, str | dict[str, str]]] = [{"name": "dummy1", "section": {"branch":"testing","repository":"extra","architecture":"x86_64"}}]
-to_delete = "to_delete"
-# formdata can be either a tuple or a dictionary
-# tuple preserves the order the elements
-# dictionary posts the data in arbitrary order
-multipart_data = MultipartEncoder(
-    boundary=f"------{uuid.uuid4()}",
-    fields={
-        (to_delete, form_content)
-    }
-)
+files = {
+    ("to_delete", (None, form_content, "application/json"))
+}
 
 headers = {
     "Authorization": f"Bearer {config.get_access_token()}",
@@ -84,9 +70,8 @@ headers = {
     "x-bxtctl-token": str(uuid.uuid4())
 }
 
-
 session = requests.Session()
-request = Request('POST', endpoint, data=multipart_data, headers=headers)
+request = Request('POST', endpoint, headers=headers, files=files)
 
 req = request.prepare()
 
@@ -95,9 +80,7 @@ to_be_printed = headers
 to_be_printed["Authorization"] = f"Bearer {config.get_access_token()[:15]}...{config.get_access_token()[-15:]}"
 print(f"req headers   : {to_be_printed}")
 print(f"req url       : {req.url}")
-print(f"Content-Length: {multipart_data.len}")
-print("--------------------------------------------------------------")
-print(multipart_data.to_string())
+print(f"req body      : {req.body}")
 print("--------------------------------------------------------------")
 print("request begin    --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
 try:
