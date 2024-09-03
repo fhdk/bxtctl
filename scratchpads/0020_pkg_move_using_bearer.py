@@ -55,13 +55,11 @@ endpoint = f"{config.get_url()}/{config.endpoint["pkgCommit"]}"
 from_section = {"branch": "testing", "repository": "extra", "architecture": "x86_64"}
 to_section = {"branch": "testing", "repository": "extra", "architecture": "aarch64"}
 
-dummy1 = "a-dummy1"
-dummy2 = "a-dummy2"
-
 form_content = json.dumps(
     [
-        {"name": dummy1, "from_section": from_section, "to_section": to_section},
-        {"name": dummy2, "from_section": from_section, "to_section": to_section}
+        {"name": "a-dummy1", "from_section": from_section, "to_section": to_section},
+        {"name": "a-dummy2", "from_section": from_section, "to_section": to_section},
+        {"name": "a-dummy3", "from_section": from_section, "to_section": to_section}
     ]
 )
 
