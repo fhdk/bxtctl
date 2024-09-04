@@ -42,9 +42,13 @@ make sure you commitzen and testzen. If du breaken, fixen it schnell!
 import jwt
 import time
 
+from Bxt.BxtException import BxtException
+
 OPTIONS = {"verify_signature": False}
 ALGORITHMS = ["HS256"]
 
+# TODO catch JWT parsing errors
+# TODO raise an BxtExeption instance on JWT parsing errors
 
 class BxtToken:
     access_token: str = ""
@@ -53,9 +57,12 @@ class BxtToken:
 
     def __init__(self, token: dict = None):
         if token:
-            self.access_token = token["access_token"]
-            self.refresh_token = token["refresh_token"]
-            self.token_type = token["token_type"]
+            try:
+                self.access_token = token["access_token"]
+                self.refresh_token = token["refresh_token"]
+                self.token_type = token["token_type"]
+            except KeyError:
+                raise BxtException(msg="Invalid token format", errors="One or more elements could not be parsed from the token")
 
     def __str__(self):
         return f"BxtToken (Access Token: '{self.access_token}', Refresh Token: '{self.refresh_token}', Token Type: '{self.token_type}')"
