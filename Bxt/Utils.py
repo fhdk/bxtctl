@@ -43,6 +43,44 @@ from typing import List
 import os
 import json
 from .BxtFile import BxtFile
+import requests
+
+def check_connection(url: str) -> bool:
+    """
+    Check connection to host
+    :param url:
+    :return:
+    """
+    response = requests.get(url, timeout=5)
+    if response.status_code == 200:
+        return True
+    return False
+
+def encode_package_data(file: BxtFile, idx: int = 1):
+    """
+    Create dictionary to be consumed by MultipartEncoder
+    :param file:
+    :param idx:
+    :return:
+    """
+    return {
+        (f"package{idx}", (file.pkg(), open(file.pkg(), "rb"), 'application/octet-stream')),
+        (f"package{idx}.signature", (file.sig, open(file.sig, "rb"), 'application/octet-stream')),
+        (f"package{idx}.section", (json.dumps(file.section()), "text/plain")),
+    }
+
+
+def fix_path(path: str) -> str:
+    """
+    Expand home path
+    :param path:
+    :rtype: str
+    :return: fixed path
+    """
+    if "~" in path:
+        path = path.replace("~", os.path.expanduser("~"))
+    return path
+
 
 def path_completion(branches, repos, archs) -> List[str]:
     """
@@ -62,26 +100,3 @@ def path_completion(branches, repos, archs) -> List[str]:
                 result.append(f"{branch}/{repo}/{arch}")
     return result
 
-def fix_path(path: str) -> str:
-    """
-    Expand home path
-    :param path:
-    :rtype: str
-    :return: fixed path
-    """
-    if "~" in path:
-        path = path.replace("~", os.path.expanduser("~"))
-    return path
-
-def encode_package_data(file: BxtFile, idx: int = 1):
-    """
-    Create dictionary to be consumed by MultipartEncoder
-    :param file:
-    :param idx:
-    :return:
-    """
-    return {
-        (f"package{idx}", (file.pkg(), open(file.pkg(), "rb"), 'application/octet-stream')),
-        (f"package{idx}.signature", (file.sig, open(file.sig, "rb"), 'application/octet-stream')),
-        (f"package{idx}.section", (json.dumps(file.section()), "text/plain")),
-    }
