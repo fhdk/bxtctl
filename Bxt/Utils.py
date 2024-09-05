@@ -45,6 +45,7 @@ import json
 from .BxtFile import BxtFile
 import requests
 
+
 def check_connection(url: str) -> bool:
     """
     Check connection to host
@@ -56,6 +57,7 @@ def check_connection(url: str) -> bool:
         return True
     return False
 
+
 def encode_package_data(file: BxtFile, idx: int = 1):
     """
     Create dictionary to be consumed by MultipartEncoder
@@ -64,9 +66,9 @@ def encode_package_data(file: BxtFile, idx: int = 1):
     :return:
     """
     return {
-        (f"package{idx}", (file.pkg(), open(file.pkg(), "rb"), 'application/octet-stream')),
-        (f"package{idx}.signature", (file.sig, open(file.sig, "rb"), 'application/octet-stream')),
-        (f"package{idx}.section", (json.dumps(file.section()), "text/plain")),
+        (f"package{idx}", (file.package, open(file.package, "rb"), 'application/octet-stream')),
+        (f"package{idx}.signature", (file.signature, open(file.signature, "rb"), 'application/octet-stream')),
+        (f"package{idx}.section", (json.dumps(file.section), "text/plain")),
     }
 
 
@@ -82,21 +84,21 @@ def fix_path(path: str) -> str:
     return path
 
 
-def path_completion(branches, repos, archs) -> List[str]:
+def path_completion(branches, repositories, architectures) -> List[str]:
     """
     generate a list of path completions for bxt repo
     :param branches:
-    :param repos:
-    :param archs:
+    :param repositories:
+    :param architectures:
     :return:
     """
     result = []
     branches = list(branches())
-    repos = list(repos())
-    archs = list(archs())
+    repositories = list(repositories())
+    architectures = list(architectures())
     for branch in branches:
-        for repo in repos:
-            for arch in archs:
+        for repo in repositories:
+            for arch in architectures:
                 result.append(f"{branch}/{repo}/{arch}")
     return result
 
