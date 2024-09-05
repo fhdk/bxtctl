@@ -55,10 +55,10 @@ acl = BxtAcl(sections)
 
 config.repos = path_completion(acl.get_branches, acl.get_repositories, acl.get_architectures)
 
-print(config.workspace)
+print(config.get_workspace())
 print(config.repos)
 
-ws = BxtWorkspace(config.workspace, config.repos)
+ws = BxtWorkspace(config.get_workspace(), config.repos)
 files = ws.get_packages("testing/extra/x86_64")
 
 # PoC create form with multiple packages for uploading in one request
