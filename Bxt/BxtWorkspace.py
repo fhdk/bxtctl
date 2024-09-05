@@ -106,7 +106,7 @@ class BxtWorkspace:
             "architecture": data[2],
         }
 
-    def init_repo_tree(self) -> bool:
+    def init_workspace(self) -> bool:
         """
         Initialize workspace structure
         :return:
