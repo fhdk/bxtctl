@@ -56,14 +56,15 @@ if config.valid_token():
 # endpoint
 endpoint = f"{config.get_url()}/{config.endpoint["pkgCommit"]}"
 # the path is provided when executing the path in the CLI
-to_section = {"branch": "testing", "repository": "extra", "architecture": "aarch64",}
+to_section = {"branch": "testing", "repository": "extra", "architecture": "x86_64",}
 # workspace with $branch/$repo/$arch
 # workspace = f"{config.workspace}/testing/extra/aarch64"
 workspace = f"{config.get_workspace()}/testing/extra/x86_64"
 # dummies
-dummy1 = "a-dummy1-20240903.1817-1-any.pkg.tar.zst"
-dummy2 = "a-dummy2-20240903.1817-1-any.pkg.tar.zst"
-dummy3 = "a-dummy3-20240903.1817-1-any.pkg.tar.zst"
+pkgver = "20240905.1651"
+dummy1 = f"a-dummy1-{pkgver}-1-any.pkg.tar.zst"
+dummy2 = f"a-dummy2-{pkgver}-1-any.pkg.tar.zst"
+dummy3 = f"a-dummy3-{pkgver}-1-any.pkg.tar.zst"
 # request identification
 bxt_token = str(uuid.uuid4())
 # files
