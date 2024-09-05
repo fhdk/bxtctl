@@ -59,7 +59,7 @@ endpoint = f"{config.get_url()}/{config.endpoint["pkgCommit"]}"
 to_section = {"branch": "testing", "repository": "extra", "architecture": "aarch64",}
 # workspace with $branch/$repo/$arch
 # workspace = f"{config.workspace}/testing/extra/aarch64"
-workspace = f"{config.workspace}/testing/extra/x86_64"
+workspace = f"{config.get_workspace()}/testing/extra/x86_64"
 # dummies
 dummy1 = "a-dummy1-20240903.1817-1-any.pkg.tar.zst"
 dummy2 = "a-dummy2-20240903.1817-1-any.pkg.tar.zst"
