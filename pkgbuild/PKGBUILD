@@ -2,16 +2,12 @@
 
 pkgbase=a-dummies
 pkgname=(a-dummy1 a-dummy2 a-dummy3)
-pkgver=20240903.1817
+pkgver=20240905.1651
 pkgrel=1
 pkgdesc="dummy packages for testing bxtctl functionality"
 url="https://github.com/fhdk/bxtctl"
 arch=('any')
 license=('MIT')
-
-pkgver(){
-  date -d "today" +"%Y%m%d.%H%M"
-}
 
 package_a-dummy1() {
   pkgdesc="a dummy1 package for testing bxtctl functionality"
