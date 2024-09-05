@@ -83,8 +83,8 @@ class BxtWorkspace:
             for file in os.listdir(f"{self._path}/{repo}"):
                 if file.endswith(".pkg.tar.zst"):
                     bxt_file = BxtFile(section, f"{self._path}/{repo}/{file}", f"{self._path}/{repo}/{file}.sig")
-                    if not os.path.exists(bxt_file.sig):
-                        bxt_file.sig = None
+                    if not os.path.exists(bxt_file.signature):
+                        bxt_file.signature = None
                     result.append(bxt_file)
             return result
         except NotADirectoryError:
@@ -131,7 +131,7 @@ class BxtWorkspace:
         :return:
         """
         try:
-            os.remove(file.pkg())
-            os.remove(file.sig)
+            os.remove(file.package)
+            os.remove(file.signature)
         except FileNotFoundError:
             pass
