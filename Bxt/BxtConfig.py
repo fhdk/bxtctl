@@ -56,11 +56,10 @@ class BxtConfig:
 
     license_url = "https://www.gnu.org/licenses/agpl.html"
     app_name = "bxtctl"
-    app_version = "0.5.0"
-    user_agent = f"{app_name}/{app_version}"
+    app_version = "0.6.0"
     config_dir = f"{Path.home()}/.config/{app_name}"
     config_file = "config.json"
-    workspace = f"{Path.home()}/bxt-workspace"
+    user_agent = f"{app_name}/{app_version}"
     repos = []
     logevents = ("commits", "syncs", "deploys")
     locations = ("automated", "overlay", "sync")
@@ -86,15 +85,18 @@ class BxtConfig:
         """
         self._configstore = f"{self.config_dir}/{self.config_file}"
         self._http = BxtSession(user_agent=self.user_agent)
+        self._batch_size = 10
         self._url: str = ""
         self._username: str = ""
         self._token: BxtToken = BxtToken()
+        self._token_renew_interval = 600
+        self._workspace = f"{Path.home()}/bxt-workspace"
 
         # create config dir if not existing
         if not os.path.isdir(self.config_dir):
             os.mkdir(self.config_dir)
-        if not os.path.isdir(self.workspace):
-            os.mkdir(self.workspace)
+        if not os.path.isdir(self._workspace):
+            os.mkdir(self._workspace)
         # check configstore on disk
         if not os.path.isfile(f"{self.config_dir}/{self.config_file}"):
             # generrate empty default
@@ -128,13 +130,6 @@ class BxtConfig:
             return True
         return False
 
-    def get_hostname(self) -> str:
-        """
-        get hostname without protocol
-        :return:
-        """
-        return self._url.split("//")[-1]
-
     def get_access_token(self) -> str:
         """
         Return Bxt token
@@ -146,6 +141,27 @@ class BxtConfig:
                 if not self.login():
                     return ""
         return self._token.get_access_token()
+
+    def get_batch_size(self) -> int:
+        """
+        Return batch size
+        :return:
+        """
+        return self._batch_size
+
+    def get_workspace(self) -> str:
+        """
+        Return workspace path
+        :return:
+        """
+        return self._workspace
+
+    def get_hostname(self) -> str:
+        """
+        get hostname without protocol
+        :return:
+        """
+        return self._url.split("//")[-1]
 
     def get_name(self) -> str:
         """
@@ -216,7 +232,8 @@ class BxtConfig:
         :return:
         """
         result = self._http.revoke_refresh_token(url=f"{self._url}/{self.endpoint["revoke"]}",
-                                                 token=self._token.get_refresh_token())
+                                                 token=self._token.get_refresh_token()
+                                                 )
         if result.status() == 200:
             self._token = {}
             self.__save_config__()
@@ -228,6 +245,24 @@ class BxtConfig:
         save config
         :return:
         """
+        self.__save_config__()
+
+    def set_batch_size(self, batch_size: int) -> None:
+        """
+        Set batch size
+        :param batch_size:
+        :return:
+        """
+        self._batch_size = batch_size
+        self.__save_config__()
+
+    def set_workspace(self, workspace: str) -> None:
+        """
+        Set workspace
+        :param workspace:
+        :return:
+        """
+        self._workspace = workspace
         self.__save_config__()
 
     def valid_config(self) -> bool:
@@ -256,7 +291,7 @@ class BxtConfig:
         Return textual representation of the configuration  class
         :return:
         """
-        return f"BxtConfig(Url: '{self._url}', Name: '{self._username}', Token: '{self._token}')"
+        return f"BxtConfig(Url: '{self._url}', Name: '{self._username}', Token: '{self._token}', TokenRenew: '{self._token_renew_interval}s', Batch: '{self._batch_size}pkgs', Workspace: '{self._workspace}')"
 
     def __load_config__(self):
         """
@@ -269,7 +304,7 @@ class BxtConfig:
                 config = json.load(infile)
             # read workdir
             try:
-                self.workspace = config["workspace"]
+                self._workspace = config["workspace"]
             except KeyError:
                 pass
             # read name
@@ -287,6 +322,11 @@ class BxtConfig:
                 self._token = BxtToken(config["token"])
             except KeyError:
                 self._token = BxtToken()
+            # read batch size
+            try:
+                self._batch_size = config["batch_size"]
+            except KeyError:
+                self._batch_size = 100
 
         except json.JSONDecodeError:
             self._username = ""
@@ -305,10 +345,11 @@ class BxtConfig:
         :return:
         """
         temp = {
+            "batch_size": self._batch_size,
+            "token": self._token,
             "url": self._url,
             "username": self._username,
-            "token": self._token,
-            "workspace": self.workspace,
+            "workspace": self._workspace,
         }
         with open(self._configstore, "w") as outfile:
             json.dump(temp, outfile, indent=2, cls=BxtEncoder)
