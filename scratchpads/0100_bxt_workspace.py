@@ -52,9 +52,9 @@ acl = BxtAcl(sections)
 
 config.repos = path_completion(acl.get_branches, acl.get_repositories, acl.get_architectures)
 
-print(config.workspace)
+print(config.get_workspace())
 print(config.repos)
 
-ws = BxtWorkspace(config.workspace, config.repos)
+ws = BxtWorkspace(config.get_workspace(), config.repos)
 
-print("init_repos: ", ws.init_repo_tree())
+print("init_repos: ", ws.init_workspace())
