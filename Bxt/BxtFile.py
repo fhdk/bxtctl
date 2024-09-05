@@ -47,9 +47,10 @@ class BxtFile:
     """
     def __init__(self, section: Dict[str,str], pkg: str, sig: str):
         self._section = section
-        self._pkg = pkg
-        self._sig = sig
+        self._package = pkg
+        self._signature = sig
 
+    @property
     def section(self):
         """
         Get Section
@@ -57,27 +58,27 @@ class BxtFile:
         """
         return self._section
 
-    def pkg(self):
+    @property
+    def package(self):
         """
         Get Package File Name and Path
         :return: 
         """""
-        return self._pkg
+        return self._package
 
     @property
-    def sig(self):
+    def signature(self):
         """
         Get Signature File Name
         :return:
         """
-        return self._sig
+        return self._signature
 
-    @sig.setter
-    def sig(self, sig: str):
+    @signature.setter
+    def signature(self, signature: str):
         """
         Set Signature File Name
-        :param sig:
+        :param signature:
         :return:
         """
-        self._sig = sig
-
+        self._signature = signature
