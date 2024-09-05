@@ -257,23 +257,23 @@ class BxtCtl(cmd2.Cmd):
         logging.info("Logging level set to INFO")
 
     if bxt_cli_args.parse_args().get_ws:
-        print(cfg.workspace)
+        print(cfg.get_workspace())
         exit(0)
 
     if bxt_cli_args.parse_args().set_ws:
-        cfg.workspace = fix_path(bxt_cli_args.parse_args().set_ws)
-        ws = BxtWorkspace(cfg.workspace, cfg.repos)
-        if not ws.init_repo_tree():
-            logging.error(f"Failed to initialize workspace: {cfg.workspace}")
+        cfg.set_workspace(fix_path(bxt_cli_args.parse_args().set_ws))
+        ws = BxtWorkspace(cfg.get_workspace(), cfg.repos)
+        if not ws.init_workspace():
+            logging.error(f"Failed to initialize workspace: {cfg.get_workspace()}")
             exit(1)
-        print(f"Workspace set to: {cfg.workspace}")
+        print(f"Workspace set to: {cfg.get_workspace()}")
         cfg.save()
         exit(0)
 
     if bxt_cli_args.parse_args().commit:
-        ws = BxtWorkspace(cfg.workspace, cfg.repos)
-        if not ws.init_repo_tree():
-            logging.error(f"Workspace has not been initialized: {cfg.workspace}")
+        ws = BxtWorkspace(cfg.get_workspace(), cfg.repos)
+        if not ws.init_workspace():
+            logging.error(f"Workspace has not been initialized: {cfg.get_workspace()}")
             exit(1)
         to_commit = bxt_cli_args.parse_args().commit
         if to_commit != "*":
@@ -283,11 +283,11 @@ class BxtCtl(cmd2.Cmd):
                 print(f"Uploading repo: '{to_commit}'")
                 file_count = 0
                 for file in files:
-                    if file.sig is None:
-                        print(f"'{file.pkg()}' has no signature... skipping", end="\n")
+                    if file.signature is None:
+                        print(f"'{file.package()}' has no signature... skipping", end="\n")
                         continue
 
-                    print(f"Sending -> {file.pkg()}...", end="\n")
+                    print(f"Sending -> {file.package()}...", end="\n")
                     encoded = encode_package_data(file)
                     multipart_data = MultipartEncoder(fields=encoded)
 
@@ -300,7 +300,7 @@ class BxtCtl(cmd2.Cmd):
                                                 headers={"Content-Type": multipart_data.content_type}
                                                 )
                     if result.status() != 200:
-                        print(f"Failed to upload '{file.pkg()}' -> '{result.status()}'")
+                        print(f"Failed to upload '{file.package()}' -> '{result.status()}'")
                         print(f"{result.content()}")
                         exit(1)
                     else:
@@ -319,10 +319,10 @@ class BxtCtl(cmd2.Cmd):
                     print(f"Uploading repo: '{repo}'")
                     file_count = 0
                     for file in files:
-                        if file.sig is None:
-                            print(f"'{file.pkg()}' has no signature... skipping", end="\n")
+                        if file.signature is None:
+                            print(f"'{file.package()}' has no signature... skipping", end="\n")
                             continue
-                        print(f"Sending -> {file.pkg()}", end="\n")
+                        print(f"Sending -> {file.package()}", end="\n")
                         file_count += 1
                     print(f"Done! {file_count} packages uploaded to '{repo}'")
                 else:
@@ -371,14 +371,14 @@ class BxtCtl(cmd2.Cmd):
         Get or set workspace
         :param args: optional path to new workspace
         """
-        if not args.workspace:
-            self.poutput(f"Current workspace is: {self.cfg.workspace}")
+        if not args._workspace:
+            self.poutput(f"Current workspace is: {self.cfg.get_workspace()}")
         else:
-            ws_path = fix_path(args.workspace)
+            ws_path = fix_path(args._workspace)
             ws = BxtWorkspace(ws_path, self.cfg.repos)
-            if ws.init_repo_tree():
+            if ws.init_workspace():
                 self.poutput(f"Workspace {ws_path} created")
-                self.cfg.workspace = ws_path
+                self.cfg.set_workspace(ws_path)
                 self.cfg.save()
             else:
                 self.perror(F"No permission on workspace: {ws_path}")
@@ -388,11 +388,11 @@ class BxtCtl(cmd2.Cmd):
         """
         List content of current workspace
         """
-        self.poutput("Current workspace is: " + self.cfg.workspace)
+        self.poutput("Current workspace is: " + self.cfg.get_workspace())
         cmd = ["ls"]
         if args.long:
             cmd.insert(len(cmd) + 1, "-l")
-        cmd.insert(len(cmd) + 1, self.cfg.workspace)
+        cmd.insert(len(cmd) + 1, self.cfg.get_workspace())
         subprocess.run(cmd)
 
     @with_argparser(bxt_list_folder_args)
@@ -533,7 +533,7 @@ class BxtCtl(cmd2.Cmd):
         # packages = args.package
         self.quiet = False
         # self.pfeedback(f"TODO - commit package to repo - using {packages}")
-        self.pfeedback(f"Reading files from workspace: {self.cfg.workspace}")
+        self.pfeedback(f"Reading files from workspace: {self.cfg.get_workspace()}")
         self.pfeedback(f"Commit endpoint is: {self.cfg.endpoint['pkgCommit']}")
         self.pfeedback(f"Commit package(s) to: {branch}/{repo}/{arch}")
         # for pkg in packages:
