@@ -41,7 +41,7 @@ make sure you commitzen and testzen. If du breaken, fixen it schnell!
 
 import logging
 from datetime import datetime
-
+import uuid
 import requests
 from json import JSONDecodeError
 from typing import Any
@@ -153,6 +153,8 @@ class BxtSession:
         )
         req = request.prepare()
         req.headers.update({"User-Agent": self._user_agent})
+        req.headers.update({"X-BxtCtl-Request-Id": str(uuid.uuid4())})
+
         logging.info(f"BxtSession: Making HTTP request: {method} {url}")
         logging.debug(f"data: {data}")
         logging.debug(f"files: {files}")
@@ -163,22 +165,30 @@ class BxtSession:
         try:
             # execute request
             response = session.send(req, stream=True, timeout=30)
-            logging.debug(response.text)
             if response.status_code == 200:
                 # return response data and status
                 return HttpResult(response.json(), response.status_code)
+            if response.status_code == 400:
+                logging.debug(response.text)
+                return HttpResult({"content": "Bad Request"}, response.status_code)
             if response.status_code == 401:
+                logging.debug(response.text)
                 return HttpResult({"content": "Unauthorized"}, response.status_code)
             if response.status_code == 403:
+                logging.debug(response.text)
                 return HttpResult({"content": "Forbidden"}, response.status_code)
             if response.status_code == 404:
+                logging.debug(response.text)
                 return HttpResult({"content": "Not found",}, response.status_code)
-
-        except requests.exceptions.ConnectionError as e:
-            return HttpResult({"Connection Error": e}, 503)
-
-        except requests.exceptions.Timeout as e:
-            return HttpResult({"Conntection Timeout": e}, 408)
+            if response.status_code == 408:
+                logging.debug(response.text)
+                return HttpResult({"content": "Connection Timeout",}, response.status_code)
+            if response.status_code == 500:
+                logging.debug(response.text)
+                return HttpResult({"content": "Internal Server Error",}, response.status_code)
+            if response.status_code == 503:
+                logging.debug(response.text)
+                return HttpResult({"content": "Connection Error",}, response.status_code)
 
         except RequestException as e:
             return HttpResult({"Internal Server Error": e}, 500)
