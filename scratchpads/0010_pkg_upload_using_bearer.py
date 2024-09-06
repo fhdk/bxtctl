@@ -65,8 +65,6 @@ pkgver = "20240905.1651"
 dummy1 = f"a-dummy1-{pkgver}-1-any.pkg.tar.zst"
 dummy2 = f"a-dummy2-{pkgver}-1-any.pkg.tar.zst"
 dummy3 = f"a-dummy3-{pkgver}-1-any.pkg.tar.zst"
-# request identification
-bxt_token = str(uuid.uuid4())
 # files
 files = {
     ("package1", (dummy1, open(f"{workspace}/{dummy1}", "rb"), "application/octet-stream")),
@@ -83,7 +81,7 @@ files = {
 headers = {
     "User-Agent": config.user_agent,
     "Authorization": f"Bearer {config.get_access_token()}",
-    "x-bxtctl-token": bxt_token,
+    "X-BxtCtl-Request-Id": str(uuid.uuid4())
 }
 # create session object
 session = requests.Session()

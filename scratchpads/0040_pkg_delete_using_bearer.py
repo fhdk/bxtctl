@@ -68,7 +68,7 @@ files = {
 headers = {
     "User-Agent": config.user_agent,
     "Authorization": f"Bearer {config.get_access_token()}",
-    "x-bxtctl-token": str(uuid.uuid4())
+    "X-BxtCtl-Request-Id": str(uuid.uuid4())
 }
 
 session = requests.Session()
