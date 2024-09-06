@@ -52,14 +52,11 @@ class BxtAcl:
         :param sections:
         """
         self._sections = sections
-        self._branches = []
-        self._architectures = []
-        self._repos = []
 
     def get(self):
         return self._sections
 
-    def get_architectures(self) -> set:
+    def get_architectures(self):
         """
         Return architectures available in the ACL
         :return:
@@ -67,7 +64,7 @@ class BxtAcl:
         architectures = []
         for section in self._sections:
             architectures.append(section["architecture"])
-        return set(architectures)
+        return sorted(set(architectures))
 
     def get_branches(self):
         """
@@ -77,7 +74,7 @@ class BxtAcl:
         branches = []
         for section in self._sections:
             branches.append(section["branch"])
-        return set(branches)
+        return sorted(set(branches))
 
     def get_repositories(self):
         """
@@ -87,7 +84,7 @@ class BxtAcl:
         repositories = []
         for section in self._sections:
             repositories.append(section["repository"])
-        return set(repositories)
+        return sorted(set(repositories))
 
     def __str__(self):
         return str(self._sections)
