@@ -43,6 +43,7 @@ make sure you commitzen and testzen. If du breaken, fixen it schnell!
 import argparse
 import cmd2
 from cmd2 import Cmd2ArgumentParser, with_argparser
+import functools
 import subprocess
 import sys
 import logging
@@ -132,135 +133,87 @@ class BxtCtl(cmd2.Cmd):
     )
 
     acl = BxtAcl(sections)
+    logging.basicConfig(level=logging.INFO, filename=f"{fix_path(cfg.config_dir)}/bxtctl.log", filemode="w")
     cfg.repos = path_completion(acl.get_branches, acl.get_repositories, acl.get_architectures)
-    repo_choices = ["*"] + cfg.repos
-    bxt_cli_args = cmd2.Cmd2ArgumentParser("Execute action an exit the shell")
-    bxt_cli_args.add_argument("-s", "--set-ws", help="Set active workspace. The full path to the workspace")
-    bxt_cli_args.add_argument("-d", "--debug", action="store_true", help="Create logfile")
-    bxt_cli_args.add_argument("-g", "--get-ws", action="store_true", help="Get active workspace")
-    bxt_cli_args.add_argument("-c", "--commit", type=str, nargs='?', help=f"Commit active workspace", choices=repo_choices)
-
+    repo_choices = {"*"}.update(cfg.repos)
     # ###############################################################
-    # list workspace content
-    bxt_list_workspace_args = Cmd2ArgumentParser(description="List workspace content")
-    bxt_list_workspace_args.add_argument(
-        "-l", "--long", action="store_true", help="use long list"
-    )
-
-    # ###############################################################
-    # list folder content
-    bxt_list_folder_args = Cmd2ArgumentParser(description="List path content")
-    bxt_list_folder_args.add_argument(
-        "-l", "--long", action="store_true", help="use long list"
-    )
-    bxt_list_folder_args.add_argument(
-        "path", type=str, nargs="?", default=".", help="Path to list content"
-    )
+    # standalone arguments
+    bxt_cli_args = cmd2.Cmd2ArgumentParser("Execute action and return to prompt.")
+    bxt_cli_args.add_argument("getws", action="store_true",
+                              help="Get active workspace")
+    bxt_cli_args.add_argument("setws",
+                              help="Set active workspace. The full path to the workspace")
+    bxt_cli_args.add_argument("commit", type=str, nargs='?', choices=repo_choices,
+                              help=f"Commit active workspace or specified repo")
+    bxt_cli_args.add_argument("-l", "--log", action="count", default=None,
+                              help="Repeat for more verbose logging")
 
     # ###############################################################
     # set workspace command
     bxt_workspace_args = Cmd2ArgumentParser(description="Get or set workspace")
-    bxt_workspace_args.add_argument(
-        "-w", "--workspace", type=str, help="Full path to workspace"
-    )
+    bxt_workspace_args.add_argument("-w", "--workspace", type=str,
+                                    help="Full path to workspace")
+
+    # list workspace content
+    bxt_list_workspace_args = Cmd2ArgumentParser(description="List workspace content")
+    bxt_list_workspace_args.add_argument("-l", "--long", action="store_true",
+                                         help="use long list")
+
+    # list folder content
+    bxt_list_folder_args = Cmd2ArgumentParser(description="List path content")
+    bxt_list_folder_args.add_argument("-l", "--long", action="store_true",
+                                      help="use long list")
+    bxt_list_folder_args.add_argument("path", type=str, nargs="?", default=".",
+                                      help="Path to list content")
 
     # ###############################################################
     # list repo command
-    bxt_list_repo_args = Cmd2ArgumentParser(
-        description="List content of remote bxt repository"
-    )
-    bxt_list_repo_args.add_argument(
-        "location",
-        type=str,
-        help=f"{acl.get_branches()}/{acl.get_repositories()}/{acl.get_architectures()}",
-    )
-    # ###############################################################
-    # compare command
-    bxt_compare_repo_args = Cmd2ArgumentParser(
-        description="Compare repo package across branches and architectures"
-    )
-    bxt_compare_repo_args.add_argument(
-        "-l",
-        "--location",
-        type=str,
-        nargs="*",
-        help=f"{acl.get_branches()}/{acl.get_repositories()}/{acl.get_architectures()}",
-    )
-    bxt_compare_repo_args.add_argument(
-        "-p",
-        "--package",
-        type=str,
-        nargs="?",
-        help="Package(s) to compare (multiple -p can be passed)",
-    )
+    bxt_list_repo_args = Cmd2ArgumentParser(description="List content of remote bxt repository")
+    bxt_list_repo_args.add_argument("repository", type=str,
+                                    help=f"{acl.get_branches()}/{acl.get_repositories()}/{acl.get_architectures()}")
 
     # ###############################################################
-    # commit command
-    bxt_upload_args = Cmd2ArgumentParser(description="Upload package(s) to repository")
-    bxt_upload_args.add_argument(
-        "-t", "--target",
-        type=str,
-        nargs="+",
-        help=f"{acl.get_branches()}/{acl.get_repositories()}/{acl.get_architectures()}. Packages in active workspace will be uploaded.",
-    )
-    # commit_args.add_argument(
-    #     "-p",
-    #     "--package",
-    #     type=str,
-    #     nargs="+",
-    #     help="package name(s) (multiple files can be passed)",
-    # )
+    # compare repo command
+    bxt_compare_repo_args = Cmd2ArgumentParser(description="Compare repo package across branches and architectures")
+    bxt_compare_repo_args.add_argument("-r", "--repo", type=str, nargs="*",
+                                       help=f"{acl.get_branches()}/{acl.get_repositories()}/{acl.get_architectures()}")
+    bxt_compare_repo_args.add_argument("-p", "--package", type=str, nargs="?",
+                                       help="Package(s) to compare (multiple -p can be passed)")
 
     # ###############################################################
     # copy command
     bxt_copy_args = Cmd2ArgumentParser(description="Copy package(s) inside bxt storage")
-    bxt_copy_args.add_argument(
-        "-p",
-        "--package",
-        type=str,
-        nargs="+",
-        help=f"'pkgname {acl.get_branches()}/{acl.get_repositories()}/{acl.get_architectures()} {acl.get_branches()}/{acl.get_repositories()}/{acl.get_architectures()}'",
-    )
+    bxt_copy_args.add_argument("-p", "--package", type=str, nargs="+",
+                               help=f"'pkgname {acl.get_branches()}/{acl.get_repositories()}/{acl.get_architectures()} {acl.get_branches()}/{acl.get_repositories()}/{acl.get_architectures()}'")
 
     # ###############################################################
     # move command
     bxt_move_args = Cmd2ArgumentParser(description="Move package(s) inside bxt storage")
-    bxt_move_args.add_argument(
-        "-p",
-        "--package",
-        type=str,
-        nargs="+",
-        help=f"Package move from repo to repo: 'pkgname {acl.get_branches()}/{acl.get_repositories()}/{acl.get_architectures()} {acl.get_branches()}/{acl.get_repositories()}/{acl.get_architectures()}'",
-    )
+    bxt_move_args.add_argument("-p", "--package", type=str, nargs="+",
+                               help=f"'pkgname {acl.get_branches()}/{acl.get_repositories()}/{acl.get_architectures()} {acl.get_branches()}/{acl.get_repositories()}/{acl.get_architectures()}'")
 
     # ###############################################################
     # remove command
-    bxt_delete_args = Cmd2ArgumentParser(
-        description="Delete package(s) inside bxt storage"
-    )
-    bxt_delete_args.add_argument(
-        "-p",
-        "--package",
-        type=str,
-        nargs="+",
-        help=f"Package remove from repo: 'pkgname {acl.get_branches()}/{acl.get_repositories()}/{acl.get_architectures()}'",
-    )
+    bxt_delete_args = Cmd2ArgumentParser(description="Delete package(s) inside bxt storage")
+    bxt_delete_args.add_argument("-p", "--package", type=str, nargs="+",
+                                 help=f"Package remove from repo: 'pkgname {acl.get_branches()}/{acl.get_repositories()}/{acl.get_architectures()}'",)
 
+    bxt_upload_target = Cmd2ArgumentParser(description="Upload package(s) to bxt storage")
+    bxt_delete_args.add_argument("-p", "--package", type=str, nargs="+",
+                                 help=f"pkgname {acl.get_branches()}/{acl.get_repositories()}/{acl.get_architectures()}",)
 
-    if bxt_cli_args.parse_args().debug:
-        logging.basicConfig(level=logging.DEBUG, filename=f"{fix_path(cfg.config_dir)}/bxtctl.log", filemode="w")
-        print("Logging level set to DEGUG")
-        logging.debug("Logging level set to DEBUG")
-    else:
-        logging.basicConfig(level=logging.INFO)
-        print("Logging level set to INFO")
-        logging.info("Logging level set to INFO")
+    # set logging verbosity
+    if bxt_cli_args.parse_args().verbose:
+        logging.getLogger("bxtctl").setLevel(bxt_cli_args.parse_args().verbose)
+        print("Logging level set to %s" % logging.getLevelName(logging.getLogger("bxtctl").getEffectiveLevel()))
 
-    if bxt_cli_args.parse_args().get_ws:
+    # return workspace and exit
+    if bxt_cli_args.parse_args().getws:
         print(cfg.get_workspace())
         exit(0)
 
-    if bxt_cli_args.parse_args().set_ws:
+    # set workspace and exit
+    if bxt_cli_args.parse_args().setws:
         cfg.set_workspace(fix_path(bxt_cli_args.parse_args().set_ws))
         ws = BxtWorkspace(cfg.get_workspace(), cfg.repos)
         if not ws.init_workspace():
@@ -270,6 +223,7 @@ class BxtCtl(cmd2.Cmd):
         cfg.save()
         exit(0)
 
+    # commit
     if bxt_cli_args.parse_args().commit:
         ws = BxtWorkspace(cfg.get_workspace(), cfg.repos)
         if not ws.init_workspace():
@@ -337,9 +291,7 @@ class BxtCtl(cmd2.Cmd):
         """
         self.poutput("TODO: implement removal")
 
-    # complete_delete_pkg = functools.partialmethod(cmd2.Cmd.delimiter_complete,
-    #                                               match_against=config.paths,
-    #                                               delimiter='/')
+    complete_delete_pkg = functools.partialmethod(cmd2.Cmd.delimiter_complete, match_against=cfg.repos, delimiter='/')
 
     @with_argparser(bxt_copy_args)
     def do_copy_pkg(self, args):
@@ -349,9 +301,7 @@ class BxtCtl(cmd2.Cmd):
         """
         self.poutput("TODO: implement copy")
 
-    # complete_copy_pkg = functools.partialmethod(cmd2.Cmd.delimiter_complete,
-    #                                             match_against=config.paths,
-    #                                             delimiter='/')
+    complete_copy_pkg = functools.partialmethod(cmd2.Cmd.delimiter_complete, match_against=cfg.repos, delimiter='/')
 
     @with_argparser(bxt_move_args)
     def do_move_pkg(self, args):
@@ -361,9 +311,7 @@ class BxtCtl(cmd2.Cmd):
         """
         self.poutput("TODO: implement move")
 
-    # complete_move_pkg = functools.partialmethod(cmd2.Cmd.delimiter_complete,
-    #                                             match_against=config.paths,
-    #                                             delimiter='/')
+    complete_move_pkg = functools.partialmethod(cmd2.Cmd.delimiter_complete, match_against=cfg.repos, delimiter='/')
 
     @with_argparser(bxt_workspace_args)
     def do_workspace(self, args):
@@ -371,10 +319,10 @@ class BxtCtl(cmd2.Cmd):
         Get or set workspace
         :param args: optional path to new workspace
         """
-        if not args._workspace:
+        if not args.workspace:
             self.poutput(f"Current workspace is: {self.cfg.get_workspace()}")
         else:
-            ws_path = fix_path(args._workspace)
+            ws_path = fix_path(args.workspace)
             ws = BxtWorkspace(ws_path, self.cfg.repos)
             if ws.init_workspace():
                 self.poutput(f"Workspace {ws_path} created")
@@ -421,10 +369,7 @@ class BxtCtl(cmd2.Cmd):
                 f"{pkg['name']:<30}: {pkg['poolEntries'][pkg['preferredLocation']]['version']}"
             )
 
-    # complete_list_repo = functools.partialmethod(cmd2.Cmd.delimiter_complete,
-    #                                              match_against=config.paths,
-    #                                              delimiter='/'
-    #                                              )
+    complete_list_repo = functools.partialmethod(cmd2.Cmd.delimiter_complete, match_against=cfg.repos, delimiter='/')
 
     @with_argparser(bxt_compare_repo_args)
     def do_compare(self, args):
@@ -505,19 +450,16 @@ class BxtCtl(cmd2.Cmd):
                 print(f"{version:>{table_header_len}}", end="")
             print()
 
-    # complate_compare_repo = functools.partialmethod(cmd2.Cmd.delimiter_complete,
-    #                                                 match_against=config.paths,
-    #                                                 delimiter='/'
-    #                                                 )
+    complate_compare_repo = functools.partialmethod(cmd2.Cmd.delimiter_complete, match_against=cfg.repos, delimiter='/')
 
-    @with_argparser(bxt_upload_args)
+    @with_argparser(bxt_upload_target)
     def do_upload(self, args):
         """
         Commpit package(s) to repo
         :param args:
         :return: True/False
         """
-        location = args.location.strip("/").split("/")
+        location = args.target[0]
         branch = location[0]
         if branch not in self.acl.get_branches():
             self.perror(f"Invalid branch: {branch}")
@@ -536,14 +478,16 @@ class BxtCtl(cmd2.Cmd):
         self.pfeedback(f"Reading files from workspace: {self.cfg.get_workspace()}")
         self.pfeedback(f"Commit endpoint is: {self.cfg.endpoint['pkgCommit']}")
         self.pfeedback(f"Commit package(s) to: {branch}/{repo}/{arch}")
-        # for pkg in packages:
-        #     self.pfeedback(f"commit package: {pkg}")
-        self.quiet = True
 
-    # complete_upload = functools.partialmethod(cmd2.Cmd.delimiter_complete,
-    #                                           match_against=config.paths,
-    #                                           delimiter='/'
-    #                                           )
+        self.quiet = True
+        ws = BxtWorkspace(self.cfg.get_workspace(), self.cfg.repos)
+        files = ws.get_packages(location)
+        self.poutput("Sending files:")
+        for file in files:
+            print(file.package)
+        print("Files has been sent.")
+
+    complete_upload = functools.partialmethod(cmd2.Cmd.delimiter_complete, match_against=cfg.repos, delimiter='/')
 
     def do_login(self, args):
         """
