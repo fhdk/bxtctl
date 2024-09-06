@@ -41,7 +41,10 @@ make sure you commitzen and testzen. If du breaken, fixen it schnell!
 
 import base64
 import json
+import logging
 import os
+
+from jinja2.lexer import TOKEN_LT
 from pwinput import pwinput
 from pathlib import Path
 from .BxtSession import BxtSession
@@ -89,7 +92,7 @@ class BxtConfig:
         self._url: str = ""
         self._username: str = ""
         self._token: BxtToken = BxtToken()
-        self._token_renew_interval = 600
+        self._token_renew_threshold = 300
         self._workspace = f"{Path.home()}/bxt-workspace"
 
         # create config dir if not existing
@@ -136,7 +139,8 @@ class BxtConfig:
         :return:
         """
         expires_in = self._token.get_access_expiration()
-        if expires_in < 15:
+        logging.debug("Token expires in %s. Threshold is %s", expires_in, self._token_renew_threshold)
+        if expires_in < self._token_renew_threshold:
             if not self.renew_access_token():
                 if not self.login():
                     return ""
