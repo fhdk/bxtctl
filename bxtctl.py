@@ -66,16 +66,16 @@ class BxtCtl(cmd2.Cmd):
             {
                 "exit": "quit",
                 "?": "help",
+                "ws": "workspace",
                 "cmp": "compare",
-                "cpp": "copy_pkg",
                 "cfg": "configure",
                 "lsp": "list_path",
                 "lsr": "list_repo",
                 "lsw": "list_workspace",
+                "upp": "upload_pkg",
+                "cpp": "copy_pkg",
                 "mvp": "move_pkg",
                 "rmp": "delete_pkg",
-                "upp": "upload",
-                "ws": "workspace",
             }
         )
         super().__init__(shortcuts=shortcuts)
@@ -104,14 +104,6 @@ class BxtCtl(cmd2.Cmd):
 
         self.prompt = f"({self.cfg.get_name()}@{self.cfg.get_hostname()}) $ "
 
-        self.pwarning(f"TODO - remove this block")
-        self.pwarning(f"---------- PERMISSIONS ---------- ")
-        self.pwarning(f"bxt user: '{self.cfg.get_name()}' has access to:")
-        self.pwarning(f"Branches      : {self.acl.get_branches()}")
-        self.pwarning(f"Repositories  : {self.acl.get_repositories()}")
-        self.pwarning(f"Architectures : {self.acl.get_architectures()}")
-        self.pwarning(f"--------------------------------- ")
-
     prompt = f"nn@bxt $ "
     cfg = BxtConfig()
     if not cfg.valid_config():
@@ -135,18 +127,18 @@ class BxtCtl(cmd2.Cmd):
     acl = BxtAcl(sections)
     logging.basicConfig(level=logging.INFO, filename=f"{fix_path(cfg.config_dir)}/bxtctl.log", filemode="w")
     cfg.repos = path_completion(acl.get_branches, acl.get_repositories, acl.get_architectures)
-    repo_choices = {"*"}.update(cfg.repos)
+    repo_choices = ["*"] + cfg.repos
     # ###############################################################
     # standalone arguments
     bxt_cli_args = cmd2.Cmd2ArgumentParser("Execute action and return to prompt.")
-    bxt_cli_args.add_argument("getws", action="store_true",
+    bxt_cli_args.add_argument("-getws", action="store_true",
                               help="Get active workspace")
-    bxt_cli_args.add_argument("setws",
+    bxt_cli_args.add_argument("-setws",
                               help="Set active workspace. The full path to the workspace")
-    bxt_cli_args.add_argument("commit", type=str, nargs='?', choices=repo_choices,
+    bxt_cli_args.add_argument("-commit", type=str, nargs='?', choices=repo_choices,
                               help=f"Commit active workspace or specified repo")
-    bxt_cli_args.add_argument("-l", "--log", action="count", default=None,
-                              help="Repeat for more verbose logging")
+    # bxt_cli_args.add_argument("-l", "--log", action="count", default=None,
+    #                           help="Repeat for more verbose logging")
 
     # ###############################################################
     # set workspace command
@@ -169,43 +161,41 @@ class BxtCtl(cmd2.Cmd):
     # ###############################################################
     # list repo command
     bxt_list_repo_args = Cmd2ArgumentParser(description="List content of remote bxt repository")
-    bxt_list_repo_args.add_argument("repository", type=str,
+    bxt_list_repo_args.add_argument("-ls", type=str,
                                     help=f"{acl.get_branches()}/{acl.get_repositories()}/{acl.get_architectures()}")
 
     # ###############################################################
     # compare repo command
     bxt_compare_repo_args = Cmd2ArgumentParser(description="Compare repo package across branches and architectures")
-    bxt_compare_repo_args.add_argument("-r", "--repo", type=str, nargs="*",
+    bxt_compare_repo_args.add_argument("-comp", type=str, nargs="*",
                                        help=f"{acl.get_branches()}/{acl.get_repositories()}/{acl.get_architectures()}")
-    bxt_compare_repo_args.add_argument("-p", "--package", type=str, nargs="?",
-                                       help="Package(s) to compare (multiple -p can be passed)")
 
     # ###############################################################
     # copy command
     bxt_copy_args = Cmd2ArgumentParser(description="Copy package(s) inside bxt storage")
-    bxt_copy_args.add_argument("-p", "--package", type=str, nargs="+",
-                               help=f"'pkgname {acl.get_branches()}/{acl.get_repositories()}/{acl.get_architectures()} {acl.get_branches()}/{acl.get_repositories()}/{acl.get_architectures()}'")
+    bxt_copy_args.add_argument("-cp", type=str, nargs="+",
+                               help=f"Copy in bxt: 'pkgname {acl.get_branches()}/{acl.get_repositories()}/{acl.get_architectures()} {acl.get_branches()}/{acl.get_repositories()}/{acl.get_architectures()}'")
 
     # ###############################################################
     # move command
     bxt_move_args = Cmd2ArgumentParser(description="Move package(s) inside bxt storage")
-    bxt_move_args.add_argument("-p", "--package", type=str, nargs="+",
-                               help=f"'pkgname {acl.get_branches()}/{acl.get_repositories()}/{acl.get_architectures()} {acl.get_branches()}/{acl.get_repositories()}/{acl.get_architectures()}'")
+    bxt_move_args.add_argument("-mv", type=str, nargs="+",
+                               help=f"Move in bxt:'pkgname {acl.get_branches()}/{acl.get_repositories()}/{acl.get_architectures()} {acl.get_branches()}/{acl.get_repositories()}/{acl.get_architectures()}'")
 
     # ###############################################################
     # remove command
     bxt_delete_args = Cmd2ArgumentParser(description="Delete package(s) inside bxt storage")
-    bxt_delete_args.add_argument("-p", "--package", type=str, nargs="+",
-                                 help=f"Package remove from repo: 'pkgname {acl.get_branches()}/{acl.get_repositories()}/{acl.get_architectures()}'",)
+    bxt_delete_args.add_argument("-rm", type=str, nargs="+",
+                                 help=f"Remove from bxt: 'pkgname {acl.get_branches()}/{acl.get_repositories()}/{acl.get_architectures()}'",)
 
     bxt_upload_target = Cmd2ArgumentParser(description="Upload package(s) to bxt storage")
-    bxt_delete_args.add_argument("-p", "--package", type=str, nargs="+",
-                                 help=f"pkgname {acl.get_branches()}/{acl.get_repositories()}/{acl.get_architectures()}",)
+    bxt_delete_args.add_argument("-up", type=str, nargs="+",
+                                 help=f"Upload to bxt: {acl.get_branches()}/{acl.get_repositories()}/{acl.get_architectures()}",)
 
-    # set logging verbosity
-    if bxt_cli_args.parse_args().verbose:
-        logging.getLogger("bxtctl").setLevel(bxt_cli_args.parse_args().verbose)
-        print("Logging level set to %s" % logging.getLevelName(logging.getLogger("bxtctl").getEffectiveLevel()))
+    # # set logging verbosity
+    # if bxt_cli_args.parse_args().verbose:
+    #     logging.getLogger("bxtctl").setLevel(bxt_cli_args.parse_args().verbose)
+    #     print("Logging level set to %s" % logging.getLevelName(logging.getLogger("bxtctl").getEffectiveLevel()))
 
     # return workspace and exit
     if bxt_cli_args.parse_args().getws:
@@ -453,7 +443,7 @@ class BxtCtl(cmd2.Cmd):
     complate_compare_repo = functools.partialmethod(cmd2.Cmd.delimiter_complete, match_against=cfg.repos, delimiter='/')
 
     @with_argparser(bxt_upload_target)
-    def do_upload(self, args):
+    def do_upload_pkg(self, args):
         """
         Commpit package(s) to repo
         :param args:
@@ -507,6 +497,16 @@ class BxtCtl(cmd2.Cmd):
         # update prompt
         self.prompt = f"({self.cfg.get_name()}@{self.cfg.get_hostname()}) $ "
 
+    def do_permissions(self, args):
+        """"
+        List permissions
+        """
+        self.poutput(f"---------- PERMISSIONS ---------- ")
+        self.poutput(f"bxt user      : {self.cfg.get_name()}")
+        self.poutput(f"Branches      : {str.join(", ", self.acl.get_branches())}")
+        self.poutput(f"Repositories  : {str.join(", ", self.acl.get_repositories())}")
+        self.poutput(f"Architectures : {str.join(", ", self.acl.get_architectures())}")
+        self.poutput(f"--------------------------------- ")
 
 def start_cmd2():
     """
