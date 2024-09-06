@@ -33,8 +33,7 @@ from Bxt.BxtWorkspace import BxtWorkspace
 from Bxt.Utils import path_completion, encode_package_data
 
 """
-This file is to test the correct creating of a workspace
-The workspace must populated with a folder tree matching the permissions
+This is for testing assembling a list of packages from workspace listing
 """
 config = BxtConfig()
 
@@ -55,11 +54,13 @@ acl = BxtAcl(sections)
 
 config.repos = path_completion(acl.get_branches, acl.get_repositories, acl.get_architectures)
 
-print(config.get_workspace())
-print(config.repos)
+# print(config.get_workspace())
+# print(config.repos)
 
 ws = BxtWorkspace(config.get_workspace(), config.repos)
 files = ws.get_packages("testing/extra/x86_64")
+# for file in files:
+#     print(file.signature, file.package, file.section)
 
 # PoC create form with multiple packages for uploading in one request
 form_data = MultipartEncoder(fields={})
@@ -74,6 +75,6 @@ for idx, file in enumerate(files):
 
 # encode the fields to a multipart/form-data
 form_data = MultipartEncoder(fields=encodings)
-print(form_data)
+# print(form_data)
 print(form_data.content_type)
 print(form_data.to_string())
