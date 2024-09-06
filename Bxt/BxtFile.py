@@ -45,10 +45,10 @@ class BxtFile:
     """
     BxtFile object
     """
-    def __init__(self, section: Dict[str,str], pkg: str, sig: str):
+    def __init__(self, section: Dict[str,str], package: str, signature: str = None):
         self._section = section
-        self._package = pkg
-        self._signature = sig
+        self._package = package
+        self._signature = signature
 
     @property
     def section(self):
