@@ -2,7 +2,10 @@
 
 Commandline tool for bxt package management
 
-## repo packages
+## Development and Testing
+Required packages
+
+### repo packages
 
 - python-cmd2
 - python-prettytable
@@ -10,11 +13,17 @@ Commandline tool for bxt package management
 - python-requests
 - python-requests-toolbelt
 
+```bash
+sudo pacman -Syu python-cmd python-prettytable python-pyjwt python-requests python-requests-toolbelt
+```
+
 ### custom package
 
 - python-pwinput
 
-## Development and Testing
+```
+pamac build python-pwinput
+```
 
 ```bash
 sudo pacman -S poetry
@@ -50,7 +59,7 @@ Ideas and thoughts
 ## Basic scripting
 What I have now is few basic commandline actions (these will only work if the shell has been launched and configured)
 
-```
+```bash
 poetry run bxtctl --help
 Usage: Execute action and return to prompt. [-h] [-getws] [-setws SETWS]
                                             [-commit [{*, stable/extra/x86_64, stable/extra/aarch64, stable/core/x86_64, stable/core/aarch64, stable/multilib/x86_64, stable/multilib/aarch64, unstable/extra/x86_64, unstable/extra/aarch64, unstable/core/x86_64, unstable/core/aarch64, unstable/multilib/x86_64, unstable/multilib/aarch64, testing/extra/x86_64, testing/extra/aarch64, testing/core/x86_64, testing/core/aarch64, testing/multilib/x86_64, testing/multilib/aarch64}]]
@@ -71,13 +80,14 @@ optional arguments:
 
 You will get prompt indicating who you are and the server you are connected to.
 
-```
+```shell
 (bxtctl@bxt.staging.manjaro.org) $ 
 ```
 
 Inside the shell has advanced functionality
 
-```
+```shell
+(bxtctl@bxt.staging.manjaro.org) $ help
 Documented commands (use 'help -v' for verbose/'help <topic>' for details):
 ===========================================================================
 compare    delete_pkg  list_path       login        quit       upload_pkg
@@ -91,7 +101,7 @@ As you have seen the webui is highly versatile, and it is next to impossible to 
 
 As example the commit endpoint - which can do all commit transactions - I have split this into
 
-```
+```text
 upload_pkg
 copy_pkg
 remove_pkg
@@ -99,17 +109,17 @@ move_pkg
 ```
 
 Upload idea
-```
+```text
 upload_pkg -p pkg -p pkg -p pkg -repo unstable/extra/aarch64
 ```
 Remove idea
-```
+```text
 remove_pkg -p pkg -p pkg -p pkg -repo unstable/extra/aarch64
 ```
 
 Copy and move is more difficult
 
-```
+```text
 copy_pkg -p pkg -from unstable/extra/aarch64 -to testing/extra/aarch64
 move_pkg -p pkg -from unstable/extra/aarch64 -to testing/extra/aarch64
 ```
@@ -118,7 +128,7 @@ Some commands will also make more sense than others.
 
 Inside bxtctl (shell) the above-mentioned commands also has shortcuts assigned
 
-```
+```shell
 (bxtctl@bxt.staging.manjaro.org) $ shortcuts
 Shortcuts for other commands:
 ?: help
@@ -136,7 +146,7 @@ ws: workspace
 ```
 
 See your permissions
-```
+```shell
 (bxtctl@bxt.staging.manjaro.org) $ permissions
 ---------- PERMISSIONS ----------
 bxt user      : bxtctl
