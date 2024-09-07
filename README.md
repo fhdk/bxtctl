@@ -35,182 +35,108 @@ A tree structure will be created in the designated workspace.
 
 The structure will macth the permissions for the user accessing the service.
 
-The interactive shell is not default launched - to enter the shell use the `-i/--interactive` argument.
+The overall design is
 
-A few arguments has been added to main entry to 
+- ~/.config/bxtctl/config.json
+- workspace ~/bxt-workspace
+- the workspace is populated with a folder structure matching the users permission on bxt
+- this is perhaps overkill - I am more in favor of having a single copy e.g. and all commits is done to unstable
+- the tests I have been doing has been using testing branch - so I could easily see what my actions accomplished.
+- I am totally open to suggestions and feedback on how you see yourself use the client
 
-- set a workspace
-- get the current workspace (can be used to instruct chrootbuild where to store the output)
-- commit current workspace - optionally only a specific repo e.g. `unstable/core/x86_64`
-- debug loggin argument
-- interactive shell
+What I have now is few basic commandline actions (these will only work if the shell has been launched and configured)
 
 ```
-usage: bxtctl [-h] [-s SET_WS] [-g] [-c [COMMIT]] [-d] [-i]
+poetry run bxtctl --help
+Usage: Execute action and return to prompt. [-h] [-getws] [-setws SETWS]
+                                            [-commit [{*, stable/extra/x86_64, stable/extra/aarch64, stable/core/x86_64, stable/core/aarch64, stable/multilib/x86_64, stable/multilib/aarch64, unstable/extra/x86_64, unstable/extra/aarch64, unstable/core/x86_64, unstable/core/aarch64, unstable/multilib/x86_64, unstable/multilib/aarch64, testing/extra/x86_64, testing/extra/aarch64, testing/core/x86_64, testing/core/aarch64, testing/multilib/x86_64, testing/multilib/aarch64}]]
 
-options:
+optional arguments:
   -h, --help            show this help message and exit
-  -s SET_WS, --set-ws SET_WS
-                        Set active workspace. The full path to the workspace
-  -g, --get-ws          Get active workspace
-  -c [COMMIT], --commit [COMMIT]
-                        Commit packages
-  -d, --debug           Create logfile
-  -i, --interactive     Load interactive shell
-  
+  -getws                Get active workspace
+  -setws SETWS          Set active workspace. The full path to the workspace
+  -commit [{*, stable/extra/x86_64, stable/extra/aarch64, stable/core/x86_64, stable/core/aarch64, stable/multilib/x86_64, stable/multilib/aarch64, unstable/extra/x86_64, unstable/extra/aarch64, unstable/core/x86_64, unstable/core/aarch64, unstable/multilib/x86_64, unstable/multilib/aarch64, testing/extra/x86_64, testing/extra/aarch64, testing/core/x86_64, testing/core/aarch64, testing/multilib/x86_64, testing/multilib/aarch64}]
+                        Commit active workspace or specified repo
 ```
 
-### Help command
+-getws is intended as outside tools to retrieve the workspace for pointing chrootbuild PKGDEST to the bxt workspace. the root of the workspace is returned
+-setws is somewhat similir - I thought it migth be useful for scripting if one could both read and write the workspace location.
+-commit is inteded to commit what is in the workspace - usually this will be new packages
+
+Then there is the shell which you launch with bxtctl without arguments
+
+You will get prompt indicating who you are and the server you are connected to.
+
+```
+(bxtctl@bxt.staging.manjaro.org) $ 
+```
+
+Inside the shell has advanced functionality
 
 ```
 Documented commands (use 'help -v' for verbose/'help <topic>' for details):
 ===========================================================================
-commit     copy     login    ls_workspace  remove  shortcuts
-compare    help     ls_path  move          set     workspace
-configure  history  ls_repo  quit          shell 
+compare    delete_pkg  list_path       login        quit       upload_pkg
+configure  help        list_repo       move_pkg     set        workspace 
+copy_pkg   history     list_workspace  permissions  shortcuts
 ```
 
-### list configured shortcuts command
-Several of the commands has shortcuts configured. To list the available shortcuts
+It is these functions I need some input on how we imagine them used - that is your purpose - I am the coder - I not likely to be the enduser - so I would love your feedback on every aspect - that includes what the commands are called, what would come natural to you as enduser.
+
+As you have seen the webui is higly versatile and it is next to impossible to make the client as versatile.
+
+As example the commit endpoint - which can do all commit transactions - I have split this into
 
 ```
-shortcuts
+upload_pkg
+copy_pkg
+remove_pkg
+move_pkg
 ```
 
-### Configure command
-
-The `configure` command is run at first start to create a basic configuration file.
-
-It will query for the http endpoint of the bxt API and the username and the password needed to retrieve an access token.
-
-At any point the `configure` command can be used to change the service endpoint and the username.
-
-### Login command
-
-The `login` command can be used to change the username and retrieve a new access token based on the username and a
-provide password.
-
-The password is never stored on the system and there will be no characters echoed to screen.
-
-### workspace command
-
-The workspace is where you keep the packages you build. A default workspace `$HOME/bxt-workspace` is created at first
-run.
-```
-Usage: workspace [-h] [-w WORKSPACE]
-
-Get or set workspace
-
-optional arguments:
-  -h, --help            show this help message and exit
-  -w, --workspace WORKSPACE
-                        Full path to workspace
-```
-### list workspace content
-List content of the current workspace
-```
-Usage: ls_workspace [-h] [-l]
-
-List workspace content
-
-optional arguments:
-  -h, --help  show this help message and exit
-  -l, --long  use long list
-```
-### list content of arbitrary path
-List content of any system paths
-```
-Usage: ls_path [-h] [-l] [path]
-
-List path content
-
-positional arguments:
-  path        Path to list content
-
-optional arguments:
-  -h, --help  show this help message and exit
-  -l, --long  use long list
-```
-
-## Remote BXT Repository commands
-
-The command will only list locations the user has permissions to access
-
-### List repo contents command
+The reason for this is that every transaction requires a destination for each package - so naturally I would like to trim the commands down to the shortest possible.
 
 ```
-Usage: ls_repo [-h] location
-
-List content of remote bxt repository
-
-positional arguments:
-  location    {'unstable'}/{'extra', 'multilib', 'core'}/{'x86_64'}
+upload_pkg -p pkg -p pkg -p pkg -repo unstable/extra/aarch64
 ```
 
-### Compare command
-
 ```
-Usage: compare [-h] [-l [LOCATION [...]]] [-p [PACKAGE]]
-
-Compare repo package across branches and architectures
-
-optional arguments:
-  -h, --help            show this help message and exit
-  -l, --location [LOCATION [...]]
-                        {'unstable'}/{'extra', 'core', 'multilib'}/{'x86_64'}
-  -p, --package [PACKAGE]
-                        Package(s) to compare (multiple -p can be passed)
+remove_pkg -p pkg -p pkg -p pkg -repo unstable/extra/aarch64
 ```
 
-### Commit command
+The copy and move is more difficult
 
 ```
-Usage: commit [-h] [-p PACKAGE [...]] location
-
-Commit package(s) to repository
-
-positional arguments:
-  location              {'unstable'}/{'extra', 'core', 'multilib'}/{'x86_64'}
-
-optional arguments:
-  -h, --help            show this help message and exit
-  -p, --package PACKAGE [...]
-                        package name(s) (multiple files can be passed)
+move_pkg -p pkg -from unstable/extra/aarch64 -to testing/extra/aarch64
 ```
 
-### Copy command
+Some commands will also make more sense than others.
+
+Inside bxtctl (shell) the above mentioned commands also has shortcuts assigned
 
 ```
-Usage: copy [-h] [-p PACKAGE [...]]
-
-Copy package(s) inside bxt storage
-
-optional arguments:
-  -h, --help            show this help message and exit
-  -p, --package PACKAGE [...]
-                        'pkgname {'unstable'}/{'extra', 'core', 'multilib'}/{'x86_64'} {'unstable'}/{'extra', 'core', 'multilib'}/{'x86_64'}'
+(bxtctl@bxt.staging.manjaro.org) $ shortcuts
+Shortcuts for other commands:
+?: help
+cfg: configure
+cmp: compare
+cpp: copy_pkg
+exit: quit
+lsp: list_path
+lsr: list_repo
+lsw: list_workspace
+mvp: move_pkg
+rmp: delete_pkg
+upp: upload_pkg
+ws: workspace
 ```
 
-### Move command
+See your permissions
 ```
-Usage: move [-h] [-p PACKAGE [...]]
-
-Move package(s) inside bxt storage
-
-optional arguments:
-  -h, --help            show this help message and exit
-  -p, --package PACKAGE [...]
-                        Package move from repo to repo: 'pkgname {'unstable'}/{'extra', 'core', 'multilib'}/{'x86_64'} {'unstable'}/{'extra', 'core', 'multilib'}/{'x86_64'}'
-```
-
-### Remove command
-```
-Usage: remove [-h] [-p PACKAGE [...]]
-
-Delete package(s) inside bxt storage
-
-optional arguments:
-  -h, --help            show this help message and exit
-  -p, --package PACKAGE [...]
-                        Package remove from repo: 'pkgname {'unstable'}/{'extra', 'core', 'multilib'}/{'x86_64'}'
+(bxtctl@bxt.staging.manjaro.org) $ permissions
+---------- PERMISSIONS ----------
+bxt user      : bxtctl
+Branches      : stable, testing, unstable
+Repositories  : core, extra, multilib
+Architectures : aarch64, x86\_64
 ```
