@@ -1,4 +1,4 @@
-# bxtctl
+# bxtctl (WIP)
 
 Commandline tool for bxt package management
 
