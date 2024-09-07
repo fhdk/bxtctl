@@ -35,8 +35,8 @@ A tree structure will be created in the designated workspace.
 
 The structure will macth the permissions for the user accessing the service.
 
-The overall design is
-
+## Overall design is
+Ideas and thoughts
 - ~/.config/bxtctl/config.json
 - workspace ~/bxt-workspace
 - the workspace is populated with a folder structure matching the users permission on bxt
@@ -44,6 +44,7 @@ The overall design is
 - the tests I have been doing has been using testing branch - so I could easily see what my actions accomplished.
 - I am totally open to suggestions and feedback on how you see yourself use the client
 
+## Basic scripting
 What I have now is few basic commandline actions (these will only work if the shell has been launched and configured)
 
 ```
@@ -59,11 +60,11 @@ optional arguments:
                         Commit active workspace or specified repo
 ```
 
--getws is intended as outside tools to retrieve the workspace for pointing chrootbuild PKGDEST to the bxt workspace. the root of the workspace is returned
--setws is somewhat similir - I thought it migth be useful for scripting if one could both read and write the workspace location.
--commit is inteded to commit what is in the workspace - usually this will be new packages
+- -getws is intended as outside tools to retrieve the workspace for pointing chrootbuild PKGDEST to the bxt workspace. the root of the workspace is returned
+- -setws is somewhat similir - I thought it migth be useful for scripting if one could both read and write the workspace location.
+- -commit is intended to commit what is in the workspace - usually this will be new packages - it is thought to be everything or a single repo
 
-Then there is the shell which you launch with bxtctl without arguments
+## The shell is bxtctl without arguments
 
 You will get prompt indicating who you are and the server you are connected to.
 
@@ -83,7 +84,7 @@ copy_pkg   history     list_workspace  permissions  shortcuts
 
 It is these functions I need some input on how we imagine them used - that is your purpose - I am the coder - I not likely to be the enduser - so I would love your feedback on every aspect - that includes what the commands are called, what would come natural to you as enduser.
 
-As you have seen the webui is higly versatile and it is next to impossible to make the client as versatile.
+As you have seen the webui is highly versatile, and it is next to impossible to make the client as versatile.
 
 As example the commit endpoint - which can do all commit transactions - I have split this into
 
@@ -94,25 +95,25 @@ remove_pkg
 move_pkg
 ```
 
-The reason for this is that every transaction requires a destination for each package - so naturally I would like to trim the commands down to the shortest possible.
-
+Upload idea
 ```
 upload_pkg -p pkg -p pkg -p pkg -repo unstable/extra/aarch64
 ```
-
+Remove idea
 ```
 remove_pkg -p pkg -p pkg -p pkg -repo unstable/extra/aarch64
 ```
 
-The copy and move is more difficult
+Copy and move is more difficult
 
 ```
+copy_pkg -p pkg -from unstable/extra/aarch64 -to testing/extra/aarch64
 move_pkg -p pkg -from unstable/extra/aarch64 -to testing/extra/aarch64
 ```
 
 Some commands will also make more sense than others.
 
-Inside bxtctl (shell) the above mentioned commands also has shortcuts assigned
+Inside bxtctl (shell) the above-mentioned commands also has shortcuts assigned
 
 ```
 (bxtctl@bxt.staging.manjaro.org) $ shortcuts
@@ -140,3 +141,4 @@ Branches      : stable, testing, unstable
 Repositories  : core, extra, multilib
 Architectures : aarch64, x86_64
 ```
+
