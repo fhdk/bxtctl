@@ -295,7 +295,9 @@ class BxtConfig:
         Return textual representation of the configuration  class
         :return:
         """
-        return f"BxtConfig(Url: '{self._url}', Name: '{self._username}', Token: '{self._token}', TokenRenew: '{self._token_renew_interval}s', Batch: '{self._batch_size}pkgs', Workspace: '{self._workspace}')"
+        return (f"BxtConfig(Url: '{self._url}', Name: '{self._username}', "
+                f"Token: '{self._token}', TokenRenew: '{self._token_renew_threshold}s', "
+                f"Batch: '{self._batch_size}pkgs', Workspace: '{self._workspace}')")
 
     def __load_config__(self):
         """
