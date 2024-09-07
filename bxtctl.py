@@ -143,54 +143,52 @@ class BxtCtl(cmd2.Cmd):
     # ###############################################################
     # set workspace command
     bxt_workspace_args = Cmd2ArgumentParser(description="Get or set workspace")
-    bxt_workspace_args.add_argument("-w", "--workspace", type=str,
-                                    help="Full path to workspace")
+    bxt_workspace_args.add_argument("-w", "--workspace", type=str, help="Full path to workspace")
 
     # list workspace content
     bxt_list_workspace_args = Cmd2ArgumentParser(description="List workspace content")
-    bxt_list_workspace_args.add_argument("-l", "--long", action="store_true",
-                                         help="use long list")
+    bxt_list_workspace_args.add_argument("-l", "--long", action="store_true", help="use long list")
 
     # list folder content
     bxt_list_folder_args = Cmd2ArgumentParser(description="List path content")
-    bxt_list_folder_args.add_argument("-l", "--long", action="store_true",
-                                      help="use long list")
-    bxt_list_folder_args.add_argument("path", type=str, nargs="?", default=".",
-                                      help="Path to list content")
+    bxt_list_folder_args.add_argument("-l", "--long", action="store_true", help="use long list")
+    bxt_list_folder_args.add_argument("path", type=str, nargs="?", default=".", help="Path to list content")
 
     # ###############################################################
     # list repo command
     bxt_list_repo_args = Cmd2ArgumentParser(description="List content of remote bxt repository")
-    bxt_list_repo_args.add_argument("-ls", type=str,
-                                    help=f"{acl.get_branches()}/{acl.get_repositories()}/{acl.get_architectures()}")
+    bxt_list_repo_args.add_argument("-ls", type=str, help=f"List repo content", choices=cfg.repos)
 
     # ###############################################################
     # compare repo command
     bxt_compare_repo_args = Cmd2ArgumentParser(description="Compare repo package across branches and architectures")
-    bxt_compare_repo_args.add_argument("-comp", type=str, nargs="*",
-                                       help=f"{acl.get_branches()}/{acl.get_repositories()}/{acl.get_architectures()}")
+    bxt_compare_repo_args.add_argument("-b", type=str, nargs="*", help=f"Compare branches", choices=cfg.repos)
+
+    # ##############################################################
+    # upload path
+    bxt_upload_target = Cmd2ArgumentParser(description="Upload package(s) to bxt storage")
+    bxt_upload_target.add_argument("-t", "--to", type=str, help="Upload to repo", choices=cfg.repos)
+    bxt_upload_target.add_argument("-p", "--pkg", type=str, nargs="+", help=f"Package(s) to upload to bxt")
 
     # ###############################################################
     # copy command
     bxt_copy_args = Cmd2ArgumentParser(description="Copy package(s) inside bxt storage")
-    bxt_copy_args.add_argument("-cp", type=str, nargs="+",
-                               help=f"Copy in bxt: 'pkgname {acl.get_branches()}/{acl.get_repositories()}/{acl.get_architectures()} {acl.get_branches()}/{acl.get_repositories()}/{acl.get_architectures()}'")
+    bxt_copy_args.add_argument("-f", "--from", type=str, help="Copy from repo", choices=cfg.repos)
+    bxt_copy_args.add_argument("-t", "--to", type=str, help="Copy to repo", choices=cfg.repos)
+    bxt_copy_args.add_argument("-p", "--pkg", type=str, nargs="+", help=f"Package(s) to copy in bxt")
 
     # ###############################################################
     # move command
     bxt_move_args = Cmd2ArgumentParser(description="Move package(s) inside bxt storage")
-    bxt_move_args.add_argument("-mv", type=str, nargs="+",
-                               help=f"Move in bxt:'pkgname {acl.get_branches()}/{acl.get_repositories()}/{acl.get_architectures()} {acl.get_branches()}/{acl.get_repositories()}/{acl.get_architectures()}'")
+    bxt_move_args.add_argument("-f", "--from", type=str, help="Move from repo", choices=cfg.repos)
+    bxt_move_args.add_argument("-t", "--to", type=str, help="Move to repo", choices=cfg.repos)
+    bxt_move_args.add_argument("-p", "--pkg", type=str, nargs="+", help=f"Packages to move in bxt")
 
     # ###############################################################
     # remove command
-    bxt_delete_args = Cmd2ArgumentParser(description="Delete package(s) inside bxt storage")
-    bxt_delete_args.add_argument("-rm", type=str, nargs="+",
-                                 help=f"Remove from bxt: 'pkgname {acl.get_branches()}/{acl.get_repositories()}/{acl.get_architectures()}'",)
-
-    bxt_upload_target = Cmd2ArgumentParser(description="Upload package(s) to bxt storage")
-    bxt_delete_args.add_argument("-up", type=str, nargs="+",
-                                 help=f"Upload to bxt: {acl.get_branches()}/{acl.get_repositories()}/{acl.get_architectures()}",)
+    bxt_delete_args = Cmd2ArgumentParser(description="Remove package(s) from bxt storage")
+    bxt_delete_args.add_argument("-f", "--from", type=str, help="Remove from repo", choices=cfg.repos)
+    bxt_delete_args.add_argument("-p", "--pkg", type=str, nargs="+", help=f"Packages to remove from bxt")
 
     # # set logging verbosity
     # if bxt_cli_args.parse_args().verbose:
@@ -449,33 +447,34 @@ class BxtCtl(cmd2.Cmd):
         :param args:
         :return: True/False
         """
-        location = args.target[0]
-        branch = location[0]
-        if branch not in self.acl.get_branches():
-            self.perror(f"Invalid branch: {branch}")
-            return False
-        repo = location[1]
-        if repo not in self.acl.get_repositories():
-            self.perror(f"Invalid repository: {repo}")
-            return False
-        arch = location[2]
-        if arch not in self.acl.get_architectures():
-            self.perror(f"Invalid architecture: {arch}")
-            return False
-        # packages = args.package
-        self.quiet = False
-        # self.pfeedback(f"TODO - commit package to repo - using {packages}")
-        self.pfeedback(f"Reading files from workspace: {self.cfg.get_workspace()}")
-        self.pfeedback(f"Commit endpoint is: {self.cfg.endpoint['pkgCommit']}")
-        self.pfeedback(f"Commit package(s) to: {branch}/{repo}/{arch}")
-
-        self.quiet = True
-        ws = BxtWorkspace(self.cfg.get_workspace(), self.cfg.repos)
-        files = ws.get_packages(location)
-        self.poutput("Sending files:")
-        for file in files:
-            print(file.package)
-        print("Files has been sent.")
+        location = args.up.split("/")
+        print(location)
+        # branch = location[0]
+        # if branch not in self.acl.get_branches():
+        #     self.perror(f"Invalid branch: {branch}")
+        #     return False
+        # repo = location[1]
+        # if repo not in self.acl.get_repositories():
+        #     self.perror(f"Invalid repository: {repo}")
+        #     return False
+        # arch = location[2]
+        # if arch not in self.acl.get_architectures():
+        #     self.perror(f"Invalid architecture: {arch}")
+        #     return False
+        # # packages = args.package
+        # self.quiet = False
+        # # self.pfeedback(f"TODO - commit package to repo - using {packages}")
+        # self.pfeedback(f"Reading files from workspace: {self.cfg.get_workspace()}")
+        # self.pfeedback(f"Commit endpoint is: {self.cfg.endpoint['pkgCommit']}")
+        # self.pfeedback(f"Commit package(s) to: {branch}/{repo}/{arch}")
+        #
+        # self.quiet = True
+        # ws = BxtWorkspace(self.cfg.get_workspace(), self.cfg.repos)
+        # files = ws.get_packages(location)
+        # self.poutput("Sending files:")
+        # for file in files:
+        #     print(file.package)
+        # print("Files has been sent.")
 
     complete_upload = functools.partialmethod(cmd2.Cmd.delimiter_complete, match_against=cfg.repos, delimiter='/')
 
