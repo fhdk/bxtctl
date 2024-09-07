@@ -138,5 +138,5 @@ See your permissions
 bxt user      : bxtctl
 Branches      : stable, testing, unstable
 Repositories  : core, extra, multilib
-Architectures : aarch64, x86\_64
+Architectures : aarch64, x86_64
 ```
