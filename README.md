@@ -14,7 +14,7 @@ Commandline tool for bxt package management
 
 - python-pwinput
 
-## Development
+## Development and Testing
 
 ```bash
 sudo pacman -S poetry
