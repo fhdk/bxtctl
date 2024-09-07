@@ -28,7 +28,10 @@ poetry run bxtctl
 
 As the project is WIP the following is subject to change.
 
-This issue https://github.com/fhdk/bxtctl/issues/2 is intended to gather feedback on how the CLI commands.
+This issue https://github.com/fhdk/bxtctl/issues/2 is intended to gather feedback on how the CLI commands could be used,
+and any thoughts and ideas to improve or extend the functionality.
+
+If you discover a bug (likely you will) please create a new issue.
 
 ## Workspace 
 A tree structure will be created in the designated workspace.
