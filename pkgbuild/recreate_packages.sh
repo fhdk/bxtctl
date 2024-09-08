@@ -16,7 +16,7 @@ pkgver=$(date -d "today" +"%Y%m%d.%H%M")
 sed -i 's|pkgver=.*|pkgver='"${pkgver}"'|g' "$PROJECTDIR/pkgbuild/PKGBUILD"
 
 # and the upload scratchpad
-sed -i 's|pkgver = .*|pkgver = '\""${pkgver}"\"'|g' "$PROJECTDIR/scratchpads/0010_pkg_upload_using_bearer.py"
+sed -i 's|pkgver = .*|pkgver = '\""${pkgver}"\"'|g' "$PROJECTDIR/scratchpads/0010_pkg_upload.py"
 
 # build new packages
 cd "$PROJECTDIR/pkgbuild" || exit 1
