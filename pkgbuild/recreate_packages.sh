@@ -19,7 +19,9 @@ sed -i 's|pkgver=.*|pkgver='"${pkgver}"'|g' "$PROJECTDIR/pkgbuild/PKGBUILD"
 sed -i 's|pkgver = .*|pkgver = '\""${pkgver}"\"'|g' "$PROJECTDIR/scratchpads/0010_pkg_upload_using_bearer.py"
 
 # build new packages
+cd "$PROJECTDIR/pkgbuild" || exit 1
 PKGDEST="$PROJECTDIR/repo" makepkg -cC
+cd "$PROJECTDIR" || exit 1
 
 # sign the new packages
 find "$PROJECTDIR/repo" -type f -name "*.pkg.tar.*" -exec signfile "{}" \;

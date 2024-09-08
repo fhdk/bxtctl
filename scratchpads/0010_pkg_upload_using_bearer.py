@@ -61,7 +61,7 @@ to_section = {"branch": "testing", "repository": "extra", "architecture": "x86_6
 # workspace = f"{config.workspace}/testing/extra/aarch64"
 workspace = f"{config.get_workspace()}/testing/extra/x86_64"
 # dummies
-pkgver = "20240905.1651"
+pkgver = "20240908.1035"
 dummy1 = f"a-dummy1-{pkgver}-1-any.pkg.tar.zst"
 dummy2 = f"a-dummy2-{pkgver}-1-any.pkg.tar.zst"
 dummy3 = f"a-dummy3-{pkgver}-1-any.pkg.tar.zst"

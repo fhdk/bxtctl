@@ -2,7 +2,7 @@
 
 pkgbase=a-dummies
 pkgname=(a-dummy1 a-dummy2 a-dummy3)
-pkgver=20240905.1651
+pkgver=20240908.1035
 pkgrel=1
 pkgdesc="dummy packages for testing bxtctl functionality"
 url="https://github.com/fhdk/bxtctl"
