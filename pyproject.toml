@@ -17,7 +17,7 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.12"
 requests = "^2.31.0"
 requests_toolbelt = "^1.0.0"
 pwinput = "^1.0.3"
