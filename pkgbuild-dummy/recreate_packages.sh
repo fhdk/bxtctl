@@ -19,7 +19,7 @@ sed -i 's|pkgver=.*|pkgver='"${pkgver}"'|g' "$PROJECTDIR/pkgbuild/PKGBUILD"
 sed -i 's|pkgver = .*|pkgver = '\""${pkgver}"\"'|g' "$PROJECTDIR/scratchpads/0010_pkg_upload.py"
 
 # build new packages
-cd "$PROJECTDIR/pkgbuild" || exit 1
+cd "$PROJECTDIR/pkgbuild-dummy" || exit 1
 PKGDEST="$PROJECTDIR/repo" makepkg -cC
 cd "$PROJECTDIR" || exit 1
 
