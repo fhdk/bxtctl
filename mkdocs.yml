@@ -1,6 +1,6 @@
 site_name: bxtctl
 repo_url: https://gitlab.manjaro.org/fhdk/bxtctl
-docs_dir: data/docs
+docs_dir: docs
 use_directory_urls: false
 theme:
   name: readthedocs
