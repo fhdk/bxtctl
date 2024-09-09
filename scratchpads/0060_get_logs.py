@@ -24,6 +24,7 @@ import time
 from Bxt.BxtConfig import BxtConfig
 from Bxt.BxtSession import BxtSession
 import logging
+
 """
 Get a list of packages from 
 from: stable -> extra -> x86_64 repo
@@ -48,7 +49,7 @@ http = BxtSession(config.user_agent)
 params = {
     "since": "2024-08-28T00:00:00.0Z",
     "until": "2024-09-04T00:00:00.0Z",
-    "text": "dummy"
+    "text": "dummy",
 }
 print("bxt_get_logs : ")
 print("log request begin --> ", time.strftime("%Y-%m-%d %H:%M:%S"))

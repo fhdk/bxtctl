@@ -47,9 +47,11 @@ http = BxtSession(config.user_agent)
 
 print("bxt_compare : ")
 print("compare request begin    --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
-compare_repo = [{'branch': 'unstable', 'repository': 'core', 'architecture': 'x86_64'},
-                {'branch': 'unstable', 'repository': 'extra', 'architecture': 'x86_64'},
-                {'branch': 'unstable', 'repository': 'multilib', 'architecture': 'x86_64'}]
+compare_repo = [
+    {"branch": "unstable", "repository": "core", "architecture": "x86_64"},
+    {"branch": "unstable", "repository": "extra", "architecture": "x86_64"},
+    {"branch": "unstable", "repository": "multilib", "architecture": "x86_64"},
+]
 
 compare_repo = sorted(compare_repo, key=lambda x: x["repository"])
 
@@ -77,9 +79,13 @@ for k, package in enumerate(compare_table.items()):
     for key in pkg_versions.keys():
         if package[1][key] not in pkg["versions"]:
             try:
-                pkg["versions"].append({"location": key, "version": package[1][key]["overlay"]})
+                pkg["versions"].append(
+                    {"location": key, "version": package[1][key]["overlay"]}
+                )
             except KeyError:
-                pkg["versions"].append({"location": key, "version": package[1][key]["automated"]})
+                pkg["versions"].append(
+                    {"location": key, "version": package[1][key]["automated"]}
+                )
     missing = [x for x in table_headers if x not in pkg_versions.keys()]
     for m in missing:
         pkg["versions"].append({"location": m, "version": "-"})
@@ -90,13 +96,15 @@ for k, package in enumerate(compare_table.items()):
 pkg_list = sorted(pkg_list, key=lambda x: x["name"])
 # ------------ test print result to screen -------------------------
 print(compare_header)
-print('-' * len(compare_header))
+print("-" * len(compare_header))
 
 for pkg in pkg_list:
     pkg_name = pkg["name"]
     pkg_versions = pkg["versions"]
     print(f"{pkg_name:<{pkgname_len}}", end="")
     for table_header in table_headers:
-        version = next((v["version"] for v in pkg_versions if v["location"] == table_header), "-")
+        version = next(
+            (v["version"] for v in pkg_versions if v["location"] == table_header), "-"
+        )
         print(f"{version:>{table_header_len}}", end="")
     print()

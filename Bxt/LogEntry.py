@@ -41,6 +41,7 @@ make sure you commitzen and testzen. If du breaken, fixen it schnell!
 
 from .LogEntryEnums import EntryClass, EntryAction, EntryType
 
+
 class PkgLocation:
     def __init__(self, branch: str, repository: str, architecture: str):
         self.branch = branch
@@ -49,7 +50,16 @@ class PkgLocation:
 
 
 class LogEntry:
-    def __init__(self, entry_class: EntryClass, time: str, commit_username: str, added: list, deleted: list, moved: list, c):
+    def __init__(
+        self,
+        entry_class: EntryClass,
+        time: str,
+        commit_username: str,
+        added: list,
+        deleted: list,
+        moved: list,
+        c,
+    ):
         """
         LogEntryCommit
         """

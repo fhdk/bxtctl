@@ -66,8 +66,14 @@ def encode_package_data(file: BxtFile, idx: int = 1):
     :return:
     """
     return {
-        (f"package{idx}", (file.package, open(file.package, "rb"), 'application/octet-stream')),
-        (f"package{idx}.signature", (file.signature, open(file.signature, "rb"), 'application/octet-stream')),
+        (
+            f"package{idx}",
+            (file.package, open(file.package, "rb"), "application/octet-stream"),
+        ),
+        (
+            f"package{idx}.signature",
+            (file.signature, open(file.signature, "rb"), "application/octet-stream"),
+        ),
         (f"package{idx}.section", (json.dumps(file.section), "text/plain")),
     }
 
@@ -101,4 +107,3 @@ def path_completion(branches, repositories, architectures) -> List[str]:
             for arch in architectures:
                 result.append(f"{branch}/{repo}/{arch}")
     return result
-

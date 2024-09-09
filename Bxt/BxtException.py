@@ -39,6 +39,7 @@ make sure you commitzen and testzen. If du breaken, fixen it schnell!
                                         ~ The Code Elfen
 """
 
+
 class BxtException(Exception):
     def __init__(self, msg, errors):
         super().__init__(msg)

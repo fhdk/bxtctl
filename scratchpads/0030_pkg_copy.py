@@ -60,22 +60,20 @@ form_content = json.dumps(
     [
         {"name": "a-dummy1", "from_section": from_section, "to_section": to_section},
         {"name": "a-dummy2", "from_section": from_section, "to_section": to_section},
-        {"name": "a-dummy3", "from_section": from_section, "to_section": to_section}
+        {"name": "a-dummy3", "from_section": from_section, "to_section": to_section},
     ]
 )
 
-files = {
-    ("to_copy", (None, form_content, "application/json"))
-}
+files = {("to_copy", (None, form_content, "application/json"))}
 
 headers = {
     "User-Agent": config.user_agent,
     "Authorization": f"Bearer {token}",
-    "X-BxtCtl-Request-Id": str(uuid.uuid4())
+    "X-BxtCtl-Request-Id": str(uuid.uuid4()),
 }
 
 session = requests.Session()
-request = Request('POST', endpoint, headers=headers, files=files)
+request = Request("POST", endpoint, headers=headers, files=files)
 
 req = request.prepare()
 
@@ -101,4 +99,3 @@ print("response recv    --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
 print("response headers --> ", response.headers)
 print("response status  --> ", response.status_code)
 print("response content --> ", response.content)
-

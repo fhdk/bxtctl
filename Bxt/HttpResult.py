@@ -45,6 +45,7 @@ class HttpResult:
     """
     HTTP response class
     """
+
     def __init__(self, content: Dict[str, Any], status: int):
         """
         Constructor

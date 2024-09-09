@@ -50,14 +50,14 @@ from cmd2 import (
 )
 
 # Data source for argparse.choices
-food_item_strs = ['Pizza', 'Ham', 'Ham Sandwich', 'Potato']
+food_item_strs = ["Pizza", "Ham", "Ham Sandwich", "Potato"]
 config = BxtConfig()
 
 
 class ArgparseCompletion(Cmd):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.sport_item_strs = ['Bat', 'Basket', 'Basketball', 'Football', 'Space Ball']
+        self.sport_item_strs = ["Bat", "Basket", "Basketball", "Football", "Space Ball"]
 
     def choices_provider(self) -> List[str]:
         """A choices provider is useful when the choice list is based on instance data of your application"""
@@ -79,9 +79,14 @@ class ArgparseCompletion(Cmd):
     def choices_completion_item(self) -> List[CompletionItem]:
         """Return CompletionItem instead of strings. These give more context to what's being tab completed."""
         fancy_item = "These things can\ncontain newlines and\n"
-        fancy_item += ansi.style("styled text!!", fg=ansi.Fg.LIGHT_YELLOW, underline=True)
+        fancy_item += ansi.style(
+            "styled text!!", fg=ansi.Fg.LIGHT_YELLOW, underline=True
+        )
         items = {1: "My item", 2: "Another item", 3: "Yet another item", 4: fancy_item}
-        return [CompletionItem(item_id, description) for item_id, description in items.items()]
+        return [
+            CompletionItem(item_id, description)
+            for item_id, description in items.items()
+        ]
 
     # noinspection PyMethodMayBeStatic
     def choices_arg_tokens(self, arg_tokens: Dict[str, List[str]]) -> List[str]:
@@ -92,40 +97,52 @@ class ArgparseCompletion(Cmd):
         a particular argument expects only 1 token.
         """
         # Check if choices_provider flag has appeared
-        values = ['choices_provider', 'flag']
-        if 'choices_provider' in arg_tokens:
-            values.append('is {}'.format(arg_tokens['choices_provider'][0]))
+        values = ["choices_provider", "flag"]
+        if "choices_provider" in arg_tokens:
+            values.append("is {}".format(arg_tokens["choices_provider"][0]))
         else:
-            values.append('not supplied')
+            values.append("not supplied")
         return values
 
     # Parser for example command
     example_parser = Cmd2ArgumentParser(
-        description="Command demonstrating tab completion with argparse\n" "Notice even the flags of this command tab complete"
+        description="Command demonstrating tab completion with argparse\n"
+        "Notice even the flags of this command tab complete"
     )
 
     # Tab complete from a list using argparse choices. Set metavar if you don't
     # want the entire choices list showing in the usage text for this command.
-    example_parser.add_argument('--choices', choices=food_item_strs, metavar="CHOICE", help="tab complete using choices")
+    example_parser.add_argument(
+        "--choices",
+        choices=food_item_strs,
+        metavar="CHOICE",
+        help="tab complete using choices",
+    )
 
     # Tab complete from choices provided by a choices_provider
     example_parser.add_argument(
-        '--choices_provider', choices_provider=choices_provider, help="tab complete using a choices_provider"
+        "--choices_provider",
+        choices_provider=choices_provider,
+        help="tab complete using a choices_provider",
     )
 
     # Tab complete using a completer
-    example_parser.add_argument('--completer', completer=Cmd.path_complete, help="tab complete using a completer")
+    example_parser.add_argument(
+        "--completer",
+        completer=Cmd.path_complete,
+        help="tab complete using a completer",
+    )
 
     # Demonstrate raising a CompletionError while tab completing
     example_parser.add_argument(
-        '--completion_error',
+        "--completion_error",
         choices_provider=choices_completion_error,
         help="raise a CompletionError while tab completing if debug is False",
     )
 
     # Demonstrate returning CompletionItems instead of strings
     example_parser.add_argument(
-        '--completion_item',
+        "--completion_item",
         choices_provider=choices_completion_item,
         metavar="ITEM_ID",
         descriptive_header="Description",
@@ -134,7 +151,9 @@ class ArgparseCompletion(Cmd):
 
     # Demonstrate use of arg_tokens dictionary
     example_parser.add_argument(
-        '--arg_tokens', choices_provider=choices_arg_tokens, help="demonstrate use of arg_tokens dictionary"
+        "--arg_tokens",
+        choices_provider=choices_arg_tokens,
+        help="demonstrate use of arg_tokens dictionary",
     )
 
     @with_argparser(example_parser)
@@ -143,7 +162,7 @@ class ArgparseCompletion(Cmd):
         self.poutput("I do nothing")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import sys
 
     app = ArgparseCompletion()

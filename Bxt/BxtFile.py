@@ -41,11 +41,13 @@ make sure you commitzen and testzen. If du breaken, fixen it schnell!
 
 from typing import Dict
 
+
 class BxtFile:
     """
     BxtFile object
     """
-    def __init__(self, section: Dict[str,str], package: str, signature: str = None):
+
+    def __init__(self, section: Dict[str, str], package: str, signature: str = None):
         self._section = section
         self._package = package
         self._signature = signature
@@ -63,7 +65,7 @@ class BxtFile:
         """
         Get Package File Name and Path
         :return: 
-        """""
+        """ ""
         return self._package
 
     @property

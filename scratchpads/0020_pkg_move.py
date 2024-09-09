@@ -28,6 +28,7 @@ from requests import RequestException
 from Bxt.BxtConfig import BxtConfig
 from requests_toolbelt.multipart.encoder import MultipartEncoder
 import uuid
+
 """
 part two of four in a series of scratchpads
 moves the test packages
@@ -59,22 +60,20 @@ form_content = json.dumps(
     [
         {"name": "a-dummy1", "from_section": from_section, "to_section": to_section},
         {"name": "a-dummy2", "from_section": from_section, "to_section": to_section},
-        {"name": "a-dummy3", "from_section": from_section, "to_section": to_section}
+        {"name": "a-dummy3", "from_section": from_section, "to_section": to_section},
     ]
 )
 
-files = {
-    ("to_move", (None, form_content, "application/json"))
-}
+files = {("to_move", (None, form_content, "application/json"))}
 
 headers = {
     "User-Agent": config.user_agent,
     "Authorization": f"Bearer {token}",
-    "X-BxtCtl-Request-Id": str(uuid.uuid4())
+    "X-BxtCtl-Request-Id": str(uuid.uuid4()),
 }
 
 session = requests.Session()
-request = Request('POST', endpoint, headers=headers, files=files)
+request = Request("POST", endpoint, headers=headers, files=files)
 
 req = request.prepare()
 

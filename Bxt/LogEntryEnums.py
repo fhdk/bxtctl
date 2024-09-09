@@ -41,17 +41,20 @@ make sure you commitzen and testzen. If du breaken, fixen it schnell!
 from enum import Enum
 from enum import auto
 
+
 class EntryClass(Enum):
     commits = auto()
     deploys = auto()
     syncs = auto()
-    
+
+
 class EntryType(Enum):
     Add = auto()
     Copy = auto()
     Move = auto()
     Remove = auto()
     Update = auto()
+
 
 class EntryAction(Enum):
     added = auto()

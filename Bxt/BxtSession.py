@@ -72,18 +72,12 @@ class BxtSession:
         :param password:
         :return: HttpResult
         """
-        data = {
-            "name": username,
-            "password": password,
-            "response_type": "bearer"
-        }
-        return self.make_http_request(
-            method="post",
-            url=url,
-            json=data
-        )
+        data = {"name": username, "password": password, "response_type": "bearer"}
+        return self.make_http_request(method="post", url=url, json=data)
 
-    def commit(self, url: str, data: Any, token: str, headers: dict = None) -> HttpResult:
+    def commit(
+        self, url: str, data: Any, token: str, headers: dict = None
+    ) -> HttpResult:
         """
         post a commit request
         :param headers:
@@ -98,10 +92,7 @@ class BxtSession:
         else:
             headers = {"Authorization": f"Bearer {token}"}
         return self.make_http_request(
-            method="post",
-            url=url,
-            headers=headers,
-            data=data
+            method="post", url=url, headers=headers, data=data
         )
 
     def compare(self, url: str, data: list, token: str) -> HttpResult:
@@ -114,10 +105,7 @@ class BxtSession:
         """
         headers = {"Authorization": f"Bearer {token}"}
         return self.make_http_request(
-            method="post",
-            url=url,
-            headers=headers,
-            json=data
+            method="post", url=url, headers=headers, json=data
         )
 
     def make_http_request(
@@ -149,7 +137,7 @@ class BxtSession:
             json=json,
             data=data,
             files=files,
-            headers=headers
+            headers=headers,
         )
         req = request.prepare()
         req.headers.update({"User-Agent": self._user_agent})
@@ -179,16 +167,36 @@ class BxtSession:
                 return HttpResult({"content": "Forbidden"}, response.status_code)
             if response.status_code == 404:
                 logging.debug(response.text)
-                return HttpResult({"content": "Not found",}, response.status_code)
+                return HttpResult(
+                    {
+                        "content": "Not found",
+                    },
+                    response.status_code,
+                )
             if response.status_code == 408:
                 logging.debug(response.text)
-                return HttpResult({"content": "Connection Timeout",}, response.status_code)
+                return HttpResult(
+                    {
+                        "content": "Connection Timeout",
+                    },
+                    response.status_code,
+                )
             if response.status_code == 500:
                 logging.debug(response.text)
-                return HttpResult({"content": "Internal Server Error",}, response.status_code)
+                return HttpResult(
+                    {
+                        "content": "Internal Server Error",
+                    },
+                    response.status_code,
+                )
             if response.status_code == 503:
                 logging.debug(response.text)
-                return HttpResult({"content": "Connection Error",}, response.status_code)
+                return HttpResult(
+                    {
+                        "content": "Connection Error",
+                    },
+                    response.status_code,
+                )
 
         except RequestException as e:
             return HttpResult({"Internal Server Error": e}, 500)
@@ -202,10 +210,9 @@ class BxtSession:
         :return: list of log entries
         """
         headers = {"Authorization": f"Bearer {token}"}
-        result = self.make_http_request(method="get",
-                                        url = url,
-                                        headers=headers,
-                                        params=params)
+        result = self.make_http_request(
+            method="get", url=url, headers=headers, params=params
+        )
         try:
             if result.status() == 200:
                 return result.content()
@@ -217,7 +224,9 @@ class BxtSession:
             print(f"{e}\n{e.errors}")
         return []
 
-    def get_packages(self, url: str, branch: str, repository: str, architectue: str, token: str) -> [Package]:
+    def get_packages(
+        self, url: str, branch: str, repository: str, architectue: str, token: str
+    ) -> [Package]:
         """
         get a list of packages
         :param token:
@@ -234,11 +243,9 @@ class BxtSession:
             "architecture": architectue,
         }
         try:
-            result = self.make_http_request(method="get",
-                                            url=url,
-                                            headers=headers,
-                                            params=params
-                                            )
+            result = self.make_http_request(
+                method="get", url=url, headers=headers, params=params
+            )
             if result.status() == 200:
                 return result.content()
             raise BxtException(
@@ -258,10 +265,7 @@ class BxtSession:
         """
         headers = {"Authorization": f"Bearer {token}"}
         try:
-            result = self.make_http_request(method="get",
-                                            url=url,
-                                            headers=headers
-                                            )
+            result = self.make_http_request(method="get", url=url, headers=headers)
             if result.status() == 200:
                 return result.content()
             raise BxtException(
@@ -289,10 +293,7 @@ class BxtSession:
         :return: HttpResult
         """
         headers = {"Authorization": f"Bearer {token}"}
-        return self.make_http_request(method="post",
-                                      url=url,
-                                      headers=headers
-                                      )
+        return self.make_http_request(method="post", url=url, headers=headers)
 
     def use_refresh_token(self, url: str, token: str, refresh_token: str) -> HttpResult:
         """
@@ -304,8 +305,6 @@ class BxtSession:
         """
         headers = {"Authorization": f"Bearer {token}"}
         json_data = {"token": refresh_token}
-        return self.make_http_request(method="get",
-                                      url=url,
-                                      headers=headers,
-                                      json=json_data
-                                      )
+        return self.make_http_request(
+            method="get", url=url, headers=headers, json=json_data
+        )

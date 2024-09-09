@@ -55,24 +55,24 @@ if config.valid_token():
 
 endpoint = f"{config.get_url()}/{config.endpoint["pkgCommit"]}"
 from_section = {"branch": "testing", "repository": "extra", "architecture": "aarch64"}
-form_content = json.dumps([
-    {"name": "a-dummy1", "section": from_section},
-    {"name": "a-dummy2", "section": from_section},
-    {"name": "a-dummy3", "section": from_section}
-])
+form_content = json.dumps(
+    [
+        {"name": "a-dummy1", "section": from_section},
+        {"name": "a-dummy2", "section": from_section},
+        {"name": "a-dummy3", "section": from_section},
+    ]
+)
 
-files = {
-    ("to_delete", (None, form_content, "application/json"))
-}
+files = {("to_delete", (None, form_content, "application/json"))}
 
 headers = {
     "User-Agent": config.user_agent,
     "Authorization": f"Bearer {config.get_access_token()}",
-    "X-BxtCtl-Request-Id": str(uuid.uuid4())
+    "X-BxtCtl-Request-Id": str(uuid.uuid4()),
 }
 
 session = requests.Session()
-request = Request('POST', endpoint, headers=headers, files=files)
+request = Request("POST", endpoint, headers=headers, files=files)
 token = config.get_access_token()
 req = request.prepare()
 
@@ -97,4 +97,3 @@ print("response recv    --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
 print("response headers --> ", response.headers)
 print("response status  --> ", response.status_code)
 print("response content --> ", response.content)
-

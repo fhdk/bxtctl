@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "bxtctl"
-version = "0.3.0"
+version = "0.6.0"
 description = "bxt repo management tool"
 authors = ["Frede Hundewadt"]
 readme = "README.md"
@@ -12,7 +12,7 @@ classifiers = [
     'Intended Audience :: End User/Desktop',
     'License :: OSI Approved :: AGPL3 License',
     'Natural Language :: English',
-    'Programming Language :: Python :: 3.11',
+    'Programming Language :: Python :: 3.12',
     'Environment :: Console'
 ]
 

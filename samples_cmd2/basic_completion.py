@@ -20,16 +20,16 @@ from typing import (
 import cmd2
 
 # List of strings used with completion functions
-food_item_strs = ['Pizza', 'Ham', 'Ham Sandwich', 'Potato']
-sport_item_strs = ['Bat', 'Basket', 'Basketball', 'Football', 'Space Ball']
+food_item_strs = ["Pizza", "Ham", "Ham Sandwich", "Potato"]
+sport_item_strs = ["Bat", "Basket", "Basketball", "Football", "Space Ball"]
 
 # This data is used to demonstrate delimiter_complete
 file_strs = [
-    '/home/user/file.db',
-    '/home/user/file space.db',
-    '/home/user/another.db',
-    '/home/other user/maps.db',
-    '/home/other user/scratchpads.db',
+    "/home/user/file.db",
+    "/home/user/file space.db",
+    "/home/user/another.db",
+    "/home/other user/maps.db",
+    "/home/other user/scratchpads.db",
 ]
 
 
@@ -49,14 +49,14 @@ class BasicCompletion(cmd2.Cmd):
         """Completion function for do_flag_based"""
         flag_dict = {
             # Tab complete food items after -f and --food flags in command line
-            '-f': food_item_strs,
-            '--food': food_item_strs,
+            "-f": food_item_strs,
+            "--food": food_item_strs,
             # Tab complete sport items after -s and --sport flags in command line
-            '-s': sport_item_strs,
-            '--sport': sport_item_strs,
+            "-s": sport_item_strs,
+            "--sport": sport_item_strs,
             # Tab complete using path_complete function after -p and --path flags in command line
-            '-p': self.path_complete,
-            '--path': self.path_complete,
+            "-p": self.path_complete,
+            "--path": self.path_complete,
         }
 
         return self.flag_based_complete(text, line, begidx, endidx, flag_dict=flag_dict)
@@ -73,14 +73,18 @@ class BasicCompletion(cmd2.Cmd):
             3: self.path_complete,  # Tab complete using path_complete function at index 3 in command line
         }
 
-        return self.index_based_complete(text, line, begidx, endidx, index_dict=index_dict)
+        return self.index_based_complete(
+            text, line, begidx, endidx, index_dict=index_dict
+        )
 
     def do_delimiter_complete(self, statement: cmd2.Statement):
         """Tab completes files from a list using delimiter_complete"""
         self.poutput("Args: {}".format(statement.args))
 
     # Use a partialmethod to set arguments to delimiter_complete
-    complete_delimiter_complete = functools.partialmethod(cmd2.Cmd.delimiter_complete, match_against=file_strs, delimiter='/')
+    complete_delimiter_complete = functools.partialmethod(
+        cmd2.Cmd.delimiter_complete, match_against=file_strs, delimiter="/"
+    )
 
     def do_raise_error(self, statement: cmd2.Statement):
         """Demonstrates effect of raising CompletionError"""
@@ -97,7 +101,7 @@ class BasicCompletion(cmd2.Cmd):
         raise cmd2.CompletionError("This is how a CompletionError behaves")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import sys
 
     app = BasicCompletion()

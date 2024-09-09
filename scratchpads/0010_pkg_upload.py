@@ -56,7 +56,11 @@ if config.valid_token():
 # endpoint
 endpoint = f"{config.get_url()}/{config.endpoint["pkgCommit"]}"
 # the path is provided when executing the path in the CLI
-to_section = {"branch": "testing", "repository": "extra", "architecture": "x86_64",}
+to_section = {
+    "branch": "testing",
+    "repository": "extra",
+    "architecture": "x86_64",
+}
 # workspace with $branch/$repo/$arch
 # workspace = f"{config.workspace}/testing/extra/aarch64"
 workspace = f"{config.get_workspace()}/testing/extra/x86_64"
@@ -67,26 +71,56 @@ dummy2 = f"a-dummy2-{pkgver}-1-any.pkg.tar.zst"
 dummy3 = f"a-dummy3-{pkgver}-1-any.pkg.tar.zst"
 # files
 files = {
-    ("package1", (dummy1, open(f"{workspace}/{dummy1}", "rb"), "application/octet-stream")),
-    ("package1.signature", (f"{dummy1}.sig", open(f"{workspace}/{dummy1}.sig", "rb"), "application/octet-stream")),
+    (
+        "package1",
+        (dummy1, open(f"{workspace}/{dummy1}", "rb"), "application/octet-stream"),
+    ),
+    (
+        "package1.signature",
+        (
+            f"{dummy1}.sig",
+            open(f"{workspace}/{dummy1}.sig", "rb"),
+            "application/octet-stream",
+        ),
+    ),
     ("package1.section", (None, json.dumps(to_section), "application/json")),
-    ("package2", (dummy2, open(f"{workspace}/{dummy2}", "rb"), "application/octet-stream")),
-    ("package2.signature", (f"{dummy2}.sig", open(f"{workspace}/{dummy2}.sig", "rb"), "application/octet-stream")),
+    (
+        "package2",
+        (dummy2, open(f"{workspace}/{dummy2}", "rb"), "application/octet-stream"),
+    ),
+    (
+        "package2.signature",
+        (
+            f"{dummy2}.sig",
+            open(f"{workspace}/{dummy2}.sig", "rb"),
+            "application/octet-stream",
+        ),
+    ),
     ("package2.section", (None, json.dumps(to_section), "application/json")),
-    ("package3", (dummy3, open(f"{workspace}/{dummy3}", "rb"), "application/octet-stream")),
-    ("package3.signature", (f"{dummy3}.sig", open(f"{workspace}/{dummy3}.sig", "rb"), "application/octet-stream")),
+    (
+        "package3",
+        (dummy3, open(f"{workspace}/{dummy3}", "rb"), "application/octet-stream"),
+    ),
+    (
+        "package3.signature",
+        (
+            f"{dummy3}.sig",
+            open(f"{workspace}/{dummy3}.sig", "rb"),
+            "application/octet-stream",
+        ),
+    ),
     ("package3.section", (None, json.dumps(to_section), "application/json")),
 }
 # headers
 headers = {
     "User-Agent": config.user_agent,
     "Authorization": f"Bearer {config.get_access_token()}",
-    "X-BxtCtl-Request-Id": str(uuid.uuid4())
+    "X-BxtCtl-Request-Id": str(uuid.uuid4()),
 }
 # create session object
 session = requests.Session()
 # populate request with endpoint data and headers
-request = Request('POST', endpoint, headers=headers, files=files)
+request = Request("POST", endpoint, headers=headers, files=files)
 token = config.get_access_token()
 # prepare request
 req = request.prepare()

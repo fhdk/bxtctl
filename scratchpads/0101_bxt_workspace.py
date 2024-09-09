@@ -50,7 +50,9 @@ sections = bxt_session.get_sections(
 
 acl = BxtAcl(sections)
 
-config.repos = path_completion(acl.get_branches, acl.get_repositories, acl.get_architectures)
+config.repos = path_completion(
+    acl.get_branches, acl.get_repositories, acl.get_architectures
+)
 
 print(config.get_workspace())
 print(config.repos)

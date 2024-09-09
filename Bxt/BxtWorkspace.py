@@ -82,7 +82,11 @@ class BxtWorkspace:
         try:
             for file in os.listdir(f"{self._path}/{repo}"):
                 if file.endswith(".pkg.tar.zst"):
-                    bxt_file = BxtFile(section, f"{self._path}/{repo}/{file}", f"{self._path}/{repo}/{file}.sig")
+                    bxt_file = BxtFile(
+                        section,
+                        f"{self._path}/{repo}/{file}",
+                        f"{self._path}/{repo}/{file}.sig",
+                    )
                     if not os.path.exists(bxt_file.signature):
                         bxt_file.signature = None
                     result.append(bxt_file)

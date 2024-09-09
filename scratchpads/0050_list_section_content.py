@@ -49,7 +49,9 @@ print("bxt_list_pkg : ")
 print("------------------------------------------")
 print("list request begin --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
 print("'testing/extra/x86_64' repo")
-pkgs = http.get_packages(endpoint, "testing", "extra", "x86_64", config.get_access_token())
+pkgs = http.get_packages(
+    endpoint, "testing", "extra", "x86_64", config.get_access_token()
+)
 if len(pkgs) > 0:
     for pkg in pkgs:
         print(
@@ -61,7 +63,9 @@ print("")
 print("------------------------------------------")
 print("list request begin --> ", time.strftime("%Y-%m-%d %H:%M:%S"))
 print("'testing/extra/aarch64' repo")
-pkgs = http.get_packages(endpoint, "testing", "extra", "aarch", config.get_access_token())
+pkgs = http.get_packages(
+    endpoint, "testing", "extra", "aarch", config.get_access_token()
+)
 if len(pkgs) > 0:
     for pkg in pkgs:
         print(

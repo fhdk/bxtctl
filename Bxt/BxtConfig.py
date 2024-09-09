@@ -121,9 +121,11 @@ class BxtConfig:
         self._username = options["name"]
         self._url = options["url"]
         # get response from service
-        result = self._http.authenticate(url=f"{self._url}/{self.endpoint["auth"]}",
-                                         username=self._username,
-                                         password=password)
+        result = self._http.authenticate(
+            url=f"{self._url}/{self.endpoint["auth"]}",
+            username=self._username,
+            password=password,
+        )
         # handle result
         if result.status() == 200:
             # assign content from result to token
@@ -139,7 +141,11 @@ class BxtConfig:
         :return:
         """
         expires_in = self._token.get_access_expiration()
-        logging.debug("Token expires in %s. Threshold is %s", expires_in, self._token_renew_threshold)
+        logging.debug(
+            "Token expires in %s. Threshold is %s",
+            expires_in,
+            self._token_renew_threshold,
+        )
         if expires_in < self._token_renew_threshold:
             if not self.renew_access_token():
                 if not self.login():
@@ -195,9 +201,11 @@ class BxtConfig:
         # password prompt
         password = pwinput(prompt="password: ", mask="")
         # get reponse from service
-        result = self._http.authenticate(url=f"{self._url}/{self.endpoint["auth"]}",
-                                         username=username,
-                                         password=password)
+        result = self._http.authenticate(
+            url=f"{self._url}/{self.endpoint["auth"]}",
+            username=username,
+            password=password,
+        )
         # handle result
         if result.status() == 200:
             # assign username - could have been changed
@@ -219,10 +227,11 @@ class BxtConfig:
         """
         if not self._token.get_refresh_expired():
             refresh_token = self._token.get_refresh_token()
-            result = self._http.use_refresh_token(url=f"{self._url}/{self.endpoint["refresh"]}",
-                                                  token=self._token.get_access_token(),
-                                                  refresh_token=refresh_token,
-                                                  )
+            result = self._http.use_refresh_token(
+                url=f"{self._url}/{self.endpoint["refresh"]}",
+                token=self._token.get_access_token(),
+                refresh_token=refresh_token,
+            )
             if result.status() == 200:
                 self._token = BxtToken(result.content())
                 self.__save_config__()
@@ -235,9 +244,10 @@ class BxtConfig:
         Revoke refresh token
         :return:
         """
-        result = self._http.revoke_refresh_token(url=f"{self._url}/{self.endpoint["revoke"]}",
-                                                 token=self._token.get_refresh_token()
-                                                 )
+        result = self._http.revoke_refresh_token(
+            url=f"{self._url}/{self.endpoint["revoke"]}",
+            token=self._token.get_refresh_token(),
+        )
         if result.status() == 200:
             self._token = {}
             self.__save_config__()
@@ -295,9 +305,11 @@ class BxtConfig:
         Return textual representation of the configuration  class
         :return:
         """
-        return (f"BxtConfig(Url: '{self._url}', Name: '{self._username}', "
-                f"Token: '{self._token}', TokenRenew: '{self._token_renew_threshold}s', "
-                f"Batch: '{self._batch_size}pkgs', Workspace: '{self._workspace}')")
+        return (
+            f"BxtConfig(Url: '{self._url}', Name: '{self._username}', "
+            f"Token: '{self._token}', TokenRenew: '{self._token_renew_threshold}s', "
+            f"Batch: '{self._batch_size}pkgs', Workspace: '{self._workspace}')"
+        )
 
     def __load_config__(self):
         """
