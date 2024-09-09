@@ -29,7 +29,7 @@ find "$PROJECTDIR/repo" -type f -name "*.pkg.tar.*" -exec signfile "{}" \;
 # loop the files
 for file in "$PROJECTDIR"/repo/*.pkg.tar.*
 do
-  # copy files to rest repos
+  # copy files to test repos
   cp "$file" "$X86DIR"
   cp "$file" "$ARMDIR"
   # clean up workspace
