@@ -21,8 +21,10 @@
 #
 
 from bxtctl.Bxt.BxtConfig import BxtConfig
-from bxtctl.Bxt import BxtWorkspace, BxtSession, BxtAcl
-from bxtctl.Bxt import path_completion
+from bxtctl.Bxt.BxtWorkspace import BxtWorkspace
+from bxtctl.Bxt.BxtSession import BxtSession
+from bxtctl.Bxt.BxtAcl import BxtAcl
+from bxtctl.Bxt.Utils import path_completion
 
 
 """

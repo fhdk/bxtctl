@@ -1,5 +1,5 @@
 import unittest
-from bxtctl.Bxt import BxtToken
+from bxtctl.Bxt.BxtToken import BxtToken
 
 
 class Test0001BxtToken(unittest.TestCase):

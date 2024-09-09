@@ -22,7 +22,7 @@
 
 import time
 from bxtctl.Bxt.BxtConfig import BxtConfig
-from bxtctl.Bxt import BxtSession
+from bxtctl.Bxt.BxtSession import BxtSession
 
 """
 Get a list of packages from 
