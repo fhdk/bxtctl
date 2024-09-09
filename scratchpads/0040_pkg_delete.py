@@ -25,7 +25,7 @@ import time
 import uuid
 
 import requests
-from src.Bxt.BxtConfig import BxtConfig
+from Bxt.BxtConfig import BxtConfig
 from requests import Request
 from requests import RequestException
 

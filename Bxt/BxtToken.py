@@ -42,7 +42,7 @@ make sure you commitzen and testzen. If du breaken, fixen it schnell!
 import jwt
 import time
 
-from src.Bxt.BxtException import BxtException
+from Bxt.BxtException import BxtException
 
 OPTIONS = {"verify_signature": False}
 ALGORITHMS = ["HS256"]

@@ -20,7 +20,7 @@
 # Authors: Frede Hundewadt https://github.com/fhdk/bxtctl
 #
 
-from src.Bxt.BxtConfig import BxtConfig
+from Bxt.BxtConfig import BxtConfig
 import argparse
 from typing import (
     Dict,

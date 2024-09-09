@@ -25,7 +25,7 @@ import time
 import uuid
 
 import requests
-from src.Bxt.BxtConfig import BxtConfig
+from Bxt.BxtConfig import BxtConfig
 from requests import Request
 from requests import RequestException
 
@@ -63,7 +63,7 @@ to_section = {
 # workspace = f"{config.workspace}/testing/extra/aarch64"
 workspace = f"{config.get_workspace()}/testing/extra/x86_64"
 # dummies
-pkgver = "20240909.0805"
+pkgver = "20240909.0818"
 dummy1 = f"a-dummy1-{pkgver}-1-any.pkg.tar.zst"
 dummy2 = f"a-dummy2-{pkgver}-1-any.pkg.tar.zst"
 dummy3 = f"a-dummy3-{pkgver}-1-any.pkg.tar.zst"

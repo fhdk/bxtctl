@@ -20,11 +20,9 @@
 # Authors: Frede Hundewadt https://github.com/fhdk/bxtctl
 #
 
-from src.Bxt import BxtAcl
-from src.Bxt.BxtConfig import BxtConfig
-from src.Bxt import BxtSession
-from src.Bxt import BxtWorkspace
-from src.Bxt import path_completion
+from Bxt.BxtConfig import BxtConfig
+from Bxt import BxtWorkspace, BxtSession, BxtAcl
+from Bxt import path_completion
 
 
 """
