@@ -23,7 +23,7 @@
 import json
 import time
 import requests
-from Bxt.BxtConfig import BxtConfig
+from bxtctl.Bxt.BxtConfig import BxtConfig
 from requests import Request
 from requests import RequestException
 import uuid

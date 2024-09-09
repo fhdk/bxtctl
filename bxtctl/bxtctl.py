@@ -49,11 +49,11 @@ import sys
 import logging
 import json
 from requests_toolbelt.multipart.encoder import MultipartEncoder
-from Bxt.BxtAcl import BxtAcl
-from Bxt.BxtConfig import BxtConfig
-from Bxt.BxtSession import BxtSession
-from Bxt.Utils import path_completion, fix_path, encode_package_data
-from Bxt.BxtWorkspace import BxtWorkspace
+from bxtctl.Bxt.BxtAcl import BxtAcl
+from bxtctl.Bxt.BxtConfig import BxtConfig
+from bxtctl.Bxt.BxtSession import BxtSession
+from bxtctl.Bxt.Utils import path_completion, fix_path, encode_package_data
+from bxtctl.Bxt.BxtWorkspace import BxtWorkspace
 
 
 class BxtCtl(cmd2.Cmd):

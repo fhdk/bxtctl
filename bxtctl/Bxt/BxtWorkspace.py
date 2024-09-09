@@ -44,7 +44,7 @@ from pathlib import Path
 import os
 import logging
 
-from Bxt.BxtFile import BxtFile
+from bxtctl.Bxt.BxtFile import BxtFile
 
 
 class BxtWorkspace:
