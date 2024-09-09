@@ -23,10 +23,9 @@
 import json
 import time
 import requests
-from Bxt.BxtConfig import BxtConfig
+from src.Bxt.BxtConfig import BxtConfig
 from requests import Request
 from requests import RequestException
-from requests_toolbelt import MultipartEncoder
 import uuid
 
 """

@@ -20,13 +20,11 @@
 # Authors: Frede Hundewadt https://github.com/fhdk/bxtctl
 #
 
-import json
-import time
-from Bxt.BxtAcl import BxtAcl
-from Bxt.BxtConfig import BxtConfig
-from Bxt.BxtSession import BxtSession
-from Bxt.BxtWorkspace import BxtWorkspace
-from Bxt.Utils import path_completion
+from src.Bxt import BxtAcl
+from src.Bxt.BxtConfig import BxtConfig
+from src.Bxt import BxtSession
+from src.Bxt import BxtWorkspace
+from src.Bxt import path_completion
 
 
 """

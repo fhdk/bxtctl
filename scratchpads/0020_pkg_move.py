@@ -25,8 +25,7 @@ import time
 import requests
 from requests import Request
 from requests import RequestException
-from Bxt.BxtConfig import BxtConfig
-from requests_toolbelt.multipart.encoder import MultipartEncoder
+from src.Bxt.BxtConfig import BxtConfig
 import uuid
 
 """

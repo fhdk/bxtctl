@@ -39,13 +39,12 @@ make sure you commitzen and testzen. If du breaken, fixen it schnell!
                                         ~ The Code Elfen
 """
 
-from logging import fatal
-from typing import List, Dict
+from typing import List
 from pathlib import Path
 import os
 import logging
 
-from Bxt.BxtFile import BxtFile
+from src.Bxt.BxtFile import BxtFile
 
 
 class BxtWorkspace:

@@ -21,8 +21,8 @@
 #
 
 import time
-from Bxt.BxtConfig import BxtConfig
-from Bxt.BxtSession import BxtSession
+from src.Bxt.BxtConfig import BxtConfig
+from src.Bxt import BxtSession
 
 """
 Get a list of packages from 

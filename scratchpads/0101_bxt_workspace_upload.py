@@ -20,17 +20,13 @@
 # Authors: Frede Hundewadt https://github.com/fhdk/bxtctl
 #
 
-import json
-import time
-
 from requests_toolbelt import MultipartEncoder
 
-from Bxt.BxtAcl import BxtAcl
-from Bxt.BxtConfig import BxtConfig
-from Bxt.BxtFile import BxtFile
-from Bxt.BxtSession import BxtSession
-from Bxt.BxtWorkspace import BxtWorkspace
-from Bxt.Utils import path_completion, encode_package_data
+from src.Bxt import BxtAcl
+from src.Bxt.BxtConfig import BxtConfig
+from src.Bxt import BxtSession
+from src.Bxt import BxtWorkspace
+from src.Bxt import path_completion, encode_package_data
 
 """
 This is for testing assembling a list of packages from workspace listing

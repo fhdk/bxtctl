@@ -23,13 +23,11 @@ import datetime
 import json
 import time
 import uuid
-from pprint import pprint
 
 import requests
-from Bxt.BxtConfig import BxtConfig
+from src.Bxt.BxtConfig import BxtConfig
 from requests import Request
 from requests import RequestException
-from requests_toolbelt.multipart.encoder import MultipartEncoder
 
 """
 Part one of four in a series of scratchpads
@@ -65,7 +63,7 @@ to_section = {
 # workspace = f"{config.workspace}/testing/extra/aarch64"
 workspace = f"{config.get_workspace()}/testing/extra/x86_64"
 # dummies
-pkgver = "20240908.1035"
+pkgver = "20240909.0805"
 dummy1 = f"a-dummy1-{pkgver}-1-any.pkg.tar.zst"
 dummy2 = f"a-dummy2-{pkgver}-1-any.pkg.tar.zst"
 dummy3 = f"a-dummy3-{pkgver}-1-any.pkg.tar.zst"

@@ -1,8 +1,5 @@
 import unittest
-from unittest.mock import patch
-from Bxt.BxtToken import BxtToken
-from Bxt.BxtConfig import BxtConfig
-from Bxt.BxtSession import BxtSession
+from src.Bxt import BxtToken
 
 
 class Test0001BxtToken(unittest.TestCase):

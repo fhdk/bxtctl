@@ -23,14 +23,11 @@
 import json
 import time
 import uuid
-from typing import List, Dict
-from uuid import uuid5
 
 import requests
-from Bxt.BxtConfig import BxtConfig
+from src.Bxt.BxtConfig import BxtConfig
 from requests import Request
 from requests import RequestException
-from requests_toolbelt import MultipartEncoder
 
 """
 part four of four in a series of scratchpads
