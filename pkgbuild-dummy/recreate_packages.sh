@@ -5,6 +5,13 @@ PROJECTDIR="$(git rev-parse --show-toplevel)"
 # test repos
 ARMDIR="$PROJECTDIR/repo/testing/extra/aarch64"
 X86DIR="$PROJECTDIR/repo/testing/extra/x86_64"
+# test and create if not existing
+if ! [[ -d "$ARMDIR"  ]]; then
+  mkdir -p "$ARMDIR"
+fi
+if ! [[ -d "$X86DIR"  ]]; then
+  mkdir -p "$X86DIR"
+fi
 
 # remove previous packages and signatures
 find "$PROJECTDIR/repo" -type f -name "a-dummy*" -exec rm "{}" \; > /dev/null
