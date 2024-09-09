@@ -257,7 +257,7 @@ class BxtCtl(cmd2.Cmd):
 
     # set workspace and exit
     if bxt_cli_args.parse_args().setws:
-        cfg.set_workspace(fix_path(bxt_cli_args.parse_args().set_ws))
+        cfg.set_workspace(fix_path(bxt_cli_args.parse_args().setws))
         ws = BxtWorkspace(cfg.get_workspace(), cfg.repos)
         if not ws.init_workspace():
             logging.error(f"Failed to initialize workspace: {cfg.get_workspace()}")
