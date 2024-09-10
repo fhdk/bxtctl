@@ -3,8 +3,8 @@
 PROJECTDIR="$(git rev-parse --show-toplevel)"
 
 # test repos
-ARMDIR="$PROJECTDIR/repo/testing/extra/aarch64"
-X86DIR="$PROJECTDIR/repo/testing/extra/x86_64"
+ARMDIR="$PROJECTDIR/dummy-repo/testing/extra/aarch64"
+X86DIR="$PROJECTDIR/dummy-repo/testing/extra/x86_64"
 # test and create if not existing
 if ! [[ -d "$ARMDIR"  ]]; then
   mkdir -p "$ARMDIR"
@@ -26,8 +26,8 @@ sed -i 's|pkgver=.*|pkgver='"${pkgver}"'|g' "$PROJECTDIR/dummy-pkg/PKGBUILD"
 sed -i 's|pkgver = .*|pkgver = '\""${pkgver}"\"'|g' "$PROJECTDIR/scratchpads/0010_pkg_upload.py"
 
 # build new packages
-cd "$PROJECTDIR/pkg-dummy" || exit 1
-PKGDEST="$PROJECTDIR/repo" makepkg -cC
+cd "$PROJECTDIR/dummy-pkg" || exit 1
+PKGDEST="$PROJECTDIR/dummy-repo" makepkg -cC
 cd "$PROJECTDIR" || exit 1
 
 # sign the new packages
