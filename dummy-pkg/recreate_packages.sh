@@ -14,13 +14,13 @@ if ! [[ -d "$X86DIR"  ]]; then
 fi
 
 # remove previous packages and signatures
-find "$PROJECTDIR/repo" -type f -name "a-dummy*" -exec rm "{}" \; > /dev/null
+find "$PROJECTDIR/dummy-repo" -type f -name "a-dummy*" -exec rm "{}" \; > /dev/null
 
 # generate a version number
 pkgver=$(date -d "today" +"%Y%m%d.%H%M")
 
 # inject the version number into the PKGBUILD
-sed -i 's|pkgver=.*|pkgver='"${pkgver}"'|g' "$PROJECTDIR/pkgbuild/PKGBUILD"
+sed -i 's|pkgver=.*|pkgver='"${pkgver}"'|g' "$PROJECTDIR/dummy-pkg/PKGBUILD"
 
 # and the upload scratchpad
 sed -i 's|pkgver = .*|pkgver = '\""${pkgver}"\"'|g' "$PROJECTDIR/scratchpads/0010_pkg_upload.py"
@@ -34,7 +34,7 @@ cd "$PROJECTDIR" || exit 1
 find "$PROJECTDIR/repo" -type f -name "*.pkg.tar.*" -exec signfile "{}" \;
 
 # loop the files
-for file in "$PROJECTDIR"/repo-dummy/*.pkg.tar.*
+for file in "$PROJECTDIR"/dummy-repo/*.pkg.tar.*
 do
   # copy files to test repos
   cp "$file" "$X86DIR"
