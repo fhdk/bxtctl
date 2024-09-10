@@ -2,9 +2,9 @@
 <module type="PYTHON_MODULE" version="4">
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
-      <excludeFolder url="file://$MODULE_DIR$/repo-dummy/stable" />
-      <excludeFolder url="file://$MODULE_DIR$/repo-dummy/testing" />
-      <excludeFolder url="file://$MODULE_DIR$/repo-dummy/unstable" />
+      <excludeFolder url="file://$MODULE_DIR$/dummy-repo/stable" />
+      <excludeFolder url="file://$MODULE_DIR$/dummy-repo/testing" />
+      <excludeFolder url="file://$MODULE_DIR$/dummy-repo/unstable" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
