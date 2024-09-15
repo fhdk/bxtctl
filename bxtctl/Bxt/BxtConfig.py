@@ -47,9 +47,9 @@ import os
 from jinja2.lexer import TOKEN_LT
 from pwinput import pwinput
 from pathlib import Path
-from .BxtSession import BxtSession
-from .BxtToken import BxtToken
-from .BxtEncoder import BxtEncoder
+from Bxt.BxtSession import BxtSession
+from Bxt.BxtToken import BxtToken
+from Bxt.BxtEncoder import BxtEncoder
 
 
 class BxtConfig:
@@ -344,7 +344,11 @@ class BxtConfig:
             try:
                 self._batch_size = config["batch_size"]
             except KeyError:
-                self._batch_size = 100
+                self._batch_size = 10
+            try:
+                self._token_renew_threshold = config["token_threshold"]
+            except KeyError:
+                self._token_renew_threshold = 300
 
         except json.JSONDecodeError:
             self._username = ""
@@ -368,6 +372,7 @@ class BxtConfig:
             "url": self._url,
             "username": self._username,
             "workspace": self._workspace,
+            "token_threshold": self._token_renew_threshold,
         }
         with open(self._configstore, "w") as outfile:
             json.dump(temp, outfile, indent=2, cls=BxtEncoder)

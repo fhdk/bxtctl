@@ -39,8 +39,8 @@ make sure you commitzen and testzen. If du breaken, fixen it schnell!
                                         ~ The Code Elfen
 """
 
-from .PkgFiles import PkgFiles
-from .PkgInfo import PkgInfo
+from Bxt.PkgFiles import PkgFiles
+from Bxt.PkgInfo import PkgInfo
 
 
 class Package:

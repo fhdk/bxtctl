@@ -6,7 +6,7 @@
       <excludeFolder url="file://$MODULE_DIR$/dummy-repo/testing" />
       <excludeFolder url="file://$MODULE_DIR$/dummy-repo/unstable" />
     </content>
-    <orderEntry type="inheritedJdk" />
+    <orderEntry type="jdk" jdkName="Poetry (bxtctl) (3)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
   <component name="PackageRequirementsSettings">

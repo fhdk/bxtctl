@@ -39,7 +39,7 @@ make sure you commitzen and testzen. If du breaken, fixen it schnell!
                                         ~ The Code Elfen
 """
 
-from User import User
+from Bxt.User import User
 
 
 class Users:

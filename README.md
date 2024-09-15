@@ -42,7 +42,7 @@ and any thoughts and ideas to improve or extend the functionality.
 
 If you discover a bug (likely you will) please create a new issue.
 
-## Workspace 
+## Workspace
 A tree structure will be created in the designated workspace.
 
 The structure will macth the permissions for the user accessing the service.
@@ -109,10 +109,13 @@ move_pkg
 ```
 
 Upload idea
+
 ```text
 upload_pkg -p pkg -p pkg -p pkg -repo unstable/extra/aarch64
 ```
+
 Remove idea
+
 ```text
 remove_pkg -p pkg -p pkg -p pkg -repo unstable/extra/aarch64
 ```
@@ -146,6 +149,7 @@ ws: workspace
 ```
 
 See your permissions
+
 ```shell
 (bxtctl@bxt.staging.manjaro.org) $ permissions
 ---------- PERMISSIONS ----------

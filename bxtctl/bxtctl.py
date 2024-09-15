@@ -41,19 +41,20 @@ make sure you commitzen and testzen. If du breaken, fixen it schnell!
 """
 
 import argparse
+from os import lseek
+
 import cmd2
-from cmd2 import Cmd2ArgumentParser, with_argparser
+from cmd2 import Cmd2ArgumentParser, with_argparser, with_argument_list, with_category
 import functools
 import subprocess
 import sys
 import logging
 import json
-from requests_toolbelt.multipart.encoder import MultipartEncoder
-from bxtctl.Bxt.BxtAcl import BxtAcl
-from bxtctl.Bxt.BxtConfig import BxtConfig
-from bxtctl.Bxt.BxtSession import BxtSession
-from bxtctl.Bxt.Utils import path_completion, fix_path, encode_package_data
-from bxtctl.Bxt.BxtWorkspace import BxtWorkspace
+from Bxt.BxtAcl import BxtAcl
+from Bxt.BxtConfig import BxtConfig
+from Bxt.BxtSession import BxtSession
+from Bxt.Utils import path_completion, fix_path, encode_package_data
+from Bxt.BxtWorkspace import BxtWorkspace
 
 
 class BxtCtl(cmd2.Cmd):
@@ -75,8 +76,8 @@ class BxtCtl(cmd2.Cmd):
                 "lsr": "list_repo",
                 "lsw": "list_workspace",
                 "upp": "upload_pkg",
-                "cpp": "copy_pkg",
-                "mvp": "move_pkg",
+                # "cpp": "copy_pkg",
+                # "mvp": "move_pkg",
                 "rmp": "delete_pkg",
             }
         )
@@ -207,31 +208,31 @@ class BxtCtl(cmd2.Cmd):
         "-p", "--pkg", type=str, nargs="+", help=f"Package(s) to upload to bxt"
     )
 
-    # ###############################################################
-    # copy command
-    bxt_copy_args = Cmd2ArgumentParser(description="Copy package(s) inside bxt storage")
-    bxt_copy_args.add_argument(
-        "-f", "--from", type=str, help="Copy from repo", choices=cfg.repos
-    )
-    bxt_copy_args.add_argument(
-        "-t", "--to", type=str, help="Copy to repo", choices=cfg.repos
-    )
-    bxt_copy_args.add_argument(
-        "-p", "--pkg", type=str, nargs="+", help=f"Package(s) to copy in bxt"
-    )
-
-    # ###############################################################
-    # move command
-    bxt_move_args = Cmd2ArgumentParser(description="Move package(s) inside bxt storage")
-    bxt_move_args.add_argument(
-        "-f", "--from", type=str, help="Move from repo", choices=cfg.repos
-    )
-    bxt_move_args.add_argument(
-        "-t", "--to", type=str, help="Move to repo", choices=cfg.repos
-    )
-    bxt_move_args.add_argument(
-        "-p", "--pkg", type=str, nargs="+", help=f"Packages to move in bxt"
-    )
+    # # ###############################################################
+    # # copy command
+    # bxt_copy_args = Cmd2ArgumentParser(description="Copy package(s) inside bxt storage")
+    # bxt_copy_args.add_argument(
+    #     "-f", "--from", type=str, help="Copy from repo", choices=cfg.repos
+    # )
+    # bxt_copy_args.add_argument(
+    #     "-t", "--to", type=str, help="Copy to repo", choices=cfg.repos
+    # )
+    # bxt_copy_args.add_argument(
+    #     "-p", "--pkg", type=str, nargs="+", help=f"Package(s) to copy in bxt"
+    # )
+    #
+    # # ###############################################################
+    # # move command
+    # bxt_move_args = Cmd2ArgumentParser(description="Move package(s) inside bxt storage")
+    # bxt_move_args.add_argument(
+    #     "-f", "--from", type=str, help="Move from repo", choices=cfg.repos
+    # )
+    # bxt_move_args.add_argument(
+    #     "-t", "--to", type=str, help="Move to repo", choices=cfg.repos
+    # )
+    # bxt_move_args.add_argument(
+    #     "-p", "--pkg", type=str, nargs="+", help=f"Packages to move in bxt"
+    # )
 
     # ###############################################################
     # remove command
@@ -275,40 +276,40 @@ class BxtCtl(cmd2.Cmd):
         to_commit = bxt_cli_args.parse_args().commit
         if to_commit != "*":
             print(f"checking '{to_commit}'", end="\r")
-            files = ws.get_packages(to_commit)
-            if len(files) > 0:
+            packages = ws.get_packages(to_commit)
+            if len(packages) > 0:
                 print(f"Uploading repo: '{to_commit}'")
-                file_count = 0
-                for file in files:
-                    if file.signature is None:
+                idx = 0
+                for pkg in packages:
+                    if pkg.signature is None:
                         print(
-                            f"'{file.package()}' has no signature... skipping", end="\n"
+                            f"'{pkg.package()}' has no signature... skipping", end="\n"
                         )
                         continue
 
-                    print(f"Sending -> {file.package()}...", end="\n")
-                    encoded = encode_package_data(file)
-                    multipart_data = MultipartEncoder(fields=encoded)
+                    print(f"Sending -> {pkg.package()}...", end="\n")
+                    form_encoded = encode_package_data(pkg)
+                    multipart_data = MultipartEncoder(fields=form_encoded)
 
                     logging.debug(multipart_data.content_type)
                     logging.debug(multipart_data.to_string())
 
-                    result = bxt_session.commit(
+                    packed = bxt_session.commit(
                         url=f"{cfg.get_url()}/{cfg.endpoint["pkgCommit"]}",
-                        data=multipart_data,
+                        files=multipart_data,
                         token=cfg.get_access_token(),
                         headers={"Content-Type": multipart_data.content_type},
                     )
-                    if result.status() != 200:
+                    if packed.status() != 200:
                         print(
-                            f"Failed to upload '{file.package()}' -> '{result.status()}'"
+                            f"Failed to upload '{pkg.package()}' -> '{packed.status()}'"
                         )
-                        print(f"{result.content()}")
+                        print(f"{packed.content()}")
                         exit(1)
                     else:
-                        file_count += 1
+                        idx += 1
 
-                print(f"Done! {file_count} packages uploaded to '{to_commit}'")
+                print(f"Done! {idx} packages uploaded to '{to_commit}'")
 
             else:
                 print(f"Nothing to do in '{to_commit}'")
@@ -316,20 +317,32 @@ class BxtCtl(cmd2.Cmd):
         else:
             print("checking all repos", end="\r")
             for repo in cfg.repos:
-                files = ws.get_packages(repo)
-                if len(files) > 0:
+                packages = ws.get_packages(repo)
+                if len(packages) > 0:
                     print(f"Uploading repo: '{repo}'")
-                    file_count = 0
-                    for file in files:
-                        if file.signature is None:
+                    idx = 0
+                    files = {}
+                    for pkg in packages:
+                        if pkg.signature is None:
                             print(
-                                f"'{file.package()}' has no signature... skipping",
+                                f"'{pkg.package()}' has no signature... skipping",
                                 end="\n",
                             )
                             continue
-                        print(f"Sending -> {file.package()}", end="\n")
-                        file_count += 1
-                    print(f"Done! {file_count} packages uploaded to '{repo}'")
+                        print(f"Preparing -> {pkg.package}", end="\n")
+                        idx += 1
+                        packed = encode_package_data(pkg, idx)
+                        files.update(packed)
+                    print("Sending data...")
+                    result = bxt_session.commit(
+                        url=f"{cfg.get_url()}/{cfg.endpoint['pkgCommit']}",
+                        token=cfg.get_access_token(),
+                        files=files,
+                    )
+                    if result.status() != 200:
+                        print(f"Error: {result.status()}. Message: {result.content()}")
+                    else:
+                        print(f"Done! {idx} packages uploaded to '{repo}'")
                 else:
                     print(f"Nothing to do in '{repo}'")
         exit(0)
@@ -346,29 +359,29 @@ class BxtCtl(cmd2.Cmd):
         cmd2.Cmd.delimiter_complete, match_against=cfg.repos, delimiter="/"
     )
 
-    @with_argparser(bxt_copy_args)
-    def do_copy_pkg(self, args):
-        """
-        Copy one or more package(s) within bxt storage
-        :param args: the package(s) to copy from source to target
-        """
-        self.poutput("TODO: implement copy")
-
-    complete_copy_pkg = functools.partialmethod(
-        cmd2.Cmd.delimiter_complete, match_against=cfg.repos, delimiter="/"
-    )
-
-    @with_argparser(bxt_move_args)
-    def do_move_pkg(self, args):
-        """
-        Move one or more package(s) in bxt storage
-        :param args: the package(s) to move from source to target
-        """
-        self.poutput("TODO: implement move")
-
-    complete_move_pkg = functools.partialmethod(
-        cmd2.Cmd.delimiter_complete, match_against=cfg.repos, delimiter="/"
-    )
+    # @with_argparser(bxt_copy_args)
+    # def do_copy_pkg(self, args):
+    #     """
+    #     Copy one or more package(s) within bxt storage
+    #     :param args: the package(s) to copy from source to target
+    #     """
+    #     self.poutput("TODO: implement copy")
+    #
+    # complete_copy_pkg = functools.partialmethod(
+    #     cmd2.Cmd.delimiter_complete, match_against=cfg.repos, delimiter="/"
+    # )
+    #
+    # @with_argparser(bxt_move_args)
+    # def do_move_pkg(self, args):
+    #     """
+    #     Move one or more package(s) in bxt storage
+    #     :param args: the package(s) to move from source to target
+    #     """
+    #     self.poutput("TODO: implement move")
+    #
+    # complete_move_pkg = functools.partialmethod(
+    #     cmd2.Cmd.delimiter_complete, match_against=cfg.repos, delimiter="/"
+    # )
 
     @with_argparser(bxt_workspace_args)
     def do_workspace(self, args):

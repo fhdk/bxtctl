@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # example file for Cmd2
 
-from bxtctl.Bxt.BxtConfig import BxtConfig
+from Bxt import BxtConfig
 import argparse
 from typing import (
     Dict,

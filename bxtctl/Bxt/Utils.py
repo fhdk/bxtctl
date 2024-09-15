@@ -42,7 +42,7 @@ make sure you commitzen and testzen. If du breaken, fixen it schnell!
 from typing import List
 import os
 import json
-from .BxtFile import BxtFile
+from Bxt.BxtFile import BxtFile
 import requests
 
 
@@ -60,21 +60,23 @@ def check_connection(url: str) -> bool:
 
 def encode_package_data(file: BxtFile, idx: int = 1):
     """
-    Create dictionary to be consumed by MultipartEncoder
+    Create dictionary to be consumed as multipart/form-data
     :param file:
     :param idx:
     :return:
     """
+    pkgfile = file.package.split("/")[-1]
+    sigfile = file.signature.split("/")[-1]
     return {
         (
             f"package{idx}",
-            (file.package, open(file.package, "rb"), "application/octet-stream"),
+            (pkgfile, open(file.package, "rb"), "application/octet-stream"),
         ),
         (
             f"package{idx}.signature",
-            (file.signature, open(file.signature, "rb"), "application/octet-stream"),
+            (sigfile, open(file.signature, "rb"), "application/octet-stream"),
         ),
-        (f"package{idx}.section", (json.dumps(file.section), "text/plain")),
+        (f"package{idx}.section", (None, json.dumps(file.section), "text/plain")),
     }
 
 

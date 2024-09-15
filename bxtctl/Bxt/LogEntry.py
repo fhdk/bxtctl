@@ -39,7 +39,7 @@ make sure you commitzen and testzen. If du breaken, fixen it schnell!
                                         ~ The Code Elfen
 """
 
-from .LogEntryEnums import EntryClass, EntryAction, EntryType
+from Bxt.LogEntryEnums import EntryClass, EntryAction, EntryType
 
 
 class PkgLocation:

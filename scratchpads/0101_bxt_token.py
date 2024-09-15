@@ -20,7 +20,7 @@
 # Authors: Frede Hundewadt https://github.com/fhdk/bxtctl
 #
 
-from bxtctl.Bxt.BxtConfig import BxtConfig
+from Bxt import BxtConfig
 
 """
 get a token from Bxt

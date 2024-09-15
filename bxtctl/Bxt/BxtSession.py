@@ -48,12 +48,12 @@ from typing import Any
 from requests import Request
 from requests import RequestException
 
-from .BxtException import BxtException
-from .HttpResult import HttpResult
-from .LogEntry import LogEntry
-from .Package import Package
-from .Section import Section
-from .User import User
+from Bxt.BxtException import BxtException
+from Bxt.HttpResult import HttpResult
+from Bxt.LogEntry import LogEntry
+from Bxt.Package import Package
+from Bxt.Section import Section
+from Bxt.User import User
 
 
 class BxtSession:
@@ -63,6 +63,7 @@ class BxtSession:
 
     def __init__(self, user_agent: str):
         self._user_agent = user_agent
+        logging.getLogger("BxtSession").info("BxtSession initialized")
 
     def authenticate(self, url: str, username: str, password: str) -> HttpResult:
         """
@@ -76,13 +77,13 @@ class BxtSession:
         return self.make_http_request(method="post", url=url, json=data)
 
     def commit(
-        self, url: str, data: Any, token: str, headers: dict = None
+        self, url: str, files: dict, token: str, headers: dict = None
     ) -> HttpResult:
         """
         post a commit request
         :param headers:
         :param url:
-        :param data:
+        :param files:
         :param headers
         :param token:
         :return: HttpResult
@@ -92,7 +93,7 @@ class BxtSession:
         else:
             headers = {"Authorization": f"Bearer {token}"}
         return self.make_http_request(
-            method="post", url=url, headers=headers, data=data
+            method="post", url=url, headers=headers, files=files
         )
 
     def compare(self, url: str, data: list, token: str) -> HttpResult:
@@ -149,7 +150,6 @@ class BxtSession:
         logging.debug(f"headers: {headers}")
         logging.debug(f"json: {json}")
         logging.debug(f"params: {params}")
-
         try:
             # execute request
             response = session.send(req, stream=True, timeout=30)

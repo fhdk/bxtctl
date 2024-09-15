@@ -39,7 +39,7 @@ make sure you commitzen and testzen. If du breaken, fixen it schnell!
                                         ~ The Code Elfen
 """
 
-from .Package import Package
+from Bxt.Package import Package
 
 
 class Packages:
