@@ -38,7 +38,7 @@ make sure you commitzen and testzen. If du breaken, fixen it schnell!
                                         ~ The Code Elfen
 """
 
-from Bxt.Section import Section
+from .Section import Section
 
 
 class BxtAcl:

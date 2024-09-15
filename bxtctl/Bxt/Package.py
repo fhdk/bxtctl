@@ -39,8 +39,8 @@ make sure you commitzen and testzen. If du breaken, fixen it schnell!
                                         ~ The Code Elfen
 """
 
-from Bxt.Section import Section
-from Bxt.PoolEntry import PoolEntry
+from .Section import Section
+from .PoolEntry import PoolEntry
 
 
 class Package:

@@ -47,9 +47,9 @@ import os
 from jinja2.lexer import TOKEN_LT
 from pwinput import pwinput
 from pathlib import Path
-from Bxt.BxtSession import BxtSession
-from Bxt.BxtToken import BxtToken
-from Bxt.BxtEncoder import BxtEncoder
+from .BxtSession import BxtSession
+from .BxtToken import BxtToken
+from .BxtEncoder import BxtEncoder
 
 
 class BxtConfig:

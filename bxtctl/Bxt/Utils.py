@@ -42,7 +42,7 @@ make sure you commitzen and testzen. If du breaken, fixen it schnell!
 from typing import List
 import os
 import json
-from Bxt.BxtFile import BxtFile
+from .BxtFile import BxtFile
 import requests
 
 

@@ -48,12 +48,12 @@ from typing import Any
 from requests import Request
 from requests import RequestException
 
-from Bxt.BxtException import BxtException
-from Bxt.HttpResult import HttpResult
-from Bxt.LogEntry import LogEntry
-from Bxt.Package import Package
-from Bxt.Section import Section
-from Bxt.User import User
+from .BxtException import BxtException
+from .HttpResult import HttpResult
+from .LogEntry import LogEntry
+from .Package import Package
+from .Section import Section
+from .User import User
 
 
 class BxtSession:
