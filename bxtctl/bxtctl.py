@@ -546,34 +546,53 @@ class BxtCtl(cmd2.Cmd):
         :param args:
         :return: True/False
         """
-        location = args.up.split("/")
-        print(location)
-        # branch = location[0]
-        # if branch not in self.acl.get_branches():
-        #     self.perror(f"Invalid branch: {branch}")
-        #     return False
-        # repo = location[1]
-        # if repo not in self.acl.get_repositories():
-        #     self.perror(f"Invalid repository: {repo}")
-        #     return False
-        # arch = location[2]
-        # if arch not in self.acl.get_architectures():
-        #     self.perror(f"Invalid architecture: {arch}")
-        #     return False
-        # # packages = args.package
-        # self.quiet = False
-        # # self.pfeedback(f"TODO - commit package to repo - using {packages}")
-        # self.pfeedback(f"Reading files from workspace: {self.cfg.get_workspace()}")
-        # self.pfeedback(f"Commit endpoint is: {self.cfg.endpoint['pkgCommit']}")
-        # self.pfeedback(f"Commit package(s) to: {branch}/{repo}/{arch}")
-        #
-        # self.quiet = True
-        # ws = BxtWorkspace(self.cfg.get_workspace(), self.cfg.repos)
-        # files = ws.get_packages(location)
-        # self.poutput("Sending files:")
-        # for file in files:
-        #     print(file.package)
-        # print("Files has been sent.")
+        location = args.to.split("/")
+        branch = location[0]
+        if branch not in self.acl.get_branches():
+            self.perror(f"Invalid branch: {branch}")
+            return False
+        repo = location[1]
+        if repo not in self.acl.get_repositories():
+            self.perror(f"Invalid repository: {repo}")
+            return False
+        arch = location[2]
+        if arch not in self.acl.get_architectures():
+            self.perror(f"Invalid architecture: {arch}")
+            return False
+        # packages = args.package
+        self.quiet = False
+        # self.pfeedback(f"TODO - commit package to repo - using {packages}")
+        self.pfeedback(f"Reading files from workspace: {self.cfg.get_workspace()}")
+        self.pfeedback(f"Commit endpoint is: {self.cfg.endpoint['pkgCommit']}")
+        self.pfeedback(f"Commit package(s) to: {branch}/{repo}/{arch}")
+
+        self.quiet = True
+        ws = BxtWorkspace(self.cfg.get_workspace(), self.cfg.repos)
+        packages = ws.get_packages(repo)
+        to_send = args.pkg
+
+        if len(packages) > 0:
+            print(f"Uploading repo: '{repo}'")
+            for pkg in packages:
+                if pkg.signature is None:
+                    print(
+                        f"'{pkg.package()}' has no signature... skipping",
+                        end="\n",
+                    )
+                    continue
+                packed = encode_package_data(pkg)
+                print(f"Sending package... {pkg.package.split('/')[-1]}")
+                result = self.bxt_session.commit(
+                    url=f"{self.cfg.get_url()}/{self.cfg.endpoint['pkgCommit']}",
+                    token=self.cfg.get_access_token(),
+                    files=packed,
+                )
+                if result.status() != 200:
+                    print(f"Error: {result.status()}. Message: {result.content()}")
+                    exit(1)
+                else:
+                    ws.pkg_remove(pkg)
+        print("Files has been sent.")
 
     complete_upload = functools.partialmethod(
         cmd2.Cmd.delimiter_complete, match_against=cfg.repos, delimiter="/"
