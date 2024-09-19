@@ -22,9 +22,11 @@
 
 from requests_toolbelt import MultipartEncoder
 
-from Bxt.BxtSession import BxtSession
-from Bxt import BxtAcl, BxtConfig, BxtWorkspace
-from Bxt import path_completion, encode_package_data
+from bxtctl.Bxt.BxtSession import BxtSession
+from bxtctl.Bxt.BxtAcl import BxtAcl
+from bxtctl.Bxt.BxtConfig import BxtConfig
+from bxtctl.Bxt.BxtWorkspace import BxtWorkspace
+from bxtctl.Bxt.Utils import path_completion, encode_package_data
 
 """
 This is for testing assembling a list of packages from workspace listing

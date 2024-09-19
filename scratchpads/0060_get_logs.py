@@ -21,8 +21,8 @@
 #
 
 import time
-from Bxt import BxtConfig
-from Bxt.BxtSession import BxtSession
+from bxtctl.Bxt.BxtConfig import BxtConfig
+from bxtctl.Bxt.BxtSession import BxtSession
 import logging
 
 """
