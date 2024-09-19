@@ -55,6 +55,7 @@ from Bxt.BxtConfig import BxtConfig
 from Bxt.BxtSession import BxtSession
 from Bxt.Utils import path_completion, fix_path, encode_package_data
 from Bxt.BxtWorkspace import BxtWorkspace
+from bxtctl.Bxt.HttpResult import HttpResult
 
 
 class BxtCtl(cmd2.Cmd):
@@ -274,42 +275,31 @@ class BxtCtl(cmd2.Cmd):
             logging.error(f"Workspace has not been initialized: {cfg.get_workspace()}")
             exit(1)
         to_commit = bxt_cli_args.parse_args().commit
+
         if to_commit != "*":
             print(f"checking '{to_commit}'", end="\r")
             packages = ws.get_packages(to_commit)
             if len(packages) > 0:
                 print(f"Uploading repo: '{to_commit}'")
-                idx = 0
                 for pkg in packages:
                     if pkg.signature is None:
                         print(
-                            f"'{pkg.package()}' has no signature... skipping", end="\n"
+                            f"'{pkg.package()}' has no signature... skipping",
+                            end="\n",
                         )
                         continue
-
-                    print(f"Sending -> {pkg.package()}...", end="\n")
-                    form_encoded = encode_package_data(pkg)
-                    multipart_data = MultipartEncoder(fields=form_encoded)
-
-                    logging.debug(multipart_data.content_type)
-                    logging.debug(multipart_data.to_string())
-
-                    packed = bxt_session.commit(
-                        url=f"{cfg.get_url()}/{cfg.endpoint["pkgCommit"]}",
-                        files=multipart_data,
+                    packed = encode_package_data(pkg)
+                    print(f"Sending package... {pkg.package.split('/')[-1]}")
+                    result = bxt_session.commit(
+                        url=f"{cfg.get_url()}/{cfg.endpoint['pkgCommit']}",
                         token=cfg.get_access_token(),
-                        headers={"Content-Type": multipart_data.content_type},
+                        files=packed,
                     )
-                    if packed.status() != 200:
-                        print(
-                            f"Failed to upload '{pkg.package()}' -> '{packed.status()}'"
-                        )
-                        print(f"{packed.content()}")
+                    if result.status() != 200:
+                        print(f"Error: {result.status()}. Message: {result.content()}")
                         exit(1)
                     else:
-                        idx += 1
-
-                print(f"Done! {idx} packages uploaded to '{to_commit}'")
+                        ws.pkg_remove(pkg)
 
             else:
                 print(f"Nothing to do in '{to_commit}'")
@@ -320,8 +310,6 @@ class BxtCtl(cmd2.Cmd):
                 packages = ws.get_packages(repo)
                 if len(packages) > 0:
                     print(f"Uploading repo: '{repo}'")
-                    idx = 0
-                    files = {}
                     for pkg in packages:
                         if pkg.signature is None:
                             print(
@@ -329,23 +317,23 @@ class BxtCtl(cmd2.Cmd):
                                 end="\n",
                             )
                             continue
-                        print(f"Preparing -> {pkg.package}", end="\n")
-                        idx += 1
-                        packed = encode_package_data(pkg, idx)
-                        files.update(packed)
-                    print("Sending data...")
-                    result = bxt_session.commit(
-                        url=f"{cfg.get_url()}/{cfg.endpoint['pkgCommit']}",
-                        token=cfg.get_access_token(),
-                        files=files,
-                    )
-                    if result.status() != 200:
-                        print(f"Error: {result.status()}. Message: {result.content()}")
-                    else:
-                        print(f"Done! {idx} packages uploaded to '{repo}'")
+                        packed = encode_package_data(pkg)
+                        print(f"Sending package... {pkg.package.split('/')[-1]}")
+                        result = bxt_session.commit(
+                            url=f"{cfg.get_url()}/{cfg.endpoint['pkgCommit']}",
+                            token=cfg.get_access_token(),
+                            files=packed,
+                        )
+                        if result.status() != 200:
+                            print(f"Error: {result.status()}. Message: {result.content()}")
+                            exit(1)
+                        else:
+                            ws.pkg_remove(pkg)
+
                 else:
                     print(f"Nothing to do in '{repo}'")
         exit(0)
+
 
     @with_argparser(bxt_delete_args)
     def do_delete_pkg(self, args):
