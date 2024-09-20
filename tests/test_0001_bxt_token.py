@@ -34,14 +34,16 @@ class Test0001BxtToken(unittest.TestCase):
         Test get access token
         :return:
         """
-        assert self.token.get_access_token() == self.test_token["access_token"]
+        token = self.token.get_access_token()
+        assert token == self.test_token["access_token"]
 
     def test_get_refresh_token(self):
         """
         Test get refresh token
         :return:
         """
-        assert self.token.get_access_token() == self.test_token["refresh_token"]
+        token = self.token.get_refresh_token()
+        assert token == self.test_token["refresh_token"]
 
     def test_token_owner(self):
         """
