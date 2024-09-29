@@ -617,16 +617,6 @@ wcwidth = "*"
 tests = ["pytest", "pytest-cov", "pytest-lazy-fixtures"]
 
 [[package]]
-name = "pwinput"
-version = "1.0.3"
-description = "A cross-platform Python module that displays **** for password input. Works on Windows, unlike getpass. Formerly called stdiomask."
-optional = false
-python-versions = "*"
-files = [
-    {file = "pwinput-1.0.3.tar.gz", hash = "sha256:ca1a8bd06e28872d751dbd4132d8637127c25b408ea3a349377314a5491426f3"},
-]
-
-[[package]]
 name = "pyjwt"
 version = "2.9.0"
 description = "JSON Web Token implementation in Python"
@@ -963,4 +953,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "c9dafcf68f7e69bc5156ee3d3da87fd43c1919a663d7f8f26dec3baffc6a7e70"
+content-hash = "d0a64ea90776cce98f7d8f60d3c84cec957361d3486b40b6b71c4bd89c8f3774"
