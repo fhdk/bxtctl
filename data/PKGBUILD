@@ -34,7 +34,7 @@ build() {
 
 package() {
   cd "$pkgname"
-  python -m installer --destdir="$pkgdir" dist/*.whl
+  python -m installer --destdir="$pkgdir" dist/bxtctl*.whl
 
   install -d "$pkgdir/usr/bin"
   install -Dm755 "$srcdir/$pkgname/data/bin/$pkgname" -t "$pkgdir/usr/bin/"
