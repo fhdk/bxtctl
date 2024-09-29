@@ -1,5 +1,4 @@
 # Maintainer: Frede Hundewadt <fh@manjaro.org>
-# Contributor: Philip Müller <philm@manjaro.org>
 
 pkgname=bxtctl
 pkgver=0.6alpha
