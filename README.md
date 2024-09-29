@@ -17,14 +17,6 @@ Required packages
 sudo pacman -Syu python-cmd python-prettytable python-pyjwt python-requests python-requests-toolbelt
 ```
 
-### custom package
-
-- python-pwinput
-
-```
-pamac build python-pwinput
-```
-
 ```bash
 sudo pacman -S poetry
 git clone https://github.com/fhdk/bxtctl.git
