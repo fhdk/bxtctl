@@ -50,13 +50,13 @@ import functools
 import subprocess
 import sys
 import logging
-import json
+
+# app supplied sources
 from bxtctl.Bxt.BxtAcl import BxtAcl
 from bxtctl.Bxt.BxtConfig import BxtConfig
 from bxtctl.Bxt.BxtSession import BxtSession
 from bxtctl.Bxt.Utils import path_completion, fix_path, encode_package_data
 from bxtctl.Bxt.BxtWorkspace import BxtWorkspace
-from bxtctl.Bxt.HttpResult import HttpResult
 
 
 class BxtCtl(cmd2.Cmd):

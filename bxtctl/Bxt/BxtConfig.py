@@ -39,14 +39,13 @@ make sure you commitzen and testzen. If du breaken, fixen it schnell!
                                         ~ The Code Elfen
 """
 
-import base64
 import json
 import logging
 import os
-
-from jinja2.lexer import TOKEN_LT
-from pwinput import pwinput
 from pathlib import Path
+
+# app supplied sources
+from bxtctl.pwinput import pwinput
 from .BxtSession import BxtSession
 from .BxtToken import BxtToken
 from .BxtEncoder import BxtEncoder

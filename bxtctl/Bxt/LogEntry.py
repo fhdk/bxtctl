@@ -39,6 +39,7 @@ make sure you commitzen and testzen. If du breaken, fixen it schnell!
                                         ~ The Code Elfen
 """
 
+# app supplied sources
 from .LogEntryEnums import EntryClass, EntryAction, EntryType
 
 

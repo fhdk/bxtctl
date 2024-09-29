@@ -40,14 +40,12 @@ make sure you commitzen and testzen. If du breaken, fixen it schnell!
 """
 
 import logging
-from datetime import datetime
 import uuid
 import requests
-from json import JSONDecodeError
-from typing import Any
 from requests import Request
 from requests import RequestException
 
+# app supplied sources
 from .BxtException import BxtException
 from .HttpResult import HttpResult
 from .LogEntry import LogEntry

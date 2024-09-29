@@ -42,8 +42,9 @@ make sure you commitzen and testzen. If du breaken, fixen it schnell!
 from typing import List
 import os
 import json
-from .BxtFile import BxtFile
 import requests
+# app supplied sources
+from .BxtFile import BxtFile
 
 
 def check_connection(url: str) -> bool:

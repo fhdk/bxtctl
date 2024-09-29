@@ -41,9 +41,6 @@ make sure you commitzen and testzen. If du breaken, fixen it schnell!
 
 from json import JSONEncoder
 
-from requests_toolbelt import MultipartEncoder
-
-
 class BxtEncoder(JSONEncoder):
     def default(self, obj):
         return obj.__dict__
