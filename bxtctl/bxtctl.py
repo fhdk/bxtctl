@@ -42,6 +42,7 @@ make sure you commitzen and testzen. If du breaken, fixen it schnell!
 
 import argparse
 from os import lseek
+from random import choices
 
 import cmd2
 from cmd2 import Cmd2ArgumentParser, with_argparser, with_argument_list, with_category
@@ -50,11 +51,11 @@ import subprocess
 import sys
 import logging
 import json
-from Bxt.BxtAcl import BxtAcl
-from Bxt.BxtConfig import BxtConfig
-from Bxt.BxtSession import BxtSession
-from Bxt.Utils import path_completion, fix_path, encode_package_data
-from Bxt.BxtWorkspace import BxtWorkspace
+from bxtctl.Bxt.BxtAcl import BxtAcl
+from bxtctl.Bxt.BxtConfig import BxtConfig
+from bxtctl.Bxt.BxtSession import BxtSession
+from bxtctl.Bxt.Utils import path_completion, fix_path, encode_package_data
+from bxtctl.Bxt.BxtWorkspace import BxtWorkspace
 from bxtctl.Bxt.HttpResult import HttpResult
 
 
@@ -134,9 +135,11 @@ class BxtCtl(cmd2.Cmd):
         filename=f"{fix_path(cfg.config_dir)}/bxtctl.log",
         filemode="w",
     )
+
     cfg.repos = path_completion(
         acl.get_branches, acl.get_repositories, acl.get_architectures
     )
+
     repo_choices = ["*"] + cfg.repos
     # ###############################################################
     # standalone arguments
@@ -168,6 +171,9 @@ class BxtCtl(cmd2.Cmd):
     bxt_list_workspace_args = Cmd2ArgumentParser(description="List workspace content")
     bxt_list_workspace_args.add_argument(
         "-l", "--long", action="store_true", help="use long list"
+    )
+    bxt_list_workspace_args.add_argument(
+        "path", type=str, nargs="?", default=".", help="Path to list content", choices=cfg.repos
     )
 
     # list folder content
@@ -394,12 +400,17 @@ class BxtCtl(cmd2.Cmd):
         """
         List content of current workspace
         """
-        self.poutput("Current workspace is: " + self.cfg.get_workspace())
+        path = args.path.strip("/")
+        self.poutput(f"{self.cfg.get_workspace()}/{path}")
         cmd = ["ls"]
         if args.long:
             cmd.insert(len(cmd) + 1, "-l")
-        cmd.insert(len(cmd) + 1, self.cfg.get_workspace())
+        cmd.insert(len(cmd) + 1, f"{self.cfg.get_workspace()}/{path}")
         subprocess.run(cmd)
+
+    complete_list_workspcae = functools.partialmethod(
+        cmd2.Cmd.delimiter_complete, match_against=cfg.repos, delimiter="/"
+    )
 
     @with_argparser(bxt_list_folder_args)
     def do_list_path(self, args):
@@ -628,24 +639,29 @@ class BxtCtl(cmd2.Cmd):
         self.poutput(f"--------------------------------- ")
 
 
-def start_cmd2():
+    def start_bxtctl(self):
+        """
+        Poetry entry point
+        :return:
+        """
+        if sys.platform.startswith("win"):
+            print(f"unsupported operating system: {sys.platform}")
+            exit(255)
+        app = self
+        sys.exit(app.cmdloop())
+
+
+def start():
     """
-    Poetry entry point
+    poetry entry point
     :return:
     """
-    if sys.platform.startswith("win"):
-        print(f"unsupported operating system: {sys.platform}")
-        exit(255)
     app = BxtCtl()
-    sys.exit(app.cmdloop())
-
-
-def main():
-    start_cmd2()
+    app.start_bxtctl()
 
 
 if __name__ == "__main__":
     """
     Main entry point
     """
-    start_cmd2()
+    start()
