@@ -27,7 +27,7 @@ prettytable = "^3.10.0"
 wcwidth = "^0.2.13"
 
 [tool.poetry.scripts]
-bxtctl = "bxtctl.bxtctl:main"
+bxtctl = "bxtctl.bxtctl:start"
 format = "black:main ."
 
 [tool.poetry.group.lint.dependencies]
