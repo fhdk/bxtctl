@@ -6,7 +6,7 @@ pkgver=0.6alpha
 pkgrel=1
 pkgdesc="Command line client for b[x]t package management"
 arch=('any')
-url="https://gitlab.manjaro.org/fhdk/bxtctl"
+url="https://github.com/fhdk/bxtctl"
 license=('GPL-3.0-or-later')
 depends=(
   'python'
