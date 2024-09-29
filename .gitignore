@@ -1,4 +1,4 @@
-# tesing dummy-repo
+# testing dummy-repo
 dummy-repo/**
 
 # Byte-compiled / optimized / DLL dummy-repo
@@ -72,7 +72,7 @@ instance/
 .scrapy
 
 # Sphinx documentation
-docs/docs/docs/_build/
+data/docs/_build/
 
 # PyBuilder
 .pybuilder/
