@@ -373,8 +373,8 @@ class BxtConfig:
             "workspace": self._workspace,
             "token_threshold": self._token_renew_threshold,
         }
-        with open(self._configstore, "w") as outfile:
-            json.dump(temp, outfile, indent=2, cls=BxtEncoder)
+        with open(self._configstore, "w") as cfg_file:
+            json.dump(temp, cfg_file, indent=2, cls=BxtEncoder)
 
     def __validate_owner__(self) -> bool:
         """
@@ -393,9 +393,10 @@ class BxtConfig:
         while True:
             options["url"] = input(f"bxt service  : ").strip()
             options["name"] = input(f"bxt username : ").strip()
-            if (
-                options["url"] != ""
+            if (options["url"] != ""
                 and options["name"] != ""
-                and options["url"].startswith("http")
-            ):
+                and options["url"].startswith("http")):
                 return options
+            else:
+                if not options["url"].startswith("http"):
+                    print("url must start with http or https")
