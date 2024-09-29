@@ -16,6 +16,9 @@ classifiers = [
     'Environment :: Console'
 ]
 
+[tool.poetry.urls]
+"Bug Tracker" = "https://github.com/fhdk/bxtctl/issues"
+
 [tool.poetry.dependencies]
 python = "^3.12"
 requests = "^2.31.0"
@@ -27,7 +30,7 @@ wcwidth = "^0.2.13"
 
 [tool.poetry.scripts]
 bxtctl = "bxtctl.bxtctl:start"
-format = "black:main ."
+#format = "black:main ."
 
 [tool.poetry.group.lint.dependencies]
 coverage = "^7.3.1"
