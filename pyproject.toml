@@ -20,7 +20,6 @@ classifiers = [
 python = "^3.12"
 requests = "^2.31.0"
 requests_toolbelt = "^1.0.0"
-pwinput = "^1.0.3"
 cmd2 = "^2.4.3"
 pyjwt = "^2.8.0"
 prettytable = "^3.10.0"
