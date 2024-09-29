@@ -191,7 +191,7 @@ class BxtCtl(cmd2.Cmd):
         description="List content of remote bxt repository"
     )
     bxt_list_repo_args.add_argument(
-        "-ls", type=str, help=f"List repo content", choices=cfg.repos
+        "location", type=str, help=f"List repo content", choices=cfg.repos
     )
 
     # ###############################################################
@@ -438,10 +438,16 @@ class BxtCtl(cmd2.Cmd):
             location[2],
             self.cfg.get_access_token(),
         )
+        page_packages = ""
+        count = 0
         for pkg in pkgs:
-            self.poutput(
-                f"{pkg['name']:<30}: {pkg['poolEntries'][pkg['preferredLocation']]['version']}"
-            )
+            print(f"Reading... {count + 1}", end="\r")
+            page_packages = page_packages + f"{pkg['name']:<30}: {pkg['poolEntries'][pkg['preferredLocation']]['version']}\n"
+
+        self.ppaged(page_packages, chop=True)
+        # self.poutput(
+        #     f"{pkg['name']:<30}: {pkg['poolEntries'][pkg['preferredLocation']]['version']}"
+        # )
 
     complete_list_repo = functools.partialmethod(
         cmd2.Cmd.delimiter_complete, match_against=cfg.repos, delimiter="/"
