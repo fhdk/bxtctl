@@ -25,7 +25,7 @@ makedepends=(
 )
 
 source=("git+${url}.git")
-sha512sums=(skip)
+sha256sums=('SKIP')
 
 build() {
   cd "$pkgname"
@@ -37,5 +37,5 @@ package() {
   python -m installer --destdir="$pkgdir" dist/*.whl
 
   install -d "$pkgdir/usr/bin"
-  install -Dm755 "data/bin/$pkgname" -t "$pkgdir/usr/bin/"
+  install -Dm755 "$srcdir/$pkgname/data/bin/$pkgname" -t "$pkgdir/usr/bin/"
 }
