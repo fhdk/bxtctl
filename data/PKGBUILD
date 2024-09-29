@@ -1,0 +1,41 @@
+# Maintainer: Frede Hundewadt <fh@manjaro.org>
+# Contributor: Philip Müller <philm@manjaro.org>
+
+pkgname=bxtctl
+pkgver=0.6alpha
+pkgrel=1
+pkgdesc="Command line client for b[x]t package management"
+arch=('any')
+url="https://gitlab.manjaro.org/fhdk/bxtctl"
+license=('GPL-3.0-or-later')
+depends=(
+  'python'
+  'python-requests'
+  'python-requests-toolbelt'
+  'python-cmd2'
+  'python-pyjwt'
+  'python-prettytable'
+  'python-wcwidth')
+makedepends=(
+  'git'
+  'python-build'
+  'python-poetry-core'
+  'python-installer'
+  'python-wheel'
+)
+
+source=("git+${url}.git")
+sha512sums=(skip)
+
+build() {
+  cd "$pkgname"
+  python -m build --wheel --no-isolation
+}
+
+package() {
+  cd "$pkgname"
+  python -m installer --destdir="$pkgdir" dist/*.whl
+
+  install -d "$pkgdir/usr/bin"
+  install -Dm755 "data/bin/$pkgname" -t "$pkgdir/usr/bin/"
+}
