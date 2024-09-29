@@ -290,7 +290,7 @@ class BxtCtl(cmd2.Cmd):
                 for pkg in packages:
                     if pkg.signature is None:
                         print(
-                            f"'{pkg.package()}' has no signature... skipping",
+                            f"'{pkg.package.split('/')[-1]}' has no signature... skipping",
                             end="\n",
                         )
                         continue
