@@ -5,6 +5,9 @@
       <excludeFolder url="file://$MODULE_DIR$/dummy-repo/stable" />
       <excludeFolder url="file://$MODULE_DIR$/dummy-repo/testing" />
       <excludeFolder url="file://$MODULE_DIR$/dummy-repo/unstable" />
+      <excludeFolder url="file://$MODULE_DIR$/data/pkgbuild/bxtctl/branches" />
+      <excludeFolder url="file://$MODULE_DIR$/data/pkgbuild/bxtctl/objects/info" />
+      <excludeFolder url="file://$MODULE_DIR$/data/pkgbuild/bxtctl/refs" />
     </content>
     <orderEntry type="jdk" jdkName="Poetry (bxtctl) (3)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
