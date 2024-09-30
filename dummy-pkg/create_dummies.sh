@@ -27,8 +27,7 @@ sed -i 's|pkgver = .*|pkgver = '\""${pkgver}"\"'|g' "$PROJECTDIR/scratchpads/001
 
 # build new packages
 cd "$PROJECTDIR/dummy-pkg" || exit 1
-PKGDEST="$PROJECTDIR/dummy-repo" makepkg -cCs
-rm -rf "$PROJECTDIR/dummy-pkg/bxtctl"
+PKGDEST="$PROJECTDIR/dummy-repo" makepkg -scC --sign
 cd "$PROJECTDIR" || exit 1
 
 # sign the new packages
