@@ -150,7 +150,7 @@ class BxtSession:
         logging.debug(f"params: {params}")
         try:
             # execute request
-            response = session.send(req, stream=True, timeout=30)
+            response = session.send(req, stream=True, timeout=300)
             if response.status_code == 200:
                 # return response data and status
                 return HttpResult(response.json(), response.status_code)
