@@ -1,5 +1,5 @@
 # testing dummy-repo
-/data/pkgbuild/bxtctl/**
+data/pkgbuild/bxtctl/**
 dummy-repo/**
 
 # Byte-compiled / optimized / DLL dummy-repo
