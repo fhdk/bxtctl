@@ -2,7 +2,7 @@
 
 pkgname=bxtctl
 pkgver=0.6alpha
-pkgrel=2
+pkgrel=3
 pkgdesc="Command line client for b[x]t package management"
 arch=('any')
 url="https://github.com/fhdk/bxtctl"
