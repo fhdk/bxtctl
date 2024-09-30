@@ -1,6 +1,6 @@
 # testing dummy-repo
-data/pkgbuild/bxtctl/**
-dummy-repo/**
+/data/pkgbuild/bxtctl/**
+/dummy-repo/**
 
 # Byte-compiled / optimized / DLL dummy-repo
 __pycache__/
