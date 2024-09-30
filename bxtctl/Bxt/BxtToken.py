@@ -48,6 +48,7 @@ from .BxtException import BxtException
 OPTIONS = {"verify_signature": False}
 ALGORITHMS = ["HS256"]
 
+
 # TODO catch JWT parsing errors
 # TODO raise an BxtExeption instance on JWT parsing errors
 
@@ -69,8 +70,10 @@ class BxtToken:
                     errors="One or more elements could not be parsed from the token",
                 )
 
+
     def __str__(self):
         return f"BxtToken (Access Token: '{self.access_token}', Refresh Token: '{self.refresh_token}', Token Type: '{self.token_type}')"
+
 
     def get(self):
         return {
@@ -79,25 +82,32 @@ class BxtToken:
             "token_type": self.token_type,
         }
 
+
     def get_access_expiration(self) -> int:
         """
         return time to access token expiration
         :return:
         """
+        if not self.access_token:
+            return -1
         decoded = jwt.decode(self.access_token, algorithms=ALGORITHMS, options=OPTIONS)
         expiration_time = decoded.get("exp")
         current_time = int(time.time())
         return expiration_time - current_time
+
 
     def get_access_expired(self) -> bool:
         """
         check if access token has expired
         :return:
         """
+        if not self.access_token:
+            return True
         decoded = jwt.decode(self.access_token, algorithms=ALGORITHMS, options=OPTIONS)
         expiration_time = decoded.get("exp")
         current_time = int(time.time())
         return expiration_time < current_time
+
 
     def get_access_token(self) -> str:
         """
@@ -106,25 +116,32 @@ class BxtToken:
         """
         return self.access_token
 
+
     def get_refresh_expiration(self) -> int:
         """
         return time to refresh token expiriration
         :return:
         """
+        if not self.refresh_token:
+            return -1
         decoded = jwt.decode(self.access_token, algorithms=ALGORITHMS, options=OPTIONS)
         expiration_time = decoded.get("exp")
         current_time = int(time.time())
         return current_time - expiration_time
+
 
     def get_refresh_expired(self) -> bool:
         """
         check if refresh token has expired
         :return:
         """
+        if not self.refresh_token:
+            return True
         decoded = jwt.decode(self.refresh_token, algorithms=ALGORITHMS, options=OPTIONS)
         expiration_time = decoded.get("exp")
         current_time = int(time.time())
         return expiration_time < current_time
+
 
     def get_refresh_token(self) -> str:
         """
@@ -133,17 +150,13 @@ class BxtToken:
         """
         return self.refresh_token
 
-    def get_token_type(self) -> str:
-        """
-        get token type
-        :return:
-        """
-        return self.token_type
 
     def validate_owner(self, bxt_owner: str) -> bool:
         """
         get the token owner
         :return:
         """
-        decoded = jwt.decode(self.refresh_token, algorithms=ALGORITHMS, options=OPTIONS)
+        if not self.access_token:
+            return False
+        decoded = jwt.decode(self.access_token, algorithms=ALGORITHMS, options=OPTIONS)
         return decoded["username"] == bxt_owner
