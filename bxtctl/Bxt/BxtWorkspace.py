@@ -79,8 +79,10 @@ class BxtWorkspace:
             logging.error(f"The '{repo}' was not found in repos {self._repos}")
             return result
         section = self.get_section_from_repo(repo)
+        files = sorted(os.listdir(f"{self._path}/{repo}"))
+        # loop the files and build a list of BxtFile objects
         try:
-            for file in os.listdir(f"{self._path}/{repo}"):
+            for file in files:
                 if file.endswith(".pkg.tar.zst"):
                     bxt_file = BxtFile(
                         section,
