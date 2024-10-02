@@ -84,3 +84,6 @@ class BxtFile:
         :return:
         """
         self._signature = signature
+
+    def __str__(self):
+        return f"Package: '{self._package}', Signature: '{self._signature}', Section: '{self._section}'"

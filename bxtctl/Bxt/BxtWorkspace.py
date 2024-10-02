@@ -41,6 +41,7 @@ make sure you commitzen and testzen. If du breaken, fixen it schnell!
 
 from typing import List
 from pathlib import Path
+import glob
 import os
 import logging
 
@@ -79,24 +80,26 @@ class BxtWorkspace:
             logging.error(f"The '{repo}' was not found in repos {self._repos}")
             return result
         section = self.get_section_from_repo(repo)
-        files = sorted(os.listdir(f"{self._path}/{repo}"))
+        repo_dir = f"{self._path}/{repo}"
+        # glob for getting only package files from repo_dir
+        package_glob = f"{repo_dir}/*.pkg.tar.zst"
+        # generate a list of files
+        package_list = filter(lambda x: os.path.isfile, glob.glob(package_glob))
+        # sort files by size - largest files first
+        files = sorted(package_list, key=lambda x: os.stat(os.path.join(repo_dir, x)).st_size, reverse=True)
         # loop the files and build a list of BxtFile objects
-        try:
-            for file in files:
-                if file.endswith(".pkg.tar.zst"):
-                    bxt_file = BxtFile(
-                        section,
-                        f"{self._path}/{repo}/{file}",
-                        f"{self._path}/{repo}/{file}.sig",
-                    )
-                    if not os.path.exists(bxt_file.signature):
-                        bxt_file.signature = None
-                    result.append(bxt_file)
-            return result
-        except NotADirectoryError:
-            return result
-        except FileNotFoundError:
-            return result
+        for file in files:
+            bxt_file = BxtFile(
+                section,
+                f"{file}",
+                f"{file}.sig",
+            )
+            # verify if signature is present
+            if not os.path.exists(bxt_file.signature):
+                # clear signature - filename is not valid
+                bxt_file.signature = None
+            result.append(bxt_file)
+        return result
 
     @staticmethod
     def get_section_from_repo(repo: str) -> dict:
