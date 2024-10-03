@@ -306,6 +306,9 @@ class BxtCtl(cmd2.Cmd):
                         token=cfg.get_access_token(),
                         files=packed,
                     )
+                    if result is None:
+                        print("fatal error")
+                        exit(1)
                     if result.status() != 200:
                         print(f"Error: {result.status()}. Message: {result.content()}")
                         exit(1)
@@ -336,6 +339,9 @@ class BxtCtl(cmd2.Cmd):
                             token=cfg.get_access_token(),
                             files=packed,
                         )
+                        if result is None:
+                            print("fatal error")
+                            exit(1)
                         if result.status() != 200:
                             print(f"Package: {pkg.package.split('/')[-1]}")
                             print(f"Error: {result.status()} Message: {result.content()}")

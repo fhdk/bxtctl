@@ -41,6 +41,8 @@ make sure you commitzen and testzen. If du breaken, fixen it schnell!
 
 import logging
 import uuid
+from json import JSONDecodeError
+
 import requests
 from requests import Request
 from requests import RequestException
@@ -150,54 +152,22 @@ class BxtSession:
         logging.debug(f"params: {params}")
         try:
             # execute request
-            response = session.send(req, stream=True, timeout=300)
+            response = session.send(req, stream=True)
             if response.status_code == 200:
-                # return response data and status
-                return HttpResult(response.json(), response.status_code)
-            if response.status_code == 400:
+                try:
+                    # return response data and status
+                    return HttpResult(response.status_code, response.json())
+                except JSONDecodeError:
+                    return HttpResult(response.status_code, response.text)
+            else:
                 logging.debug(response.text)
-                return HttpResult({"content": "Bad Request"}, response.status_code)
-            if response.status_code == 401:
-                logging.debug(response.text)
-                return HttpResult({"content": "Unauthorized"}, response.status_code)
-            if response.status_code == 403:
-                logging.debug(response.text)
-                return HttpResult({"content": "Forbidden"}, response.status_code)
-            if response.status_code == 404:
-                logging.debug(response.text)
-                return HttpResult(
-                    {
-                        "content": "Not found",
-                    },
-                    response.status_code,
-                )
-            if response.status_code == 408:
-                logging.debug(response.text)
-                return HttpResult(
-                    {
-                        "content": "Connection Timeout",
-                    },
-                    response.status_code,
-                )
-            if response.status_code == 500:
-                logging.debug(response.text)
-                return HttpResult(
-                    {
-                        "content": "Internal Server Error",
-                    },
-                    response.status_code,
-                )
-            if response.status_code == 503:
-                logging.debug(response.text)
-                return HttpResult(
-                    {
-                        "content": "Connection Error",
-                    },
-                    response.status_code,
-                )
+                return HttpResult(response.status_code, response.text)
 
         except RequestException as e:
-            return HttpResult({"Internal Server Error": e}, 500)
+            return HttpResult(0, {"Unexpected Response": e})
+
+        except Exception as e:
+            return HttpResult(0, {"Unexpected Error": e})
 
     def get_logs(self, url: str, params: dict, token: str) -> [LogEntry]:
         """
