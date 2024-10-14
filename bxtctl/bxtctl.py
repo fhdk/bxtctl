@@ -43,7 +43,7 @@ make sure you commitzen and testzen. If du breaken, fixen it schnell!
 import argparse
 from os import lseek
 from random import choices
-
+from datetime import datetime
 import cmd2
 from cmd2 import Cmd2ArgumentParser, with_argparser, with_argument_list, with_category
 import functools
@@ -170,6 +170,7 @@ class BxtCtl(cmd2.Cmd):
     # bxt_cli_args.add_argument("-l", "--log", action="count", default=None,
     #                           help="Repeat for more verbose logging")
 
+    bxt_cli_args.add_argument("-configure", action="store_true", help="Configure bxt")
     # ###############################################################
     # shell command line arguments
     # get or set workspace
@@ -269,6 +270,9 @@ class BxtCtl(cmd2.Cmd):
     #     logging.getLogger("bxtctl").setLevel(bxt_cli_args.parse_args().verbose)
     #     print("Logging level set to %s" % logging.getLevelName(logging.getLogger("bxtctl").getEffectiveLevel()))
 
+    if bxt_cli_args.parse_args().configure:
+        pass
+
     # ###############################################################
     # standalone -> return workspace and exit
     if bxt_cli_args.parse_args().getws:
@@ -292,15 +296,17 @@ class BxtCtl(cmd2.Cmd):
             packages = ws.get_packages(to_commit)
             if len(packages) > 0:
                 print(f"Uploading repo: '{to_commit}'")
+                ts = int(datetime.now().timestamp())
                 for pkg in packages:
+                    ts = ts + 1
                     if pkg.signature is None:
                         print(
                             f"'{pkg.package.split('/')[-1]}' has no signature... skipping",
                             end="\n",
                         )
                         continue
-                    packed = encode_package_data(pkg)
-                    print(f"Sending package... {pkg.package.split('/')[-1]}")
+                    packed = encode_package_data(pkg, ts)
+                    print(f"Sending package... {pkg.package.split('/')[-1]} ({ts})")
                     result = bxt_session.commit(
                         url=f"{cfg.get_url()}/{cfg.endpoint['pkgCommit']}",
                         token=cfg.get_access_token(),
