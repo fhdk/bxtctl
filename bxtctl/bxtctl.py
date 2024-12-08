@@ -124,11 +124,15 @@ class BxtCtl(cmd2.Cmd):
         ws.init_workspace()
 
     # standalone arguments
-    bxt_cli_args = Cmd2ArgumentParser()
+    bxt_cli_args = Cmd2ArgumentParser(description="Actions to execute and return to system.")
     bxt_cli_args.add_argument("-getws", action="store_true", help="Get active workspace")
     bxt_cli_args.add_argument("-setws", help="Set active workspace. The full path to the workspace")
     bxt_cli_args.add_argument("-commit", type=str, nargs="?", choices=["*"] + cfg.repos, help=f"Commit active workspace or specified repo", )
     bxt_cli_args.add_argument("-configure", action="store_true", help="Configure bxt")
+
+    bxt_verbose_args = Cmd2ArgumentParser(description="Verbose logging options")
+    bxt_verbose_args.add_argument("-on", action="store_true", help="Turn on verbose logging")
+    bxt_verbose_args.add_argument("-off", action="store_true", help="Turn off verbose logging")
 
     # get or set workspace
     bxt_workspace_args = Cmd2ArgumentParser(description="Get or set workspace")
@@ -446,13 +450,18 @@ class BxtCtl(cmd2.Cmd):
 
     complete_upload = functools.partialmethod(cmd2.Cmd.delimiter_complete, match_against=cfg.repos, delimiter="/")
 
-    def do_debug(self, args):
+    @with_argparser(bxt_verbose_args)
+    def do_verbose(self, args):
         """
         Activate debug logging
         :param args:
         :return:
         """
-        logging.getLogger(self.cfg.app_name).setLevel(logging.DEBUG)
+        if args.on:
+            logging.getLogger(self.cfg.app_name).setLevel(logging.DEBUG)
+        if args.off:
+            logging.getLogger(self.cfg.app_name).setLevel(logging.INFO)
+
         print("Logging level set to %s" % logging.getLevelName(logging.getLogger(self.cfg.app_name).getEffectiveLevel()))
 
     def do_login(self, args):
