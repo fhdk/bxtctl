@@ -34,7 +34,7 @@ cd "$PROJECTDIR" || exit 1
 find "$PROJECTDIR/dummy-repo" -type f -name "*.pkg.tar.zst" -exec signfile "{}" \;
 
 # loop the files
-for file in "$PROJECTDIR"/dummy-repo/*.pkg.tar.*
+for file in "$PROJECTDIR"/dummy-repo/*.pkg.tar.zst
 do
   # copy files to test repos
   cp "$file" "$X86DIR"
