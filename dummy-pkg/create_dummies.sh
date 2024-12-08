@@ -31,7 +31,7 @@ PKGDEST="$PROJECTDIR/dummy-repo" makepkg -scC --sign
 cd "$PROJECTDIR" || exit 1
 
 # sign the new packages
-find "$PROJECTDIR/dummy-repo" -type f -name "*.pkg.tar.*" -exec signfile "{}" \;
+find "$PROJECTDIR/dummy-repo" -type f -name "*.pkg.tar.zst" -exec signfile "{}" \;
 
 # loop the files
 for file in "$PROJECTDIR"/dummy-repo/*.pkg.tar.*
