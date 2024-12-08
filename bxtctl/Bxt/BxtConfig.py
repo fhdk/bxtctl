@@ -58,7 +58,7 @@ class BxtConfig:
 
     license_url = "https://www.gnu.org/licenses/agpl.html"
     app_name = "bxtctl"
-    app_version = "0.6alpha"
+    app_version = "0.7alpha"
     config_dir = f"{Path.home()}/.config/{app_name}"
     config_file = "config.json"
     user_agent = f"{app_name}/{app_version}"
