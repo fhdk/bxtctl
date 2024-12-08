@@ -65,10 +65,11 @@ formdata = []
 if len(pkgs) > 0:
     for pkg in pkgs:
         formdata.append({"name": pkg["name"], "section": from_section})
-        print(pkg['name'], end="")
+        print(f"{pkg['name']} ", end="")
 else:
     print("no packages found")
     exit(0)
+print()
 print(f"Removing {len(formdata)} packages from {from_section['branch']}/{from_section["repository"]}/{from_section['architecture']}")
 json_formdata = json.dumps(formdata)
 files = {("to_delete", (None, json_formdata, "application/json"))}
