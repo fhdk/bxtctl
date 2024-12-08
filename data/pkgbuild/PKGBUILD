@@ -1,8 +1,8 @@
 # Maintainer: Frede Hundewadt <fh@manjaro.org>
 
 pkgname=bxtctl
-pkgver=0.6alpha
-pkgrel=4
+pkgver=0.7alpha
+pkgrel=1
 pkgdesc="Command line client for b[x]t package management"
 arch=('any')
 url="https://github.com/fhdk/bxtctl"
