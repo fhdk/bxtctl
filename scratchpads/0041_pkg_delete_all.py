@@ -26,6 +26,7 @@ import uuid
 
 import requests
 from bxtctl.Bxt.BxtConfig import BxtConfig
+from bxtctl.Bxt.BxtSession import BxtSession
 from requests import Request
 from requests import RequestException
 
@@ -50,17 +51,27 @@ if config.valid_token():
     if not config.renew_access_token():
         z = config.login()
 
-endpoint = f"{config.get_url()}/{config.endpoint["pkgCommit"]}"
+token = config.get_access_token()
+endpoint_rm = f"{config.get_url()}/{config.endpoint["pkgCommit"]}"
 from_section = {"branch": "testing", "repository": "extra", "architecture": "x86_64"}
-form_content = json.dumps(
-    [
-        {"name": "a-dummy1", "section": from_section},
-        {"name": "a-dummy2", "section": from_section},
-        {"name": "a-dummy3", "section": from_section},
-    ]
-)
 
-files = {("to_delete", (None, form_content, "application/json"))}
+endpoint_list = f"{config.get_url()}/{config.endpoint["pkgList"]}"
+http = BxtSession(config.user_agent)
+
+pkgs = http.get_packages(
+    endpoint_list, "testing", "extra", "x86_64", config.get_access_token()
+)
+formdata = []
+if len(pkgs) > 0:
+    for pkg in pkgs:
+        formdata.append({"name": pkg["name"], "section": from_section})
+        print(pkg['name'], end="")
+else:
+    print("no packages found")
+    exit(0)
+print(f"Removing {len(formdata)} packages from {from_section['branch']}/{from_section["repository"]}/{from_section['architecture']}")
+json_formdata = json.dumps(formdata)
+files = {("to_delete", (None, json_formdata, "application/json"))}
 
 headers = {
     "User-Agent": config.user_agent,
@@ -69,7 +80,7 @@ headers = {
 }
 
 session = requests.Session()
-request = Request("POST", endpoint, headers=headers, files=files)
+request = Request("POST", endpoint_rm, headers=headers, files=files)
 token = config.get_access_token()
 req = request.prepare()
 
