@@ -1,3 +1,23 @@
+# -*- coding: utf-8 -*-
+#
+# bxtctl is a command line client designed to interact
+# with bxt api which can be found at https://gitlab.com/anydistro/bxt
+#
+# BxtCtl is free software: you can redistribute it and/or modify
+# it under the terms of the Affero GNU General Public License
+# as published by the Free Software Foundation,
+# either version 3 of the License, or (at your option) any later version.
+#
+# BxtCtl is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the Affero GNU General Public License
+# along with bxtctl.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Authors: Frede Hundewadt https://github.com/fhdk/bxtctl
+#
 import unittest
 from bxtctl.Bxt.BxtToken import BxtToken
 
@@ -47,11 +67,10 @@ class Test0001BxtToken(unittest.TestCase):
 
     def test_token_owner(self):
         """
-        Test if token is the expected owner
+        Test if the token belong is the expected owner
         :return:
         """
         assert self.token.validate_owner("bxtuser") == True
-
 
     def tearDown(self):
         pass

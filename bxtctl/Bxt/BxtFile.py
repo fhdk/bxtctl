@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 #
-# bxtctl is command line client designed to interact with bxt api
-# bxt can be found at https://gitlab.com/anydistro/bxt
+# bxtctl is a command line client designed to interact
+# with bxt api which can be found at https://gitlab.com/anydistro/bxt
 #
-# bxtctl is free software: you can redistribute it and/or modify
+# BxtCtl is free software: you can redistribute it and/or modify
 # it under the terms of the Affero GNU General Public License
 # as published by the Free Software Foundation,
 # either version 3 of the License, or (at your option) any later version.
 #
-# bxtctl is distributed in the hope that it will be useful,
+# BxtCtl is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the Affero GNU General Public License
@@ -47,10 +47,13 @@ class BxtFile:
     BxtFile object
     """
 
-    def __init__(self, section: Dict[str, str], package: str, signature: str = None):
+    def __init__(
+        self, section: Dict[str, str], package: str, signature: str, size: int
+    ):
         self._section = section
         self._package = package
         self._signature = signature
+        self._size = size
 
     @property
     def section(self):
@@ -85,5 +88,12 @@ class BxtFile:
         """
         self._signature = signature
 
+    @property
+    def size(self):
+        """
+        Get ghe package size
+        """
+        return self._size
+
     def __str__(self):
-        return f"Package: '{self._package}', Signature: '{self._signature}', Section: '{self._section}'"
+        return f"Package: '{self._package}', Signature: '{self._signature}', Section: '{self._section}', Size: '{self._size}'"

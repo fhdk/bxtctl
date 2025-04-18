@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 #
-# bxtctl is command line client designed to interact with bxt api
-# bxt can be found at https://gitlab.com/anydistro/bxt
+# bxtctl is a command line client designed to interact
+# with bxt api which can be found at https://gitlab.com/anydistro/bxt
 #
-# bxtctl is free software: you can redistribute it and/or modify
+# BxtCtl is free software: you can redistribute it and/or modify
 # it under the terms of the Affero GNU General Public License
 # as published by the Free Software Foundation,
 # either version 3 of the License, or (at your option) any later version.
 #
-# bxtctl is distributed in the hope that it will be useful,
+# BxtCtl is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the Affero GNU General Public License
@@ -18,7 +18,6 @@
 #
 # Authors: Frede Hundewadt https://github.com/fhdk/bxtctl
 #
-
 """
                             ACHTUNG!
                ALLES CODEMONKEYS UND DEVELOPERS!
@@ -85,20 +84,23 @@ class BxtWorkspace:
         package_glob = f"{repo_dir}/*.pkg.tar.zst"
         # generate a list of files
         package_list = filter(lambda x: os.path.isfile, glob.glob(package_glob))
-        # sort files by size - largest files first
-        files = sorted(package_list, key=lambda x: os.stat(os.path.join(repo_dir, x)).st_size, reverse=True)
         # loop the files and build a list of BxtFile objects
-        for file in files:
+        for file in package_list:
+            # Get file size
+            file_size = os.stat(file).st_size
             bxt_file = BxtFile(
-                section,
-                f"{file}",
-                f"{file}.sig",
+                section=section,
+                package=f"{file}",
+                signature=f"{file}.sig",
+                size=file_size,
             )
             # verify if signature is present
             if not os.path.exists(bxt_file.signature):
                 # clear signature - filename is not valid
                 bxt_file.signature = None
             result.append(bxt_file)
+        # Sort the result by BxtFile.size in descending order
+        result.sort(key=lambda x: x.size, reverse=True)
         return result
 
     @staticmethod

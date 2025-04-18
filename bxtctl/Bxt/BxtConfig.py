@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 #
-# bxtctl is command line client designed to interact with bxt api
-# bxt can be found at https://gitlab.com/anydistro/bxt
+# bxtctl is a command line client designed to interact
+# with bxt api which can be found at https://gitlab.com/anydistro/bxt
 #
-# bxtctl is free software: you can redistribute it and/or modify
+# BxtCtl is free software: you can redistribute it and/or modify
 # it under the terms of the Affero GNU General Public License
 # as published by the Free Software Foundation,
 # either version 3 of the License, or (at your option) any later version.
 #
-# bxtctl is distributed in the hope that it will be useful,
+# BxtCtl is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the Affero GNU General Public License
@@ -18,7 +18,6 @@
 #
 # Authors: Frede Hundewadt https://github.com/fhdk/bxtctl
 #
-
 """
                             ACHTUNG!
                ALLES CODEMONKEYS UND DEVELOPERS!
@@ -80,7 +79,6 @@ class BxtConfig:
         "userInfo": "api/userinfo",
     }
 
-
     def __init__(self):
         """
         Intialize configuration
@@ -107,7 +105,6 @@ class BxtConfig:
         else:
             # load config
             self.__load_config__()
-
 
     def configure(self) -> bool:
         """
@@ -136,7 +133,6 @@ class BxtConfig:
             return True
         return False
 
-
     def get_access_token(self) -> str:
         """
         Return Bxt token
@@ -154,7 +150,6 @@ class BxtConfig:
                     return ""
         return self._token.get_access_token()
 
-
     def get_batch_size(self) -> int:
         """
         Return batch size
@@ -162,14 +157,12 @@ class BxtConfig:
         """
         return self._batch_size
 
-
     def get_workspace(self) -> str:
         """
-        Return workspace path
+        Return a workspace path
         :return:
         """
         return self._workspace
-
 
     def get_hostname(self) -> str:
         """
@@ -178,7 +171,6 @@ class BxtConfig:
         """
         return self._url.split("//")[-1]
 
-
     def get_name(self) -> str:
         """
         Return Bxt username
@@ -186,14 +178,12 @@ class BxtConfig:
         """
         return self._username
 
-
     def get_url(self) -> str:
         """
         Return Bxt endpoint url
         :return:
         """
         return self._url
-
 
     def login(self) -> bool:
         """
@@ -228,7 +218,6 @@ class BxtConfig:
         self.__save_config__()
         return False
 
-
     def renew_access_token(self) -> bool:
         """
         Renew access token
@@ -248,7 +237,6 @@ class BxtConfig:
 
         return False
 
-
     def revoke_refresh_token(self) -> bool:
         """
         Revoke refresh token
@@ -264,14 +252,12 @@ class BxtConfig:
             return True
         return False
 
-
     def save(self) -> None:
         """
         save config
         :return:
         """
         self.__save_config__()
-
 
     def set_batch_size(self, batch_size: int) -> None:
         """
@@ -282,7 +268,6 @@ class BxtConfig:
         self._batch_size = batch_size
         self.__save_config__()
 
-
     def set_workspace(self, workspace: str) -> None:
         """
         Set workspace
@@ -292,14 +277,12 @@ class BxtConfig:
         self._workspace = workspace
         self.__save_config__()
 
-
     def valid_config(self) -> bool:
         """
         Verify if config is valid
         :return:
         """
         return self._url != "" and self._username != ""
-
 
     def valid_refresh(self) -> bool:
         """
@@ -308,14 +291,12 @@ class BxtConfig:
         """
         return self._token.get_refresh_expired()
 
-
     def valid_token(self) -> bool:
         """
         Verify if access token is valid
         :return:
         """
         return self._token.get_access_expired()
-
 
     def __str__(self):
         """
@@ -327,7 +308,6 @@ class BxtConfig:
             f"Token: '{self._token}', TokenRenew: '{self._token_renew_threshold}s', "
             f"Batch: '{self._batch_size}pkgs', Workspace: '{self._workspace}')"
         )
-
 
     def __load_config__(self):
         """
@@ -379,7 +359,6 @@ class BxtConfig:
         except (Exception,):
             pass
 
-
     def __save_config__(self):
         """
         Initialize configuration and write config
@@ -396,14 +375,12 @@ class BxtConfig:
         with open(self._configstore, "w") as cfg_file:
             json.dump(temp, cfg_file, indent=2, cls=BxtEncoder)
 
-
     def __validate_owner__(self) -> bool:
         """
         validate if token belongs to name in config
         :return:
         """
         return self._token.validate_owner(self._username)
-
 
     @staticmethod
     def __get_basic_config__() -> dict:
@@ -415,9 +392,11 @@ class BxtConfig:
         while True:
             options["url"] = input(f"bxt service  : ").strip()
             options["name"] = input(f"bxt username : ").strip()
-            if (options["url"] != ""
+            if (
+                options["url"] != ""
                 and options["name"] != ""
-                and options["url"].startswith("http")):
+                and options["url"].startswith("http")
+            ):
                 return options
             else:
                 if not options["url"].startswith("http"):

@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 #
-# bxtctl is command line client designed to interact with bxt api
-# bxt can be found at https://gitlab.com/anydistro/bxt
+# bxtctl is a command line client designed to interact
+# with bxt api which can be found at https://gitlab.com/anydistro/bxt
 #
-# bxtctl is free software: you can redistribute it and/or modify
+# BxtCtl is free software: you can redistribute it and/or modify
 # it under the terms of the Affero GNU General Public License
 # as published by the Free Software Foundation,
 # either version 3 of the License, or (at your option) any later version.
 #
-# bxtctl is distributed in the hope that it will be useful,
+# BxtCtl is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the Affero GNU General Public License
@@ -18,7 +18,6 @@
 #
 # Authors: Frede Hundewadt https://github.com/fhdk/bxtctl
 #
-
 """
                             ACHTUNG!
                ALLES CODEMONKEYS UND DEVELOPERS!
@@ -70,10 +69,8 @@ class BxtToken:
                     errors="One or more elements could not be parsed from the token",
                 )
 
-
     def __str__(self):
         return f"BxtToken (Access Token: '{self.access_token}', Refresh Token: '{self.refresh_token}', Token Type: '{self.token_type}')"
-
 
     def get(self):
         return {
@@ -81,7 +78,6 @@ class BxtToken:
             "refresh_token": self.refresh_token,
             "token_type": self.token_type,
         }
-
 
     def get_access_expiration(self) -> int:
         """
@@ -95,7 +91,6 @@ class BxtToken:
         current_time = int(time.time())
         return expiration_time - current_time
 
-
     def get_access_expired(self) -> bool:
         """
         check if access token has expired
@@ -108,14 +103,12 @@ class BxtToken:
         current_time = int(time.time())
         return expiration_time < current_time
 
-
     def get_access_token(self) -> str:
         """
         get access token
         :return:
         """
         return self.access_token
-
 
     def get_refresh_expiration(self) -> int:
         """
@@ -129,7 +122,6 @@ class BxtToken:
         current_time = int(time.time())
         return current_time - expiration_time
 
-
     def get_refresh_expired(self) -> bool:
         """
         check if refresh token has expired
@@ -142,14 +134,12 @@ class BxtToken:
         current_time = int(time.time())
         return expiration_time < current_time
 
-
     def get_refresh_token(self) -> str:
         """
         get refresh token
         :return:
         """
         return self.refresh_token
-
 
     def validate_owner(self, bxt_owner: str) -> bool:
         """

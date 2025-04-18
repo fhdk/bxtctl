@@ -1,17 +1,16 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# bxtctl is command line client designed to interact with bxt api
-# bxt can be found at https://gitlab.com/anydistro/bxt
+# bxtctl is a command line client designed to interact
+# with bxt api which can be found at https://gitlab.com/anydistro/bxt
 #
-# bxtctl is free software: you can redistribute it and/or modify
+# BxtCtl is free software: you can redistribute it and/or modify
 # it under the terms of the Affero GNU General Public License
 # as published by the Free Software Foundation,
 # either version 3 of the License, or (at your option) any later version.
 #
-# bxtctl is distributed in the hope that it will be useful,
+# BxtCtl is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the Affero GNU General Public License
@@ -60,6 +59,7 @@ class BxtCtl(cmd2.Cmd):
     """
     Main bctctl shell instance
     """
+
     def __init__(self):
         # shortcuts = dict(cmd2.DEFAULT_SHORTCUTS)
         shortcuts = dict()
@@ -73,10 +73,10 @@ class BxtCtl(cmd2.Cmd):
                 "lsp": "list_path",
                 "lsr": "list_repo",
                 "lsw": "list_workspace",
-                "upkg": "upload_pkg",
-                "rpkg": "remove_pkg",
-                # "cpp": "copy_pkg",
-                # "mvp": "move_pkg",
+                "add": "upload_pkg",
+                "rm": "remove_pkg",
+                "cp": "copy_pkg",
+                "mv": "move_pkg",
             }
         )
         super().__init__(shortcuts=shortcuts)
@@ -101,7 +101,11 @@ class BxtCtl(cmd2.Cmd):
             z = cfg.login()
 
     # setup basic logging
-    logging.basicConfig(level=logging.INFO, filename=f"{fix_path(cfg.config_dir)}/bxtctl.log", encoding="utf-8")
+    logging.basicConfig(
+        level=logging.INFO,
+        filename=f"{fix_path(cfg.config_dir)}/bxtctl.log",
+        encoding="utf-8",
+    )
 
     # initialize the prompt based on configuration information
     prompt = f"({cfg.get_name()}@{cfg.get_hostname()}) $ "
@@ -110,13 +114,17 @@ class BxtCtl(cmd2.Cmd):
     bxt_session = BxtSession(cfg.user_agent)
 
     # read sections for the current user from the bxt service endpoint
-    sections = bxt_session.get_sections(f"{cfg.get_url()}/{cfg.endpoint['pkgSection']}", cfg.get_access_token())
+    sections = bxt_session.get_sections(
+        f"{cfg.get_url()}/{cfg.endpoint['pkgSection']}", cfg.get_access_token()
+    )
 
     # set up the access control
     acl = BxtAcl(sections)
 
     # create a path completion object and store in configuration
-    cfg.repos = path_completion(acl.get_branches, acl.get_repositories, acl.get_architectures)
+    cfg.repos = path_completion(
+        acl.get_branches, acl.get_repositories, acl.get_architectures
+    )
 
     # ensure workspace has been initialized
     ws = BxtWorkspace(cfg.get_workspace(), cfg.repos)
@@ -124,47 +132,96 @@ class BxtCtl(cmd2.Cmd):
         ws.init_workspace()
 
     # standalone arguments
-    bxt_cli_args = Cmd2ArgumentParser(description="Actions to execute and return to system.")
-    bxt_cli_args.add_argument("-getws", action="store_true", help="Get active workspace")
-    bxt_cli_args.add_argument("-setws", help="Set active workspace. The full path to the workspace")
-    bxt_cli_args.add_argument("-commit", type=str, nargs="?", choices=["*"] + cfg.repos, help=f"Commit active workspace or specified repo", )
+    bxt_cli_args = Cmd2ArgumentParser(
+        description="Actions to execute and return to system."
+    )
+    bxt_cli_args.add_argument(
+        "-getws", action="store_true", help="Get active workspace"
+    )
+    bxt_cli_args.add_argument(
+        "-setws", help="Set active workspace. The full path to the workspace"
+    )
+    bxt_cli_args.add_argument(
+        "-commit",
+        type=str,
+        nargs="?",
+        choices=["*"] + cfg.repos,
+        help=f"Commit active workspace or specified repo",
+    )
     bxt_cli_args.add_argument("-configure", action="store_true", help="Configure bxt")
 
     bxt_verbose_args = Cmd2ArgumentParser(description="Verbose logging options")
-    bxt_verbose_args.add_argument("-on", action="store_true", help="Turn on verbose logging")
-    bxt_verbose_args.add_argument("-off", action="store_true", help="Turn off verbose logging")
+    bxt_verbose_args.add_argument(
+        "-on", action="store_true", help="Turn on verbose logging"
+    )
+    bxt_verbose_args.add_argument(
+        "-off", action="store_true", help="Turn off verbose logging"
+    )
 
     # get or set workspace
     bxt_workspace_args = Cmd2ArgumentParser(description="Get or set workspace")
-    bxt_workspace_args.add_argument("-w", "--workspace", type=str, help="Full path to workspace")
+    bxt_workspace_args.add_argument(
+        "-w", "--workspace", type=str, help="Full path to workspace"
+    )
 
     # list folder content
     bxt_lsfolder_args = Cmd2ArgumentParser(description="List path content")
-    bxt_lsfolder_args.add_argument("-l", "--long", action="store_true", help="use long list")
-    bxt_lsfolder_args.add_argument("path", type=str, nargs="?", default=".", help="Path to list content")
+    bxt_lsfolder_args.add_argument(
+        "-l", "--long", action="store_true", help="use long list"
+    )
+    bxt_lsfolder_args.add_argument(
+        "path", type=str, nargs="?", default=".", help="Path to list content"
+    )
 
     # list workspace content
     bxt_lsws_args = Cmd2ArgumentParser(description="List workspace content")
-    bxt_lsws_args.add_argument("-l", "--long", action="store_true", help="use long list")
-    bxt_lsws_args.add_argument("path", type=str, nargs="?", default=".", help="Path to list content", choices=cfg.repos)
+    bxt_lsws_args.add_argument(
+        "-l", "--long", action="store_true", help="use long list"
+    )
+    bxt_lsws_args.add_argument(
+        "path",
+        type=str,
+        nargs="?",
+        default=".",
+        help="Path to list content",
+        choices=cfg.repos,
+    )
 
     # list repo content
-    bxt_lsrepo_args = Cmd2ArgumentParser(description="List content of remote bxt repository")
-    bxt_lsrepo_args.add_argument("location", type=str, help=f"List repo content", choices=cfg.repos)
+    bxt_lsrepo_args = Cmd2ArgumentParser(
+        description="List content of remote bxt repository"
+    )
+    bxt_lsrepo_args.add_argument(
+        "location", type=str, help=f"List repo content", choices=cfg.repos
+    )
 
     # compare repo command
-    bxt_compare_args = Cmd2ArgumentParser(description="Compare repo package across branches and architectures")
-    bxt_compare_args.add_argument("-b", type=str, nargs="*", help=f"Compare branches", choices=cfg.repos)
+    bxt_compare_args = Cmd2ArgumentParser(
+        description="Compare repo package across branches and architectures"
+    )
+    bxt_compare_args.add_argument(
+        "-b", type=str, nargs="*", help=f"Compare branches", choices=cfg.repos
+    )
 
     # upload path
     bxt_upload_args = Cmd2ArgumentParser(description="Upload package(s) to bxt storage")
-    bxt_upload_args.add_argument("repo", type=str, help="Upload to repo", choices=cfg.repos)
-    bxt_upload_args.add_argument("-p", "--pkg", type=str, nargs="+", help=f"Package(s) to upload to bxt")
+    bxt_upload_args.add_argument(
+        "repo", type=str, help="Upload to repo", choices=cfg.repos
+    )
+    bxt_upload_args.add_argument(
+        "-p", "--pkg", type=str, nargs="+", help=f"Package(s) to upload to bxt"
+    )
 
     # remove command
-    bxt_rmpkg_args = Cmd2ArgumentParser(description="Remove package(s) from bxt storage")
-    bxt_rmpkg_args.add_argument("repo", type=str, help="Remove from repo", choices=cfg.repos)
-    bxt_rmpkg_args.add_argument("-p", "--pkg", type=str, nargs="+", help=f"Packages to remove from bxt")
+    bxt_rmpkg_args = Cmd2ArgumentParser(
+        description="Remove package(s) from bxt storage"
+    )
+    bxt_rmpkg_args.add_argument(
+        "repo", type=str, help="Remove from repo", choices=cfg.repos
+    )
+    bxt_rmpkg_args.add_argument(
+        "-p", "--pkg", type=str, nargs="+", help=f"Packages to remove from bxt"
+    )
 
     # standalone -> configuration
     if bxt_cli_args.parse_args().configure:
@@ -197,7 +254,10 @@ class BxtCtl(cmd2.Cmd):
                 for pkg in packages:
                     ts = ts + 1
                     if pkg.signature is None:
-                        print(f"'{pkg.package.split('/')[-1]}' has no signature... skipping", end="\n")
+                        print(
+                            f"'{pkg.package.split('/')[-1]}' has no signature... skipping",
+                            end="\n",
+                        )
                         continue
                     packed = encode_package_data(pkg, ts)
                     print(f"Sending package... {pkg.package.split('/')[-1]} ({ts})")
@@ -214,7 +274,6 @@ class BxtCtl(cmd2.Cmd):
                         exit(1)
                     else:
                         ws.pkg_remove(pkg)
-
             else:
                 print(f"Nothing to do in '{to_commit}'")
         else:
@@ -226,10 +285,15 @@ class BxtCtl(cmd2.Cmd):
                     print(f"Uploading repo: '{repo}'")
                     for pkg in packages:
                         if pkg.signature is None:
-                            print(f"'{pkg.package}' has no signature... skipping", end="\n")
+                            print(
+                                f"'{pkg.package}' has no signature... skipping",
+                                end="\n",
+                            )
                             continue
                         packed = encode_package_data(pkg)
-                        print(f"Sending package... {pkg.package.split('/')[-1]}", end="\r")
+                        print(
+                            f"Sending package... {pkg.package.split('/')[-1]}", end="\r"
+                        )
                         result = bxt_session.commit(
                             url=f"{cfg.get_url()}/{cfg.endpoint['pkgCommit']}",
                             token=cfg.get_access_token(),
@@ -240,11 +304,12 @@ class BxtCtl(cmd2.Cmd):
                             exit(1)
                         if result.status() != 200:
                             print(f"Package: {pkg.package.split('/')[-1]}")
-                            print(f"Error: {result.status()} Message: {result.content()}")
+                            print(
+                                f"Error: {result.status()} Message: {result.content()}"
+                            )
                             exit(1)
                         else:
                             ws.pkg_remove(pkg)
-
                 else:
                     print(f"Nothing to do in '{repo}'")
         exit(0)
@@ -264,7 +329,9 @@ class BxtCtl(cmd2.Cmd):
         self.poutput(args.path)
         self.poutput(args.pkg)
 
-    complete_delete_pkg = functools.partialmethod(cmd2.Cmd.delimiter_complete, match_against=cfg.repos, delimiter="/")
+    complete_delete_pkg = functools.partialmethod(
+        cmd2.Cmd.delimiter_complete, match_against=cfg.repos, delimiter="/"
+    )
 
     @with_argparser(bxt_workspace_args)
     def do_workspace(self, args):
@@ -297,7 +364,9 @@ class BxtCtl(cmd2.Cmd):
         cmd.insert(len(cmd) + 1, f"{self.cfg.get_workspace()}/{path}")
         subprocess.run(cmd)
 
-    complete_list_workspcae = functools.partialmethod(cmd2.Cmd.delimiter_complete, match_against=cfg.repos, delimiter="/")
+    complete_list_workspcae = functools.partialmethod(
+        cmd2.Cmd.delimiter_complete, match_against=cfg.repos, delimiter="/"
+    )
 
     @with_argparser(bxt_lsfolder_args)
     def do_list_path(self, args):
@@ -329,11 +398,16 @@ class BxtCtl(cmd2.Cmd):
         count = 0
         for pkg in pkgs:
             self.poutput(f"Reading... {count + 1}", end="\r")
-            page_packages = page_packages + f"{pkg['name']:<30}: {pkg['poolEntries'][pkg['preferredLocation']]['version']}\n"
+            page_packages = (
+                page_packages
+                + f"{pkg['name']:<30}: {pkg['poolEntries'][pkg['preferredLocation']]['version']}\n"
+            )
 
         self.ppaged(page_packages, chop=True)
 
-    complete_list_repo = functools.partialmethod(cmd2.Cmd.delimiter_complete, match_against=cfg.repos, delimiter="/")
+    complete_list_repo = functools.partialmethod(
+        cmd2.Cmd.delimiter_complete, match_against=cfg.repos, delimiter="/"
+    )
 
     @with_argparser(bxt_compare_args)
     def do_compare(self, args):
@@ -379,7 +453,9 @@ class BxtCtl(cmd2.Cmd):
         pkg_list = []
         table_headers = []
         for target in compare_us:
-            content = f"{target['branch']}/{target['repository']}/{target['architecture']}"
+            content = (
+                f"{target['branch']}/{target['repository']}/{target['architecture']}"
+            )
             table_headers.append(content)
 
         table_header_len = max(len(elm) for elm in table_headers) + 1
@@ -432,7 +508,9 @@ class BxtCtl(cmd2.Cmd):
                 print(f"{version:>{table_header_len}}", end="")
             print()
 
-    complate_compare_repo = functools.partialmethod(cmd2.Cmd.delimiter_complete, match_against=cfg.repos, delimiter="/")
+    complate_compare_repo = functools.partialmethod(
+        cmd2.Cmd.delimiter_complete, match_against=cfg.repos, delimiter="/"
+    )
 
     @with_argparser(bxt_upload_args)
     def do_upload_pkg(self, args):
@@ -443,12 +521,16 @@ class BxtCtl(cmd2.Cmd):
         """
         self.quiet = False
         # self.pfeedback(f"TODO - commit package to repo - using {packages}")
-        self.pfeedback(f"Reading files from workspace: {self.cfg.get_workspace()}/{args.repo}")
+        self.pfeedback(
+            f"Reading files from workspace: {self.cfg.get_workspace()}/{args.repo}"
+        )
         self.pfeedback(f"Commit endpoint is: {self.cfg.endpoint['pkgCommit']}")
         self.pfeedback(f"Commit to repo: {args.repo}")
         self.pfeedback(f"Commit package(s): {args.pkg}")
 
-    complete_upload = functools.partialmethod(cmd2.Cmd.delimiter_complete, match_against=cfg.repos, delimiter="/")
+    complete_upload = functools.partialmethod(
+        cmd2.Cmd.delimiter_complete, match_against=cfg.repos, delimiter="/"
+    )
 
     @with_argparser(bxt_verbose_args)
     def do_verbose(self, args):
@@ -462,7 +544,12 @@ class BxtCtl(cmd2.Cmd):
         if args.off:
             logging.getLogger(self.cfg.app_name).setLevel(logging.INFO)
 
-        print("Logging level set to %s" % logging.getLevelName(logging.getLogger(self.cfg.app_name).getEffectiveLevel()))
+        print(
+            "Logging level set to %s"
+            % logging.getLevelName(
+                logging.getLogger(self.cfg.app_name).getEffectiveLevel()
+            )
+        )
 
     def do_login(self, args):
         """
@@ -495,7 +582,6 @@ class BxtCtl(cmd2.Cmd):
         self.poutput(f"Architectures : {str.join(", ", self.acl.get_architectures())}")
         self.poutput(f"--------------------------------- ")
 
-
     def start_bxtctl(self):
         """
         Poetry entry point
@@ -506,6 +592,7 @@ class BxtCtl(cmd2.Cmd):
             exit(255)
         app = self
         sys.exit(app.cmdloop())
+
 
 def start():
     """
